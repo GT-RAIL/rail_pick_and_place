@@ -1,0 +1,24 @@
+ <package>
+  <name>rail_pick_and_place</name>
+  <version>0.0.8</version>
+  <description>Metapackage for pick and place, as well as supporting packages such as object recognition, model construction, and grasp training.</description>
+
+  <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
+  <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
+  <author email="davidkent@wpi.edu">David Kent</author>
+  <author email="rctoris@wpi.edu">Russell Toris</author>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/carl_bot</url>
+  <url type="bugtracker">https://github.com/WPI-RAIL/carl_bot/issues</url>
+  <url type="repository">https://github.com/WPI-RAIL/carl_bot</url>
+ 
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>rail_pick_and_place_msgs</run_depend>
+  
+  <export>
+    <metapackage />
+  </export>
+</package>
