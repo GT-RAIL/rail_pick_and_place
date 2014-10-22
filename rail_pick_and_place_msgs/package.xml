@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 <package>
   <name>rail_pick_and_place_msgs</name>
-  <version>0.0.1</version>
-  <description>Messages and services for pick and place</description>
+  <version>0.0.0</version>
+  <description>Messages and Services for RAIL Pick and Place</description>
   
+
+  <author email="davidkent@wpi.edu">David Kent</author>
   <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
+  <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
   
   <license>BSD</license>
   
@@ -17,7 +20,4 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
-
-  <export>
-  </export>
 </package>
