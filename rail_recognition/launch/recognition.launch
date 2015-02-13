@@ -1,0 +1,11 @@
+<launch>
+  <!-- This launch file starts everything necessary for object recognition. -->
+
+  <arg name="model_dir" default="$(find rail_recognition)/models" />
+
+  <node pkg="rail_recognition" name="grasp_reader" type="grasp_reader" output="screen">
+    <param name="model_dir" type="string" value="$(arg model_dir)" />
+  </node>
+  <node pkg="rail_recognition" name="pc_recognition" type="pc_recognition" output="screen" />
+
+</launch>

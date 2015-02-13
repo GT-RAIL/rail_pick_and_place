@@ -1,0 +1,5 @@
+string grasp_entry
+bool visualize_grasps
+---
+bool success
+rail_grasping/GraspModel grasp

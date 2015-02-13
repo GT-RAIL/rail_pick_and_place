@@ -1,0 +1,6 @@
+float32 x
+float32 y
+float32 z
+---
+string reference_frame_id
+sensor_msgs/PointCloud pointCloud

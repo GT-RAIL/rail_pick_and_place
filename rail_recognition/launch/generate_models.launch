@@ -1,0 +1,14 @@
+<launch>
+  <!-- This launch file starts everything necessary to generate object models from demonstration grasps. -->
+
+  <arg name="model_dir" default="$(find rail_recognition)/models/grasps" />
+  <arg name="output_dir" default="$(env HOME)" />
+
+  <node pkg="rail_recognition" name="grasp_reader" type="grasp_reader" output="screen">
+    <param name="model_dir" type="string" value="$(arg model_dir)" />
+  </node>
+  <node pkg="rail_recognition" name="pc_registration" type="pc_registration" output="screen">
+    <param name="output_dir" type="string" value="$(arg output_dir)" />
+  </node>
+
+</launch>
