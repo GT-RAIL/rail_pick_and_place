@@ -21,7 +21,7 @@ install:
   - mkdir -p /tmp/ws/src
   - ln -s `pwd` /tmp/ws/src/package
   - cd /tmp/ws
-  - https://github.com/RIVeR-Lab/wpi_jaco.git -b indigo-devel
+  - git clone https://github.com/RIVeR-Lab/wpi_jaco.git -b indigo-devel
   - git clone https://github.com/WPI-RAIL/rail_segmentation.git -b indigo-devel
   - git clone https://github.com/ros-perception/perception_pcl.git -b indigo-devel
   - git clone https://github.com/ros/common_msgs.git -b indigo-devel
