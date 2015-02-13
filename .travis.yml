@@ -20,7 +20,7 @@ install:
   - rosdep update
   - mkdir -p /tmp/ws/src
   - ln -s `pwd` /tmp/ws/src/package
-  - cd /tmp/ws
+  - cd /tmp/ws/src
   - git clone https://github.com/RIVeR-Lab/wpi_jaco.git
   - git clone https://github.com/WPI-RAIL/rail_segmentation.git
   - git clone https://github.com/ros-perception/perception_pcl.git -b indigo-devel
