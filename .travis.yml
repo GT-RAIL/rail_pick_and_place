@@ -22,7 +22,7 @@ install:
   - ln -s `pwd` /tmp/ws/src/package
   - cd /tmp/ws
   - git clone https://github.com/RIVeR-Lab/wpi_jaco.git
-  - git clone https://github.com/WPI-RAIL/rail_segmentation.git -b indigo-devel
+  - git clone https://github.com/WPI-RAIL/rail_segmentation.git
   - git clone https://github.com/ros-perception/perception_pcl.git -b indigo-devel
   - git clone https://github.com/ros/common_msgs.git -b indigo-devel
   - git clone https://github.com/ros/geometry_experimental.git -b indigo-devel
