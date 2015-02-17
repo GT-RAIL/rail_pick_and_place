@@ -122,11 +122,11 @@ bool pcRecognition::recognize(rail_segmentation::Recognize::Request &req,
   vector<geometry_msgs::Pose> finalGraspList;
   icpRegistration(models[minIndex], targetCloudPtr, baseGraspList, targetGraspList, &finalGraspList, false);
   //Store grasps in response with coordinate frame of original point cloud
-  res.graspPoses.resize(targetGraspList.size());
-  for (unsigned int i = 0; i < targetGraspList.size(); i ++)
+  res.graspPoses.resize(finalGraspList.size());
+  for (unsigned int i = 0; i < finalGraspList.size(); i ++)
   {
     res.graspPoses[i].header.frame_id = req.objectCloud.header.frame_id;
-    res.graspPoses[i].pose = targetGraspList[i];
+    res.graspPoses[i].pose = finalGraspList[i];
   }
   res.model = minIndex;
   //fill in object name

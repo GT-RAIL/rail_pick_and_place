@@ -1,4 +1,4 @@
- <package>
+<package>
   <name>rail_pick_and_place</name>
   <version>0.0.1</version>
   <description>Pick and Place Functionality for CARL in the RAIL Lab</description>
@@ -15,8 +15,12 @@
  
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>rail_grasp_collection</run_depend>
+  <run_depend>rail_grasping</run_depend>
   <run_depend>rail_pick_and_place_msgs</run_depend>
-  
+  <run_depend>rail_pick_and_place_wrapper</run_depend>
+  <run_depend>rail_recognition</run_depend>
+
   <export>
     <metapackage />
   </export>
