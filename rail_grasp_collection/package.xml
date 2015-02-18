@@ -1,12 +1,17 @@
-<?xml version="1.0"?>
 <package>
   <name>rail_grasp_collection</name>
-  <version>0.2.1</version>
-  <description>Grasp collection for constructing a grasping and recognition database (designed for use with an offline interface)</description>
-  
+  <version>0.0.1</version>
+  <description>Grasp Collection for Constructing a Grasping and Recognition Database</description>
+
+  <author email="davidkent@wpi.edu">David Kent</author>
   <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
+  <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
   
   <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/rail_grasp_collection</url>
+  <url type="bugtracker">https://github.com/WPI-RAIL/rail_pick_and_place/issues</url>
+  <url type="repository">https://github.com/WPI-RAIL/rail_pick_and_place</url>
   
   <buildtool_depend>catkin</buildtool_depend>
   
@@ -24,7 +29,7 @@
   <build_depend>trajectory_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>message_generation</build_depend>
-  
+
   <run_depend>roscpp</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>actionlib</run_depend>
@@ -39,7 +44,4 @@
   <run_depend>trajectory_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
-  
-  <export>
-  </export>
 </package>

@@ -3,50 +3,50 @@
 using namespace std;
 
 graspObject::graspObject() :
-  acPickup("jaco_arm/manipulation/pickup"),
-  acGrasp("jaco_arm/manipulation/grasp"),
-  acJointTrajectory("jaco_arm/joint_velocity_controller/trajectory"),
-  acMoveArm("carl_moveit_wrapper/move_to_pose")
+    acPickup("jaco_arm/manipulation/pickup"),
+    acGrasp("jaco_arm/manipulation/grasp"),
+    acJointTrajectory("jaco_arm/joint_velocity_controller/trajectory"),
+    acMoveArm("carl_moveit_wrapper/move_to_pose")
 {
   ROS_INFO("Starting rail grasping...");
   graspTransform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
   graspTransform.setRotation(tf::Quaternion(0, 0, 0, 1));
-  
+
   cartesianCommandPub = n.advertise<wpi_jaco_msgs::CartesianCommand>("jaco_arm/cartesian_cmd", 1);
-  
+
   armJointSubscriber = n.subscribe("jaco_arm/joint_states", 1, &graspObject::armJointStatesCallback, this);
-  
+
   IKClient = n.serviceClient<carl_moveit::CallIK>("carl_moveit_wrapper/call_ik");
   cartesianPositionClient = n.serviceClient<wpi_jaco_msgs::GetCartesianPosition>("jaco_arm/get_cartesian_position");
   cartesianPathClient = n.serviceClient<carl_moveit::CartesianPath>("carl_moveit_wrapper/cartesian_path");
-  
+
   jointNamesSet = false;
   armJointPos.resize(NUM_JACO_JOINTS);
   armJointNames.resize(NUM_JACO_JOINTS);
-  
-  while (  !acPickup.waitForServer(ros::Duration(5.0)) &&
-          !acGrasp.waitForServer(ros::Duration(5.0)) &&
-          !acJointTrajectory.waitForServer(ros::Duration(5.0)))
+
+  while (!acPickup.waitForServer(ros::Duration(5.0)) &&
+      !acGrasp.waitForServer(ros::Duration(5.0)) &&
+      !acJointTrajectory.waitForServer(ros::Duration(5.0)))
   {
     ROS_INFO("Waiting for grasp, pickup, and arm trajectory action servers...");
   }
-  
+
   requestGraspServer = n.advertiseService("rail_grasping/request_grasp", &graspObject::requestGrasp, this);
   requestReleaseServer = n.advertiseService("rail_grasping/request_release", &graspObject::requestRelease, this);
-  
+
   ROS_INFO("Rail grasping started.");
 }
 
-void graspObject::armJointStatesCallback(const sensor_msgs::JointState& msg)
+void graspObject::armJointStatesCallback(const sensor_msgs::JointState &msg)
 {
-  for (unsigned int i = 0; i < NUM_JACO_JOINTS; i ++)
+  for (unsigned int i = 0; i < NUM_JACO_JOINTS; i++)
   {
     armJointPos[i] = msg.position[i];
   }
-  
+
   if (!jointNamesSet)
   {
-    for (unsigned int i = 0; i < NUM_JACO_JOINTS; i ++)
+    for (unsigned int i = 0; i < NUM_JACO_JOINTS; i++)
     {
       armJointNames[i] = msg.name[i];
     }
@@ -54,7 +54,7 @@ void graspObject::armJointStatesCallback(const sensor_msgs::JointState& msg)
   }
 }
 
-bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail_grasping::RequestGrasp::Response &res)
+bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request & req, rail_grasping::RequestGrasp::Response & res)
 {
   ROS_INFO("Received new release request...");
   //set release position
@@ -89,14 +89,14 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
   poseOut.pose.position.z += .05;
   //!!!!!!!!!! end test  !!!!!!!!!!!!!
   */
-  
+
   //Send goal to move arm service
-  
+
   //try
   geometry_msgs::Pose releasePose = req.graspPose;
   releasePose.position.z += .05;
   //end try
-  
+
   bool success = false;
   int counter = 0;
   while (!success)
@@ -106,24 +106,48 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
     movePoseGoal.pose = releasePose;
     switch (counter)
     {
-    case 0: movePoseGoal.pose.position.x += .005; break;
-    case 1: movePoseGoal.pose.position.x -= .005; break;
-    case 2: movePoseGoal.pose.position.y += .005; break;
-    case 3: movePoseGoal.pose.position.y -= .005; break;
-    case 4: movePoseGoal.pose.position.z += .005; break;
-    case 5: movePoseGoal.pose.position.z -= .005; break;
-    case 6: movePoseGoal.pose.position.x += .005; movePoseGoal.pose.position.y += .005; break;
-    case 7: movePoseGoal.pose.position.x += .005; movePoseGoal.pose.position.y -= .005; break;
-    case 8: movePoseGoal.pose.position.x -= .005; movePoseGoal.pose.position.y += .005; break;
-    case 9: movePoseGoal.pose.position.x -= .005; movePoseGoal.pose.position.y -= .005; break;
+      case 0:
+        movePoseGoal.pose.position.x += .005;
+        break;
+      case 1:
+        movePoseGoal.pose.position.x -= .005;
+        break;
+      case 2:
+        movePoseGoal.pose.position.y += .005;
+        break;
+      case 3:
+        movePoseGoal.pose.position.y -= .005;
+        break;
+      case 4:
+        movePoseGoal.pose.position.z += .005;
+        break;
+      case 5:
+        movePoseGoal.pose.position.z -= .005;
+        break;
+      case 6:
+        movePoseGoal.pose.position.x += .005;
+        movePoseGoal.pose.position.y += .005;
+        break;
+      case 7:
+        movePoseGoal.pose.position.x += .005;
+        movePoseGoal.pose.position.y -= .005;
+        break;
+      case 8:
+        movePoseGoal.pose.position.x -= .005;
+        movePoseGoal.pose.position.y += .005;
+        break;
+      case 9:
+        movePoseGoal.pose.position.x -= .005;
+        movePoseGoal.pose.position.y -= .005;
+        break;
     }
     acMoveArm.sendGoal(movePoseGoal);
     ROS_INFO("Approach angle arm move initiated.");
     acMoveArm.waitForResult(ros::Duration(20.0));
     carl_moveit::MoveToPoseResultConstPtr movePoseResult = acMoveArm.getResult();
-  
-    counter ++;
-  
+
+    counter++;
+
     res.earlyFailureDetected = !movePoseResult->success;
     if (!res.earlyFailureDetected)
     {
@@ -137,12 +161,12 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
       return false;
     }
   }
-  
+
   //!!!!!!!!!! test code !!!!!!!!!!!!!
   wpi_jaco_msgs::GetCartesianPosition::Request ikReq;
   wpi_jaco_msgs::GetCartesianPosition::Response ikRes;
   cartesianPositionClient.call(ikReq, ikRes);
-  
+
   wpi_jaco_msgs::CartesianCommand cartesianCmd;
   cartesianCmd.position = true;
   cartesianCmd.armCommand = true;
@@ -154,7 +178,7 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
 
   ros::Duration(5.0).sleep(); //wait for cartesian trajectory execution
   //!!!!!!!!!! end test  !!!!!!!!!!!!!
-  
+
   //Open gripper
   ROS_INFO("Fully opening gripper...");
   wpi_jaco_msgs::ExecuteGraspGoal openGripperGoal;
@@ -163,7 +187,7 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
   acGrasp.sendGoal(openGripperGoal);
   acGrasp.waitForResult(ros::Duration(5.0));
   ROS_INFO("Gripper opened.");
-  
+
   //*********** lift hand ***********
   ROS_INFO("Lifting hand...");
   wpi_jaco_msgs::ExecutePickupGoal pickupGoal;
@@ -174,14 +198,14 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
   ROS_INFO("hand lifting complete.");
 }
 
-bool graspObject::requestGrasp(rail_grasping::RequestGrasp::Request &req, rail_grasping::RequestGrasp::Response &res)
+bool graspObject::requestGrasp(rail_grasping::RequestGrasp::Request & req, rail_grasping::RequestGrasp::Response & res)
 {
   ROS_INFO("Received new grasp request...");
   //set new grasp position
   graspTransform.setOrigin(tf::Vector3(req.graspPose.position.x, req.graspPose.position.y, req.graspPose.position.z));
   graspTransform.setRotation(tf::Quaternion(req.graspPose.orientation.x, req.graspPose.orientation.y, req.graspPose.orientation.z, req.graspPose.orientation.w));
   tfBroadcaster.sendTransform(tf::StampedTransform(graspTransform, ros::Time::now(), "base_footprint", "grasp_frame"));
-  
+
   ros::Duration(1).sleep();
 
   bool earlyFailureDetected;
@@ -203,7 +227,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   acGrasp.sendGoal(openGripperGoal);
   acGrasp.waitForResult(ros::Duration(5.0));
   ROS_INFO("Gripper opened.");
-  
+
   //*********** Align gripper on approach angle ***********
   //Calculate pose on approach angle
   geometry_msgs::PoseStamped approachPose;
@@ -218,12 +242,12 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   approachPose.pose.orientation.y = 0.0;
   approachPose.pose.orientation.z = 0.0;
   approachPose.pose.orientation.w = 1.0;
-  
+
   //adjustment to put approach pose from centered at fingers to jaco_link_hand
   approachPose.pose.position.z += .19;
-  
+
   tfListener.transformPose("base_footprint", approachPose, poseOut);
-  
+
   //Send goal to move arm service
   ROS_INFO("Moving to approach angle...");
   carl_moveit::MoveToPoseGoal movePoseGoal;
@@ -232,7 +256,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   ROS_INFO("Approach angle arm move initiated.");
   acMoveArm.waitForResult(ros::Duration(20.0));
   carl_moveit::MoveToPoseResultConstPtr movePoseResult = acMoveArm.getResult();
-  
+
   *earlyFailureFlag = !movePoseResult->success;
   if (*earlyFailureFlag)
   {
@@ -291,7 +315,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   ros::Duration(10.0).sleep();
   ROS_INFO("Done waiting for trajectory execution.");
   */
-  
+
   //********** Move gripper along approach angle ***********
   /* TODO: Disabled for testing
   //Determine pickup pose
@@ -325,7 +349,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   }
   ROS_INFO("Arm at pickup pose.");
   */
-  
+
   //Close gripper
   ROS_INFO("Closing gripper...");
   wpi_jaco_msgs::ExecuteGraspGoal closeGripperGoal;
@@ -334,7 +358,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   acGrasp.sendGoal(closeGripperGoal);
   acGrasp.waitForResult(ros::Duration(5.0));
   ROS_INFO("Gripper closed.");
-  
+
   //*********** lift object ***********
   /* Lift object using pickup action server instead, switch it out with this if the
    * Cartesian lift is not working consistantly
@@ -371,7 +395,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
     return false;
   }
   //!!!!!!!!!! end test  !!!!!!!!!!!!!
-  
+
   /*
   //Calculate lift pose
   geometry_msgs::PoseStamped liftPose;
@@ -400,7 +424,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
     return false;
   }
   */
-  
+
   return true;
 }
 
@@ -411,13 +435,13 @@ bool graspObject::moveArmToPose(geometry_msgs::PoseStamped poseGoal)
   carl_moveit::CallIK::Response ikRes;
   ikReq.pose = poseGoal.pose;
   IKClient.call(ikReq, ikRes);
-  
+
   if (ikRes.success = false)
   {
     ROS_INFO("IK Server returned false");
     return false;
   }
-  
+
   //Create and send trajectory to the arm
   //possibly send to arm directly as a joint goal with speed limitation?
   if (!jointNamesSet)
@@ -425,7 +449,7 @@ bool graspObject::moveArmToPose(geometry_msgs::PoseStamped poseGoal)
     ROS_INFO("Joint data from the arm has not been received");
     return false;
   }
-  
+
   trajectory_msgs::JointTrajectoryPoint startPoint;
   trajectory_msgs::JointTrajectoryPoint endPoint;
   startPoint.positions = armJointPos;
@@ -438,12 +462,12 @@ bool graspObject::moveArmToPose(geometry_msgs::PoseStamped poseGoal)
   //trajGoal.goal_tolerance.clear();
   //TODO: determine if setting joint goal tolerances is required
   //trajGoal.goal_time_tolerance = ros::Duration(10.0);  //TODO: This is adjustable
-  
+
   ROS_INFO("Sending trajectory goal directly to arm");
-  
+
   acJointTrajectory.sendGoal(trajGoal);
   acJointTrajectory.waitForResult(ros::Duration(10.0));
-  
+
   //TODO: check result of trajectory execution to determine return value
   return true;
 }
@@ -456,9 +480,9 @@ void graspObject::publishGraspFrame()
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "rail_grasping");
-  
+
   graspObject go;
-  
+
   ros::Rate loop_rate(30);
   while (ros::ok())
   {
@@ -466,6 +490,6 @@ int main(int argc, char **argv)
     go.publishGraspFrame();
     loop_rate.sleep();
   }
-  
+
   return 0;
 }

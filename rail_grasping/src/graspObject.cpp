@@ -24,7 +24,7 @@ graspObject::graspObject() :
   armJointPos.resize(NUM_JACO_JOINTS);
   armJointNames.resize(NUM_JACO_JOINTS);
 
-  while (  !acPickup.waitForServer(ros::Duration(5.0)) &&
+  while (!acPickup.waitForServer(ros::Duration(5.0)) &&
       !acGrasp.waitForServer(ros::Duration(5.0)) &&
       !acJointTrajectory.waitForServer(ros::Duration(5.0)))
   {
@@ -37,16 +37,16 @@ graspObject::graspObject() :
   ROS_INFO("Rail grasping started.");
 }
 
-void graspObject::armJointStatesCallback(const sensor_msgs::JointState& msg)
+void graspObject::armJointStatesCallback(const sensor_msgs::JointState &msg)
 {
-  for (unsigned int i = 0; i < NUM_JACO_JOINTS; i ++)
+  for (unsigned int i = 0; i < NUM_JACO_JOINTS; i++)
   {
     armJointPos[i] = msg.position[i];
   }
 
   if (!jointNamesSet)
   {
-    for (unsigned int i = 0; i < NUM_JACO_JOINTS; i ++)
+    for (unsigned int i = 0; i < NUM_JACO_JOINTS; i++)
     {
       armJointNames[i] = msg.name[i];
     }
@@ -106,23 +106,47 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
     movePoseGoal.pose = releasePose;
     switch (counter)
     {
-      case 0: movePoseGoal.pose.position.x += .005; break;
-      case 1: movePoseGoal.pose.position.x -= .005; break;
-      case 2: movePoseGoal.pose.position.y += .005; break;
-      case 3: movePoseGoal.pose.position.y -= .005; break;
-      case 4: movePoseGoal.pose.position.z += .005; break;
-      case 5: movePoseGoal.pose.position.z -= .005; break;
-      case 6: movePoseGoal.pose.position.x += .005; movePoseGoal.pose.position.y += .005; break;
-      case 7: movePoseGoal.pose.position.x += .005; movePoseGoal.pose.position.y -= .005; break;
-      case 8: movePoseGoal.pose.position.x -= .005; movePoseGoal.pose.position.y += .005; break;
-      case 9: movePoseGoal.pose.position.x -= .005; movePoseGoal.pose.position.y -= .005; break;
+      case 0:
+        movePoseGoal.pose.position.x += .005;
+        break;
+      case 1:
+        movePoseGoal.pose.position.x -= .005;
+        break;
+      case 2:
+        movePoseGoal.pose.position.y += .005;
+        break;
+      case 3:
+        movePoseGoal.pose.position.y -= .005;
+        break;
+      case 4:
+        movePoseGoal.pose.position.z += .005;
+        break;
+      case 5:
+        movePoseGoal.pose.position.z -= .005;
+        break;
+      case 6:
+        movePoseGoal.pose.position.x += .005;
+        movePoseGoal.pose.position.y += .005;
+        break;
+      case 7:
+        movePoseGoal.pose.position.x += .005;
+        movePoseGoal.pose.position.y -= .005;
+        break;
+      case 8:
+        movePoseGoal.pose.position.x -= .005;
+        movePoseGoal.pose.position.y += .005;
+        break;
+      case 9:
+        movePoseGoal.pose.position.x -= .005;
+        movePoseGoal.pose.position.y -= .005;
+        break;
     }
     acMoveArm.sendGoal(movePoseGoal);
     ROS_INFO("Approach angle arm move initiated.");
     acMoveArm.waitForResult(ros::Duration(20.0));
     carl_moveit::MoveToPoseResultConstPtr movePoseResult = acMoveArm.getResult();
 
-    counter ++;
+    counter++;
 
     res.earlyFailureDetected = !movePoseResult->success;
     if (!res.earlyFailureDetected)

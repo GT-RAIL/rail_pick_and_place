@@ -8,16 +8,16 @@
 class graspLogger
 {
 public:
-	ros::NodeHandle n;
-	
-	int graspNum;
-	
-	ros::Subscriber graspSubscriber;
-	
-	void graspCallback(const rail_grasp_collection::PickupActionResult pickupResult);
-	
-	/**
-	* Constructor
-	*/
-	graspLogger();
+  ros::NodeHandle n;
+
+  int graspNum;
+
+  ros::Subscriber graspSubscriber;
+
+  void graspCallback(const rail_grasp_collection::PickupActionResult pickupResult);
+
+  /**
+  * Constructor
+  */
+  graspLogger();
 };

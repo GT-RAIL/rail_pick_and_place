@@ -1,43 +1,55 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rail_pick_and_place_wrapper)
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  message_generation
-  rail_pick_and_place_msgs
-  rail_recognition
-  rail_segmentation
-  sensor_msgs
-  wpi_jaco_msgs
-)
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS roscpp actionlib message_generation rail_pick_and_place_msgs rail_recognition rail_segmentation sensor_msgs wpi_jaco_msgs)
 
-################################################
-## Declare ROS messages, services and actions ##
-################################################
+###################################################
+## Declare things to be passed to other projects ##
+###################################################
 
-###################################
-## catkin specific configuration ##
-###################################
-
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp rail_pick_and_place_msgs rail_recognition rail_segmentation sensor_msgs wpi_jaco_msgs message_runtime
-)
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
+catkin_package()
 
 ###########
 ## Build ##
 ###########
 
-include_directories(
-  include
+## Specify additional locations of header files
+include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-#include_directories(/usr/include/vtk-5.8)
-
+## Declare a cpp executable
 add_executable(pick_and_place src/pick_and_place.cpp)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(pick_and_place
+  ${catkin_LIBRARIES}
+)
 
 add_dependencies(pick_and_place rail_segmentation_generate_messages_cpp)
 
-#target_link_libraries(pc_registration ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so libmysqlcppconn.so)
-target_link_libraries(pick_and_place ${catkin_LIBRARIES})
+#############
+## Install ##
+#############
+
+## Mark executables and/or libraries for installation
+install(TARGETS pick_and_place
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Copy header files
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
+)
+
+## Copy launch files
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)

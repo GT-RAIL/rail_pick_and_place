@@ -18,48 +18,48 @@
 
 class graspObject
 {
-public:  
+public:
   //ROS publishers, subscribers, and action servers
   ros::NodeHandle n;
-  
+
   ros::Publisher cartesianCommandPub;
-  
+
   ros::Subscriber armJointSubscriber;
-  
+
   ros::ServiceClient IKClient;
   ros::ServiceClient cartesianPositionClient;
   ros::ServiceClient cartesianPathClient;
-  
+
   ros::ServiceServer requestGraspServer;
   ros::ServiceServer requestReleaseServer;
-  
+
   //action clients
   actionlib::SimpleActionClient<wpi_jaco_msgs::ExecutePickupAction> acPickup;
   actionlib::SimpleActionClient<wpi_jaco_msgs::ExecuteGraspAction> acGrasp;
   actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> acJointTrajectory;
   actionlib::SimpleActionClient<carl_moveit::MoveToPoseAction> acMoveArm;
-  
+
   //tf
   tf::TransformBroadcaster tfBroadcaster;
   tf::TransformListener tfListener;
   tf::Transform graspTransform;
-  
+
   std::vector<double> armJointPos;
   std::vector<std::string> armJointNames;
   bool jointNamesSet;
-  
+
   /**
-   * Constructor
-   */
+  * Constructor
+  */
   graspObject();
-  
-  void armJointStatesCallback(const sensor_msgs::JointState& msg);
-  
+
+  void armJointStatesCallback(const sensor_msgs::JointState &msg);
+
   bool requestGrasp(rail_grasping::RequestGrasp::Request &req, rail_grasping::RequestGrasp::Response &res);
-  
+
   bool requestRelease(rail_grasping::RequestGrasp::Request &req, rail_grasping::RequestGrasp::Response &res);
-  
+
   bool executeGrasp(bool *earlyFailureFlag);
-  
+
   void publishGraspFrame();
 };

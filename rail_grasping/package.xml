@@ -1,12 +1,17 @@
-<?xml version="1.0"?>
 <package>
   <name>rail_grasping</name>
-  <version>0.1.1</version>
-  <description>Grasping for use with the grasp_learning package</description>
-  
+  <version>0.0.1</version>
+  <description>Grasping for Use With the Grasp Learning Package</description>
+
+  <author email="davidkent@wpi.edu">David Kent</author>
   <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
+  <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
   
   <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/rail_grasping</url>
+  <url type="bugtracker">https://github.com/WPI-RAIL/rail_pick_and_place/issues</url>
+  <url type="repository">https://github.com/WPI-RAIL/rail_pick_and_place</url>
   
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -29,7 +34,4 @@
   <run_depend>tf</run_depend>
   <run_depend>wpi_jaco_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
-
-  <export>
-  </export>
 </package>

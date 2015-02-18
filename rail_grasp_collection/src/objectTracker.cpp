@@ -3,13 +3,13 @@
 using namespace std;
 
 objectTracker::objectTracker()
-{  
+{
   objectSubscriber = n.subscribe("rail_segmentation/segmented_objects", 1, &objectTracker::objectCallback, this);
-  
+
   closestObjectServer = n.advertiseService("rail_grasp_collection/determine_closest_object", &objectTracker::determineClosestObject, this);
 }
 
-void objectTracker::objectCallback(const rail_segmentation::SegmentedObjectList& objects)
+void objectTracker::objectCallback(const rail_segmentation::SegmentedObjectList &objects)
 {
   ROS_INFO("Received new object data");
   objectList = objects;
@@ -34,18 +34,18 @@ bool objectTracker::determineClosestObject(rail_grasp_collection::ClosestObject:
     //from the reqested point
     float minDst = 999;
     objectIndex = 0;
-    for (unsigned int i = 0; i < objectList.objects.size(); i ++)
+    for (unsigned int i = 0; i < objectList.objects.size(); i++)
     {
       float minPointDst = 999;
       //convert PointCloud2 to PointCloud to access the data
       sensor_msgs::PointCloud tempCloud;
       sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[i].objectCloud, tempCloud);
-      for (unsigned int j = 0; j < tempCloud.points.size(); j ++)
+      for (unsigned int j = 0; j < tempCloud.points.size(); j++)
       {
         float dst = sqrt(
-          pow(tempCloud.points[j].x - req.x, 2) + 
-          pow(tempCloud.points[j].y - req.y, 2) + 
-          pow(tempCloud.points[j].z - req.z, 2));
+            pow(tempCloud.points[j].x - req.x, 2) +
+                pow(tempCloud.points[j].y - req.y, 2) +
+                pow(tempCloud.points[j].z - req.z, 2));
         if (dst < minPointDst)
           minPointDst = dst;
       }
@@ -56,20 +56,20 @@ bool objectTracker::determineClosestObject(rail_grasp_collection::ClosestObject:
       }
     }
   }
-  
+
   res.reference_frame_id = objectList.header.frame_id;
   sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[objectIndex].objectCloud, res.pointCloud);
-  
+
   return true;
 }
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "object_tracker");
-  
+
   objectTracker ot;
-  
+
   ros::spin();
-  
+
   return 0;
 }
