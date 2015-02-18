@@ -1,6 +1,6 @@
 <package>
   <name>rail_pick_and_place</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>Pick and Place Functionality for CARL in the RAIL Lab</description>
 
   <author email="davidkent@wpi.edu">David Kent</author>

@@ -1,6 +1,6 @@
 <package>
   <name>rail_grasping</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>Grasping for Use With the Grasp Learning Package</description>
 
   <author email="davidkent@wpi.edu">David Kent</author>
