@@ -1,0 +1,10 @@
+# Define the goal
+bool lift           # If a lift request should be sent after grasping the object
+bool verify         # If a grasp verification request should be sent after grasping the object
+string object_name  # The unique name of the object you are picking up
+---
+# Define the result
+bool success        # If the grasp and store was successful
+---
+# Define a feedback message
+string message      # The current state message
