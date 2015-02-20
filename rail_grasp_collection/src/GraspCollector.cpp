@@ -211,7 +211,7 @@ int GraspCollector::determineClosestObject(const geometry_msgs::Vector3 &v)
       sensor_msgs::PointCloud cloud;
       sensor_msgs::convertPointCloud2ToPointCloud(object_list_.objects[i].cloud, cloud);
       // check each point in the cloud
-      for (unsigned int j = 0; j < cloud.points.size(); j++)
+      for (size_t j = 0; j < cloud.points.size(); j++)
       {
         // euclidean distance to the point
         float dist = sqrt(pow(cloud.points[j].x - v.x, 2) + pow(cloud.points[j].y - v.y, 2) + pow(cloud.points[j].z - v.z, 2));

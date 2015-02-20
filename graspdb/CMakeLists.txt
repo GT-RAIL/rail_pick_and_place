@@ -1,19 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rail_grasp_collection)
+project(graspdb)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  actionlib
-  geometry_msgs
-  graspdb
-  rail_manipulation_msgs
-  rail_pick_and_place_msgs
+find_package(catkin REQUIRED
   roscpp
-  sensor_msgs
-  tf2_ros
-  tf2_sensor_msgs
 )
 
 ###################################################
@@ -23,7 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package()
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME} pqxx
+)
 
 ###########
 ## Build ##
@@ -34,15 +29,17 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a cpp executable
-add_executable(rail_grasp_collection
-  nodes/rail_grasp_collection.cpp
-  src/GraspCollector.cpp
+set(GRASPDB_SOURCE
+  src/Client.cpp
 )
 
+## Declare a cpp library
+add_library(${PROJECT_NAME} ${GRASPDB_SOURCE})
+
 ## Specify libraries to link a library or executable target against
-target_link_libraries(rail_grasp_collection
+target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
+  pqxx
 )
 
 #############
@@ -50,17 +47,13 @@ target_link_libraries(rail_grasp_collection
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS rail_grasp_collection
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 ## Copy header files
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/rms
   FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
-)
-
-## Copy launch files
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )

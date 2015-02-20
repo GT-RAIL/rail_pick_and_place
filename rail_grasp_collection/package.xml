@@ -17,6 +17,7 @@
 
   <build_depend>actionlib</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>graspdb</build_depend>
   <build_depend>rail_manipulation_msgs</build_depend>
   <build_depend>rail_pick_and_place_msgs</build_depend>
   <build_depend>roscpp</build_depend>
@@ -26,6 +27,7 @@
 
   <run_depend>actionlib</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>graspdb</run_depend>
   <run_depend>rail_manipulation_msgs</run_depend>
   <run_depend>rail_pick_and_place_msgs</run_depend>
   <run_depend>roscpp</run_depend>

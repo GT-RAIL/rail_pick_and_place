@@ -24,6 +24,7 @@ install:
   - ln -s `pwd` /tmp/ws/src/package
   - cd /tmp/ws/src
   - git clone https://github.com/WPI-RAIL/carl_moveit.git
+  - git clone https://github.com/WPI-RAIL/rail_manipulation_msgs.git
   - git clone https://github.com/WPI-RAIL/carl_bot.git
   - git clone https://github.com/WPI-RAIL/python_ethernet_rmp.git
   - git clone https://github.com/WPI-RAIL/battery_monitor_rmp.git
