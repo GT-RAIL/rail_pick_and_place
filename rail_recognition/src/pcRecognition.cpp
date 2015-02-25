@@ -79,11 +79,9 @@ bool pcRecognition::recognize(rail_segmentation::Recognize::Request &req,
 {
   PointCloud<PointXYZRGB>::Ptr baseCloudPtr(new PointCloud<PointXYZRGB>);
   PointCloud<PointXYZRGB>::Ptr targetCloudPtr(new PointCloud<PointXYZRGB>);
-  PointCloud<PointXYZRGB>::Ptr resultPtr(new PointCloud<PointXYZRGB>);
 
   vector<geometry_msgs::Pose> baseGraspList;
   vector<geometry_msgs::Pose> targetGraspList;
-  vector<geometry_msgs::Pose> resultGraspList;
 
   //convert point cloud to pcl format
   PCLPointCloud2 tempConvCloud;
@@ -123,11 +121,14 @@ bool pcRecognition::recognize(rail_segmentation::Recognize::Request &req,
   icpRegistration(models[minIndex], targetCloudPtr, baseGraspList, targetGraspList, &finalGraspList, false);
   //Store grasps in response with coordinate frame of original point cloud
   res.graspPoses.resize(finalGraspList.size());
+  ROS_INFO("------------------");
   for (unsigned int i = 0; i < finalGraspList.size(); i++)
   {
     res.graspPoses[i].header.frame_id = req.objectCloud.header.frame_id;
     res.graspPoses[i].pose = finalGraspList[i];
+    ROS_INFO("Grasp %d position: (%f, %f, %f)", i, res.graspPoses[i].pose.position.x, res.graspPoses[i].pose.position.y, res.graspPoses[i].pose.position.z);
   }
+  ROS_INFO("------------------");
   res.model = minIndex;
   //fill in object name
   //TODO: Have a better system for this!
@@ -157,11 +158,9 @@ bool pcRecognition::recognizeAndPickup(rail_pick_and_place_msgs::RecognizeAndGra
 
   PointCloud<PointXYZRGB>::Ptr baseCloudPtr(new PointCloud<PointXYZRGB>);
   PointCloud<PointXYZRGB>::Ptr targetCloudPtr(new PointCloud<PointXYZRGB>);
-  PointCloud<PointXYZRGB>::Ptr resultPtr(new PointCloud<PointXYZRGB>);
 
   vector<geometry_msgs::Pose> baseGraspList;
   vector<geometry_msgs::Pose> targetGraspList;
-  vector<geometry_msgs::Pose> resultGraspList;
 
 
   //make sure point cloud is in the correct frame for planning purposes
@@ -266,7 +265,7 @@ bool pcRecognition::graspRecognized(rail_pick_and_place_msgs::GraspRecognized::R
     else
     {
       geometry_msgs::PoseStamped tempPose;
-      tfListener.transformPose("base_footprint", req.grasps[i], tempPose);
+      tfListener.transformPose("base_footprint", ros::Time(0), req.grasps[i], req.grasps[i].header.frame_id, tempPose);
       transformedGrasps[i] = tempPose.pose;
     }
   }
@@ -668,8 +667,8 @@ PointCloud<PointXYZRGB>::Ptr pcRecognition::icpRegistration(PointCloud<PointXYZR
     tfTransform.setRotation(quat);
 
     ros::Time now = ros::Time::now();
-    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransform, now, "target_cloud_frame", "base_cloud_frame"));
-    tfListener.waitForTransform("target_cloud_frame", "base_cloud_frame", now, ros::Duration(5.0));
+    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransform, now, "base_cloud_frame", "target_cloud_frame"));
+    tfListener.waitForTransform("base_cloud_frame", "target_cloud_frame", now, ros::Duration(5.0));
 
     if (swapped)
     {

@@ -1,0 +1,9 @@
+<library path="lib/librail_recognition">
+  <class name="rail_recognition/ModelGeneration"
+         type="rail_recognition::ModelGenerationPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget allowing interactive recognition and grasping model generation.
+    </description>
+  </class>
+</library>

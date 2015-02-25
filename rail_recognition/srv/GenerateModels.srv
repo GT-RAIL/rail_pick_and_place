@@ -1,0 +1,4 @@
+int32[] models
+int32 maxModelSize
+---
+int32[] unusedModelIds
