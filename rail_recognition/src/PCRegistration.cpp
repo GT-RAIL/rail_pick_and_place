@@ -188,7 +188,7 @@ void PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModel
               baseGraspList = models[i].graspList;
               targetGraspList = models[j].graspList;
               resultGraspList.clear();
-              resultPtr = icpRegistration(baseCloudPtr, targetCloudPtr, baseGraspList, targetGraspList, &resultGraspList, false);
+              resultPtr = icpRegistration(baseCloudPtr, targetCloudPtr, baseGraspList, targetGraspList, &resultGraspList);
               filterRedundentPoints(resultPtr, DST_THRESHOLD);
 
               Model mergedModel;

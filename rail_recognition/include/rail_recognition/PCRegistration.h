@@ -107,14 +107,12 @@ private:
    * @param scoreFiltered option to only register point clouds if the registration score exceeds a given threshold
    * @return a pointer to the merged point cloud
    */
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpRegistration(pcl::PointCloud<pcl::
-  PointXYZRGB>::Ptr baseCloudPtr,
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpRegistration(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr, std::vector<
       geometry_msgs::Pose> baseGrasps,
     std::vector<geometry_msgs::Pose> targetGrasps, std::vector<
       geometry_msgs::Pose> *
-  resultGrasps,
-    bool scoreFiltered = false);
+  resultGrasps);
 
   /**
    * Determine if a point cloud registration is successful based on various score metrics

@@ -13,6 +13,7 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QVBoxLayout>
 
 class QLineEdit;
@@ -36,8 +37,9 @@ public:
 
 protected:
   // List of grasps and models
-  QListWidget* models_list_;
-  QComboBox* models_dropdown_;
+  QListWidget *models_list_;
+  QComboBox *models_dropdown_;
+  QSpinBox *model_size_spinbox_;
 
   ros::ServiceClient display_model_client_;
   ros::ServiceClient get_model_numbers_client_;

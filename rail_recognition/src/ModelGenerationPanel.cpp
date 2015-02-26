@@ -20,19 +20,35 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget* parent)
 
   //grasp/model list
   QVBoxLayout *models_layout = new QVBoxLayout;
-  QLabel *name_label = new QLabel("Grasps and Models:");
+  QLabel *name_label = new QLabel("Model List:");
   models_layout->addWidget(name_label);
   models_layout->addWidget(models_list_);
 
+  //model generation instructions
   QVBoxLayout *generate_layout = new QVBoxLayout;
   QLabel *generate_instructions = new QLabel("Models will be generated from the selected grasps and models.");
   generate_instructions->setWordWrap(true);
-  QPushButton *generate_button = new QPushButton("Generate Models");
-  generate_layout->addWidget(generate_instructions, Qt::AlignBottom);
-  generate_layout->addWidget(generate_button, Qt::AlignBottom);
+  generate_layout->addWidget(generate_instructions);
 
+  //max model size setting
+  model_size_spinbox_ = new QSpinBox;
+  model_size_spinbox_->setRange(2, 20);
+  model_size_spinbox_->setSingleStep(1);
+  model_size_spinbox_->setValue(6);
+  QLabel *model_size_label = new QLabel("Max Model Size:");
+  QHBoxLayout *model_size_layout = new QHBoxLayout;
+  model_size_layout->addWidget(model_size_label);
+  model_size_layout->addWidget(model_size_spinbox_);
+  generate_layout->addLayout(model_size_layout);
+
+  //generate button
+  QPushButton *generate_button = new QPushButton("Generate Models");
+  generate_layout->addWidget(generate_button);
+
+  //model display
   QPushButton *display_button = new QPushButton("Display Model");
 
+  //final layout
   QGridLayout *layout = new QGridLayout;
   layout->addLayout(models_layout, 0, 0);
   layout->addLayout(generate_layout, 0, 1);
