@@ -18,36 +18,36 @@ public:
   static const uint32_t UNSET_ID = 0;
   static const time_t UNSET_TIME = 0;
 
-  GraspDemonstration(uint32_t id, std::string object_name, Pose grasp_pose, uint8_t *point_cloud, size_t point_cloud_size, time_t created);
+  GraspDemonstration(const uint32_t id, const std::string object_name, const Pose grasp_pose, const uint8_t *point_cloud, const size_t point_cloud_size, const time_t created);
 
-  GraspDemonstration(std::string object_name, Pose grasp_pose, uint8_t *point_cloud, size_t point_cloud_size);
+  GraspDemonstration(const std::string object_name, const Pose grasp_pose, const uint8_t *point_cloud, const size_t point_cloud_size);
 
   ~GraspDemonstration();
 
   uint32_t getID() const;
 
-  void setID(uint32_t id);
+  void setID(const uint32_t id);
 
-  std::string &getObjectName();
+  const std::string &getObjectName() const;
 
-  void setObjectName(std::string object_name);
+  void setObjectName(const std::string object_name);
 
-  Pose &getGraspPose();
+  const Pose &getGraspPose() const;
 
-  void setGraspPose(Pose grasp_pose);
+  void setGraspPose(const Pose grasp_pose);
 
   uint8_t *getPointCloud() const;
 
-  void setPointCloud(uint8_t *point_cloud, size_t point_cloud_size);
+  void setPointCloud(const uint8_t *point_cloud, const size_t point_cloud_size);
 
   size_t getPointCloudSize() const;
 
   time_t getCreated() const;
 
-  void setCreated(time_t created);
+  void setCreated(const time_t created);
 
 private:
-  void copyPointCloudBuffer(uint8_t *point_cloud, size_t point_cloud_size, bool clean = false);
+  void copyPointCloudBuffer(const uint8_t *point_cloud, const size_t point_cloud_size, const bool clean = false);
 
   uint32_t id_;
   std::string object_name_;

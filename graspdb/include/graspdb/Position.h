@@ -13,17 +13,17 @@ namespace graspdb
 class Position
 {
 public:
-  Position(double x = 0, double y = 0, double z = 0);
+  Position(const double x = 0, const double y = 0, const double z = 0);
 
-  void setX(double x);
+  void setX(const double x);
 
   double getX() const;
 
-  void setY(double y);
+  void setY(const double y);
 
   double getY() const;
 
-  void setZ(double z);
+  void setZ(const double z);
 
   double getZ() const;
 

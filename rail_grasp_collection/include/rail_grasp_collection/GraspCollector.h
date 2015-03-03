@@ -4,6 +4,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/server/simple_action_server.h>
 #include <geometry_msgs/Point32.h>
+#include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/GripperAction.h>
 #include <rail_manipulation_msgs/LiftAction.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
@@ -22,12 +23,15 @@ class GraspCollector
 {
 public:
   static const bool DEFAULT_DEBUG = false;
+  static const unsigned int DEFAULT_PORT = 5432;
   static const int TF_CACHE_TIME = 5;
   static const int AC_WAIT_TIME = 10;
 
   GraspCollector();
 
   ~GraspCollector();
+
+  bool okay() const;
 
 private:
 
@@ -39,8 +43,9 @@ private:
 
   ros::NodeHandle node_, private_node_;
 
-  bool debug_;
-  std::string robot_fixed_frame_, grasp_frame_, gripper_action_server_, lift_action_server_, verify_grasp_action_server_;
+  bool debug_, okay_;
+  std::string robot_fixed_frame_, grasp_frame_, gripper_action_server_, lift_action_server_, verify_grasp_action_server_, host_, user_, password_, db_;
+  int port_;
 
   ros::Publisher debug_pub_;
   ros::Subscriber segmented_objects_sub_;
@@ -49,7 +54,8 @@ private:
   actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction> *gripper_ac_;
   actionlib::SimpleActionClient<rail_manipulation_msgs::LiftAction> *lift_ac_;
   actionlib::SimpleActionClient<rail_manipulation_msgs::VerifyGraspAction> *verify_grasp_ac_;
-  std::vector<std::string> finger_frames_;
+  graspdb::Client *graspdb_;
+
 
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;

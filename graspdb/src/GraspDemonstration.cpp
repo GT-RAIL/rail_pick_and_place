@@ -3,7 +3,7 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
-GraspDemonstration::GraspDemonstration(uint32_t id, string object_name, Pose grasp_pose, uint8_t *point_cloud, size_t point_cloud_size, time_t created)
+GraspDemonstration::GraspDemonstration(const uint32_t id, const string object_name, const Pose grasp_pose, const uint8_t *point_cloud, const size_t point_cloud_size, const time_t created)
     : object_name_(object_name), grasp_pose_(grasp_pose)
 {
   id_ = id;
@@ -12,7 +12,7 @@ GraspDemonstration::GraspDemonstration(uint32_t id, string object_name, Pose gra
   this->copyPointCloudBuffer(point_cloud, point_cloud_size);
 }
 
-GraspDemonstration::GraspDemonstration(string object_name, Pose grasp_pose, uint8_t *point_cloud, size_t point_cloud_size)
+GraspDemonstration::GraspDemonstration(const string object_name, const Pose grasp_pose, const uint8_t *point_cloud, const size_t point_cloud_size)
     : object_name_(object_name), grasp_pose_(grasp_pose)
 {
   // default values
@@ -36,27 +36,27 @@ uint32_t GraspDemonstration::getID() const
   return id_;
 }
 
-void GraspDemonstration::setID(uint32_t id)
+void GraspDemonstration::setID(const uint32_t id)
 {
   id_ = id;
 }
 
-std::string &GraspDemonstration::getObjectName()
+const std::string &GraspDemonstration::getObjectName() const
 {
   return object_name_;
 }
 
-void GraspDemonstration::setObjectName(std::string object_name)
+void GraspDemonstration::setObjectName(const string object_name)
 {
   object_name_ = object_name;
 }
 
-Pose &GraspDemonstration::getGraspPose()
+const Pose &GraspDemonstration::getGraspPose() const
 {
   return grasp_pose_;
 }
 
-void GraspDemonstration::setGraspPose(Pose grasp_pose)
+void GraspDemonstration::setGraspPose(const Pose grasp_pose)
 {
   grasp_pose_ = grasp_pose;
 }
@@ -66,7 +66,7 @@ uint8_t *GraspDemonstration::getPointCloud() const
   return point_cloud_;
 }
 
-void GraspDemonstration::setPointCloud(uint8_t *point_cloud, size_t point_cloud_size)
+void GraspDemonstration::setPointCloud(const uint8_t *point_cloud, const size_t point_cloud_size)
 {
   // perform the copy and clear the old data
   this->copyPointCloudBuffer(point_cloud, point_cloud_size, true);
@@ -82,12 +82,12 @@ time_t GraspDemonstration::getCreated() const
   return created_;
 }
 
-void GraspDemonstration::setCreated(time_t created)
+void GraspDemonstration::setCreated(const time_t created)
 {
   created_ = created;
 }
 
-void GraspDemonstration::copyPointCloudBuffer(uint8_t *point_cloud, size_t point_cloud_size, bool clean)
+void GraspDemonstration::copyPointCloudBuffer(const uint8_t *point_cloud, const size_t point_cloud_size, const bool clean)
 {
   // check if we need to clean old data
   if (clean && point_cloud_size_ > 0)

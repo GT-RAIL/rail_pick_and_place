@@ -15,19 +15,19 @@ namespace graspdb
 class Pose
 {
 public:
-  Pose(std::string frame_id = "", Position position = Position(), Orientation orientation = Orientation());
+  Pose(const std::string frame_id = "", const Position position = Position(), const Orientation orientation = Orientation());
 
-  void setFrameID(std::string frame_id);
+  void setFrameID(const std::string frame_id);
 
-  std::string &getFrameID();
+  const std::string &getFrameID() const;
 
-  void setPosition(Position position);
+  void setPosition(const Position position);
 
-  Position &getPosition();
+  const Position &getPosition() const;
 
-  void setOrientation(Orientation orientation);
+  void setOrientation(const Orientation orientation);
 
-  Orientation &getOrientation();
+  const Orientation &getOrientation() const;
 
 private:
   std::string frame_id_;

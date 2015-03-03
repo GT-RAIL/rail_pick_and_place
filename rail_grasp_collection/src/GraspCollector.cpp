@@ -6,6 +6,10 @@ using namespace rail::pick_and_place;
 
 GraspCollector::GraspCollector()
     : private_node_("~"),
+      host_("127.0.0.1"),
+      user_("ros"),
+      password_(""),
+      db_("graspdb"),
       ac_wait_time_(AC_WAIT_TIME),
       tf_cache_time_(TF_CACHE_TIME),
       tf_buffer_(tf_cache_time_),
@@ -19,6 +23,7 @@ GraspCollector::GraspCollector()
 {
   // set defaults
   debug_ = DEFAULT_DEBUG;
+  port_ = DEFAULT_PORT;
 
   // grab any parameters we need
   private_node_.getParam("debug", debug_);
@@ -27,7 +32,15 @@ GraspCollector::GraspCollector()
   private_node_.getParam("gripper_action_server", gripper_action_server_);
   private_node_.getParam("lift_action_server", lift_action_server_);
   private_node_.getParam("verify_grasp_action_server", verify_grasp_action_server_);
-  private_node_.getParam("finger_frames", finger_frames_);
+  private_node_.getParam("host", host_);
+  private_node_.getParam("port", port_);
+  private_node_.getParam("user", user_);
+  private_node_.getParam("password", password_);
+  private_node_.getParam("db", db_);
+
+  // set up a connection to the grasp database
+  graspdb_ = new graspdb::Client(host_, port_, user_, password_, db_);
+  okay_ = graspdb_->connect();
 
   // setup a debug publisher if we need it
   if (debug_)
@@ -51,11 +64,18 @@ GraspCollector::GraspCollector()
 
 GraspCollector::~GraspCollector()
 {
-  // cleanup actionlib
+  // cleanup
   as_.shutdown();
+  graspdb_->disconnect();
   delete gripper_ac_;
   delete lift_ac_;
   delete verify_grasp_ac_;
+  delete graspdb_;
+}
+
+bool GraspCollector::okay() const
+{
+  return okay_;
 }
 
 void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalConstPtr &goal)

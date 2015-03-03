@@ -15,7 +15,7 @@ namespace graspdb
 class Client
 {
 public:
-  Client(std::string host, unsigned int port, std::string user, std::string password, std::string db);
+  Client(const std::string host, const unsigned int port, const std::string user, const std::string password, const std::string db);
 
   ~Client();
 
@@ -35,20 +35,22 @@ public:
 
   void disconnect();
 
-  void addGraspDemonstration(GraspDemonstration &gd);
+  void addGraspDemonstration(const GraspDemonstration &gd);
 
 private:
-  std::string toSQL(Pose &p);
-  std::string toSQL(Position &p);
-  std::string toSQL(Orientation &o);
+  void createTables() const;
+
+  bool doesTypeExist(const std::string &type) const;
+
+  std::string toSQL(const Pose &p) const;
+
+  std::string toSQL(const Position &p) const;
+
+  std::string toSQL(const Orientation &o) const;
 
   std::string host_, user_, password_, db_;
   unsigned int port_;
   pqxx::connection *connection_;
-
-  void createTables();
-
-  bool doesTypeExist(const std::string &type);
 };
 
 }

@@ -4,7 +4,7 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
-Client::Client(string host, unsigned int port, string user, string password, string db) :
+Client::Client(const string host, const unsigned int port, const string user, const string password, const string db) :
     host_(host), user_(user), password_(password), db_(db)
 {
   port_ = port;
@@ -91,7 +91,7 @@ void Client::disconnect()
   }
 }
 
-void Client::createTables()
+void Client::createTables() const
 {
   // check for and create the pose type
   if (!this->doesTypeExist("pose"))
@@ -122,7 +122,7 @@ void Client::createTables()
   w.commit();
 }
 
-bool Client::doesTypeExist(const string &type)
+bool Client::doesTypeExist(const string &type) const
 {
   pqxx::work w(*connection_);
   // create and execute the query
@@ -132,10 +132,10 @@ bool Client::doesTypeExist(const string &type)
   return result[0][0].as<bool>();
 }
 
-void Client::addGraspDemonstration(GraspDemonstration &gd)
+void Client::addGraspDemonstration(const GraspDemonstration &gd)
 {
   // build the SQL bits we need
-  string &objectName = gd.getObjectName();
+  const string &objectName = gd.getObjectName();
   string graspPose = this->toSQL(gd.getGraspPose());
   pqxx::binarystring pointCloud(gd.getPointCloud(), gd.getPointCloudSize());
 
@@ -145,14 +145,14 @@ void Client::addGraspDemonstration(GraspDemonstration &gd)
   w.commit();
 }
 
-std::string Client::toSQL(Pose &p)
+std::string Client::toSQL(const Pose &p) const
 {
   // build the SQL
   string sql = "(\"" + p.getFrameID() + "\", \"" + this->toSQL(p.getPosition()) + "\", \"" + this->toSQL(p.getOrientation()) + "\")";
   return sql;
 }
 
-std::string Client::toSQL(Position &p)
+std::string Client::toSQL(const Position &p) const
 {
   // build the SQL
   stringstream ss;
@@ -160,7 +160,7 @@ std::string Client::toSQL(Position &p)
   return ss.str();
 }
 
-std::string Client::toSQL(Orientation &o)
+std::string Client::toSQL(const Orientation &o) const
 {
   // build the SQL
   stringstream ss;
