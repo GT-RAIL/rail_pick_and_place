@@ -1,6 +1,7 @@
 #ifndef RAIL_GRASPDB_ORIENTATION_H_
 #define RAIL_GRASPDB_ORIENTATION_H_
 
+#include <geometry_msgs/Quaternion.h>
 #include <string>
 
 namespace rail
@@ -14,6 +15,8 @@ class Orientation
 {
 public:
   Orientation(const double x = 0, const double y = 0, const double z = 0, const double w = 0);
+
+  Orientation(const geometry_msgs::Quaternion &quaternion);
 
   void setX(const double x);
 

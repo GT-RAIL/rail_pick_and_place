@@ -15,9 +15,15 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>libpqxx-dev</build_depend>
+  <build_depend>geometry_msgs</build_depend>
   <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>roscpp_serialization</build_depend>
 
   <run_depend>libpqxx-dev</run_depend>
+  <run_depend>geometry_msgs</run_depend>
   <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>roscpp_serialization</run_depend>
 </package>
 

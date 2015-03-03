@@ -2,6 +2,8 @@
 #define RAIL_GRASPDB_POSE_H_
 
 #include <string>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Transform.h>
 #include <graspdb/Position.h>
 #include <graspdb/Orientation.h>
 
@@ -16,6 +18,14 @@ class Pose
 {
 public:
   Pose(const std::string frame_id = "", const Position position = Position(), const Orientation orientation = Orientation());
+
+  Pose(const std::string frame_id, const geometry_msgs::Point &position, const geometry_msgs::Quaternion &orientation);
+
+  Pose(const std::string frame_id, const geometry_msgs::Pose &pose);
+
+  Pose(const std::string frame_id, const geometry_msgs::Transform &transform);
+
+  Pose(const std::string frame_id, const geometry_msgs::Vector3 &position, const geometry_msgs::Quaternion &orientation);
 
   void setFrameID(const std::string frame_id);
 

@@ -12,6 +12,15 @@ Orientation::Orientation(const double x, const double y, const double z, const d
   w_ = w;
 }
 
+Orientation::Orientation(const geometry_msgs::Quaternion &quaternion)
+{
+  // copy position data
+  x_ = quaternion.x;
+  y_ = quaternion.y;
+  z_ = quaternion.z;
+  w_ = quaternion.w;
+}
+
 void Orientation::setX(const double x)
 {
   x_ = x;

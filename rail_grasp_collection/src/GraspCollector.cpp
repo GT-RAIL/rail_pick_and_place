@@ -59,7 +59,10 @@ GraspCollector::GraspCollector()
   // start the action server
   as_.start();
 
-  ROS_INFO("Grasp Collector Successfully Initialized");
+  if (okay_)
+  {
+    ROS_INFO("Grasp Collector Successfully Initialized");
+  }
 }
 
 GraspCollector::~GraspCollector()
@@ -183,6 +186,7 @@ void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalCo
   feedback.message = "Storing grasp data...";
   as_.publishFeedback(feedback);
   // TODO: store the data
+  graspdb::GraspDemonstration demo(goal->object_name, robot_fixed_frame_, grasp.transform, object.cloud);
 
   // success
   result.success = true;

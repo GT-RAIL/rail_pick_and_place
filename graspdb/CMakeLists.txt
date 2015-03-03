@@ -6,6 +6,9 @@ project(graspdb)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
   roscpp
+  roscpp_serialization
+  geometry_msgs
+  sensor_msgs
 )
 
 ###################################################
@@ -17,7 +20,7 @@ find_package(catkin REQUIRED
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME} pqxx
+  LIBRARIES ${PROJECT_NAME} pqxx roscpp roscpp_serialization
 )
 
 ###########

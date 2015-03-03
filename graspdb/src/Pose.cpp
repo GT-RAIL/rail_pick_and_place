@@ -8,6 +8,26 @@ Pose::Pose(const string frame_id, const Position position, const Orientation ori
 {
 }
 
+Pose::Pose(const std::string frame_id, const geometry_msgs::Point &position, const geometry_msgs::Quaternion &orientation)
+    : frame_id_(frame_id), position_(position), orientation_(orientation)
+{
+}
+
+Pose::Pose(const std::string frame_id, const geometry_msgs::Pose &pose)
+    : frame_id_(frame_id), position_(pose.position), orientation_(pose.orientation)
+{
+}
+
+Pose::Pose(const std::string frame_id, const geometry_msgs::Transform &transform)
+    : frame_id_(frame_id), position_(transform.translation), orientation_(transform.rotation)
+{
+}
+
+Pose::Pose(const std::string frame_id, const geometry_msgs::Vector3 &position, const geometry_msgs::Quaternion &orientation)
+    : frame_id_(frame_id), position_(position), orientation_(orientation)
+{
+}
+
 void Pose::setFrameID(const std::string frame_id)
 {
   frame_id_ = frame_id;
