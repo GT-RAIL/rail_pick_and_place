@@ -1,0 +1,4 @@
+int32 modelId       # index of the model to display
+bool isMergedModel  # true if the modelId corresponds to a merged model, false if it corresponds to an individual grasp
+string frame        # frame to display everything in
+---

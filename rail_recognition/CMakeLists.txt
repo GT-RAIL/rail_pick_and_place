@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rail_recognition)
 
-find_package(catkin REQUIRED COMPONENTS roscpp roslib std_msgs std_srvs pcl_conversions pcl_ros manipulation_msgs message_generation rail_grasping rail_pick_and_place_msgs rail_segmentation sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp roslib std_msgs std_srvs pcl_conversions pcl_ros manipulation_msgs message_generation rail_grasping rail_pick_and_place_msgs rail_segmentation sensor_msgs rviz)
 
 #######################################
 ## Declare ROS messages and services ##
@@ -10,6 +10,9 @@ find_package(catkin REQUIRED COMPONENTS roscpp roslib std_msgs std_srvs pcl_conv
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
+  DisplayModel.srv
+  GenerateModels.srv
+  GetModelNumbers.srv
   ReadGrasp.srv
   Release.srv
 )
@@ -35,33 +38,57 @@ catkin_package()
 ###########
 
 ## Specify additional locations of header files
-include_directories(include
-  ${catkin_INCLUDE_DIRS}
+include_directories(include ${catkin_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
+
+## This plugin includes Qt widgets, so we must include Qt like so:
+find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+include(${QT_USE_FILE})
+
+## I prefer the Qt signals and slots to avoid defining "emit", "slots",
+## etc because they can conflict with boost signals, so define QT_NO_KEYWORDS here.
+add_definitions(-DQT_NO_KEYWORDS)
+
+## Here we specify which header files need to be run through "moc",
+## Qt's meta-object compiler.
+qt4_wrap_cpp(MOC_FILES
+  include/rail_recognition/ModelGenerationPanel.h
 )
+
+## Here we specify the list of source files, including the output of
+## the previous command which is stored in ``${MOC_FILES}``.
+set(SOURCE_FILES
+  src/ModelGenerationPanel.cpp
+  ${MOC_FILES}
+)
+
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${catkin_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Declare a cpp executable
 add_executable(grasp_reader src/GraspReader.cpp)
-add_executable(pc_registration src/pcRegistration.cpp)
-add_executable(pc_saver src/pcSaver.cpp)
-add_executable(pc_recognition src/pcRecognition.cpp)
+add_executable(pc_registration src/PCRegistration.cpp)
+add_executable(pc_recognition src/PCRecognition.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pc_registration ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
 target_link_libraries(pc_recognition ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
 target_link_libraries(grasp_reader ${catkin_LIBRARIES})
-target_link_libraries(pc_saver ${catkin_LIBRARIES})
 
 add_dependencies(grasp_reader ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pc_registration ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(pc_saver ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pc_recognition ${PROJECT_NAME}_generate_messages_cpp)
 
 #############
 ## Install ##
 #############
-
 ## Mark executables and/or libraries for installation
-install(TARGETS grasp_reader pc_registration pc_saver pc_recognition
+install(TARGETS ${PROJECT_NAME} grasp_reader pc_registration pc_recognition
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -80,3 +107,7 @@ install(DIRECTORY launch/
 install(DIRECTORY models/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/models
 )
+
+install(FILES
+  plugin_description.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

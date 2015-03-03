@@ -33,7 +33,7 @@
 //Recognition Constants
 #define ALPHA .5
 
-class pcRecognition
+class PCRecognition
 {
 public:
   //ROS publishers, subscribers, and action servers
@@ -83,7 +83,7 @@ public:
   /**
   * Constructor
   */
-  pcRecognition();
+  PCRecognition();
 
   /**
   * Service callback to switch between training and testing modes, will also print out current training information
