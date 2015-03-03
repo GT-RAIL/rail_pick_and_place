@@ -1,3 +1,13 @@
+/*!
+ * \file Orientation.cpp
+ * \brief Quaternion orientation information.
+ *
+ * An orientation simply contains x, y, z, and w values.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date March 3, 2015
+ */
+
 #include <graspdb/Orientation.h>
 
 using namespace std;

@@ -1,10 +1,20 @@
+/*!
+ * \file Client.cpp
+ * \brief The main grasp database client.
+ *
+ * The graspdb client can communicate with a PostgreSQL database.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date March 3, 2015
+ */
+
 #include <graspdb/Client.h>
 #include <ros/ros.h>
 
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
-Client::Client(const string host, const unsigned int port, const string user, const string password, const string db) :
+Client::Client(const string host, const uint16_t port, const string user, const string password, const string db) :
     host_(host), user_(user), password_(password), db_(db)
 {
   port_ = port;
@@ -17,27 +27,27 @@ Client::~Client()
   this->disconnect();
 }
 
-unsigned int Client::getPort() const
+uint16_t Client::getPort() const
 {
   return port_;
 }
 
-string Client::getHost() const
+const string &Client::getHost() const
 {
   return host_;
 }
 
-string Client::getUser() const
+const string &Client::getUser() const
 {
   return user_;
 }
 
-string Client::getPassword() const
+const string &Client::getPassword() const
 {
   return password_;
 }
 
-string Client::getDatabase() const
+const string &Client::getDatabase() const
 {
   return db_;
 }

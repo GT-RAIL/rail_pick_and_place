@@ -1,3 +1,13 @@
+/*!
+ * \file GraspDemonstration.cpp
+ * \brief A grasp demonstration database entry.
+ *
+ * A grasp demonstration contains information about a single grasp demonstration in the grasp database. This contains information about the grasp pose, object name, and serialized segmented point cloud.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date March 3, 2015
+ */
+
 #include <graspdb/GraspDemonstration.h>
 
 using namespace std;

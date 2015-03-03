@@ -1,3 +1,13 @@
+/*!
+ * \file Pose.cpp
+ * \brief Position and orientation information with respect to a given coordinate frame.
+ *
+ * A pose contains position and orientation information as well as a coordinate frame identifier.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date March 3, 2015
+ */
+
 #include <graspdb/Pose.h>
 
 using namespace std;

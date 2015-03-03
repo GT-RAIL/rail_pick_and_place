@@ -1,3 +1,13 @@
+/*!
+ * \file Position.cpp
+ * \brief 3-point position information.
+ *
+ * A position simply contains x, y, and z value.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date March 3, 2015
+ */
+
 #include <graspdb/Position.h>
 
 using namespace std;
