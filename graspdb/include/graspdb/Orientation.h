@@ -34,6 +34,7 @@ public:
    * \brief Create a new Orientation.
    *
    * Creates a new Orientation with the given x, y, z, and w values (defaults are 0).
+   *
    * \param x The x value (default of 0).
    * \param y The y value (default of 0).
    * \param z The z value (default of 0).
@@ -45,6 +46,7 @@ public:
    * \brief Create a new Orientation.
    *
    * Creates a new Orientation with the given x, y, z, and w values from the ROS Quaternion message.
+   *
    * \param point The ROS Quaternion message to extract values from.
    */
   Orientation(const geometry_msgs::Quaternion &quaternion);
@@ -53,6 +55,7 @@ public:
    * \brief X value mutator.
    *
    * Set the x value of this Position.
+   *
    * \param x The new x value.
    */
   void setX(const double x);
@@ -61,6 +64,7 @@ public:
    * \brief X value accessor.
    *
    * Get the x value of this Position.
+   *
    * \return The x value.
    */
   double getX() const;
@@ -69,6 +73,7 @@ public:
    * \brief Y value mutator.
    *
    * Set the y value of this Position.
+   *
    * \param y The new y value.
    */
   void setY(const double y);
@@ -77,6 +82,7 @@ public:
    * \brief Y value accessor.
    *
    * Get the y value of this Position.
+   *
    * \return The y value.
    */
   double getY() const;
@@ -85,6 +91,7 @@ public:
    * \brief Z value mutator.
    *
    * Set the z value of this Position.
+   *
    * \param z The new z value.
    */
   void setZ(const double z);
@@ -93,6 +100,7 @@ public:
    * \brief Z value accessor.
    *
    * Get the z value of this Position.
+   *
    * \return The z value.
    */
   double getZ() const;
@@ -101,6 +109,7 @@ public:
    * \brief W value mutator.
    *
    * Set the w value of this Position.
+   *
    * \param w The new w value.
    */
   void setW(const double w);
@@ -109,12 +118,13 @@ public:
    * \brief W value accessor.
    *
    * Get the w value of this Position.
+   *
    * \return The w value.
    */
   double getW() const;
 
 private:
-  /* Members to hold values. */
+  /*! Members to hold values. */
   double x_, y_, z_, w_;
 };
 

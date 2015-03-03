@@ -37,6 +37,7 @@ public:
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier, position, and orientation (defaults are 0).
+   *
    * \param frame_id The frame identifier (defaults to the empty string).
    * \param position The position values (defaults are 0).
    * \param orientation The orientation values (defaults are 0).
@@ -47,6 +48,7 @@ public:
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier, position, and orientation from ROS messages.
+   *
    * \param frame_id The frame identifier.
    * \param position The ROS Point message to extract position data from.
    * \param orientation The ROS Quaternion message to extract orientation data from.
@@ -57,6 +59,7 @@ public:
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier and pose data from the given ROS message.
+   *
    * \param frame_id The frame identifier.
    * \param position The ROS Pose message to extract position and orientation data from.
    */
@@ -66,6 +69,7 @@ public:
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier and pose data from the given ROS message.
+   *
    * \param frame_id The frame identifier.
    * \param position The ROS Transform message to extract position and orientation data from.
    */
@@ -75,6 +79,7 @@ public:
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier, position, and orientation from ROS messages.
+   *
    * \param frame_id The frame identifier.
    * \param position The ROS Vector3 message to extract position data from.
    * \param orientation The ROS Quaternion message to extract orientation data from.
@@ -85,6 +90,7 @@ public:
    * \brief Frame ID value mutator.
    *
    * Set the frame ID value of this Pose.
+   *
    * \param frame_id The new frame ID value.
    */
   void setFrameID(const std::string frame_id);
@@ -93,6 +99,7 @@ public:
    * \brief Frame ID value accessor.
    *
    * Get the frame ID value of this Pose.
+   *
    * \return The frame ID value.
    */
   const std::string &getFrameID() const;
@@ -101,6 +108,7 @@ public:
    * \brief Position value mutator.
    *
    * Set the position value of this Pose.
+   *
    * \param position The new position value.
    */
   void setPosition(const Position position);
@@ -109,6 +117,7 @@ public:
    * \brief Position value accessor.
    *
    * Get the position value of this Pose.
+   *
    * \return The position value.
    */
   const Position &getPosition() const;
@@ -117,6 +126,7 @@ public:
    * \brief Orientation value mutator.
    *
    * Set the orientation value of this Pose.
+   *
    * \param orientation The new orientation value.
    */
   void setOrientation(const Orientation orientation);
@@ -125,16 +135,17 @@ public:
    * \brief Orientation value accessor.
    *
    * Get the orientation value of this Pose.
+   *
    * \return The orientation value.
    */
   const Orientation &getOrientation() const;
 
 private:
-  /* Frame identifier. */
+  /*! Frame identifier. */
   std::string frame_id_;
-  /* Position data. */
+  /*! Position data. */
   Position position_;
-  /* Orientation data. */
+  /*! Orientation data. */
   Orientation orientation_;
 };
 

@@ -35,6 +35,7 @@ public:
    * \brief Create a new Position.
    *
    * Creates a new Position with the given x, y, and z values (defaults are 0).
+   *
    * \param x The x value (default of 0).
    * \param y The y value (default of 0).
    * \param z The z value (default of 0).
@@ -45,6 +46,7 @@ public:
    * \brief Create a new Position.
    *
    * Creates a new Position with the given x, y, and z values from the ROS Point message.
+   *
    * \param point The ROS Point message to extract values from.
    */
   Position(const geometry_msgs::Point &point);
@@ -53,6 +55,7 @@ public:
    * \brief Create a new Position.
    *
    * Creates a new Position with the given x, y, and z values from the ROS Vector3 message.
+   *
    * \param point The ROS Vector3 message to extract values from.
    */
   Position(const geometry_msgs::Vector3 &v);
@@ -61,6 +64,7 @@ public:
    * \brief X value mutator.
    *
    * Set the x value of this Position.
+   *
    * \param x The new x value.
    */
   void setX(const double x);
@@ -69,6 +73,7 @@ public:
    * \brief X value accessor.
    *
    * Get the x value of this Position.
+   *
    * \return The x value.
    */
   double getX() const;
@@ -77,6 +82,7 @@ public:
    * \brief Y value mutator.
    *
    * Set the y value of this Position.
+   *
    * \param y The new y value.
    */
   void setY(const double y);
@@ -85,6 +91,7 @@ public:
    * \brief Y value accessor.
    *
    * Get the y value of this Position.
+   *
    * \return The y value.
    */
   double getY() const;
@@ -93,6 +100,7 @@ public:
    * \brief Z value mutator.
    *
    * Set the z value of this Position.
+   *
    * \param z The new z value.
    */
   void setZ(const double z);
@@ -101,12 +109,13 @@ public:
    * \brief Z value accessor.
    *
    * Get the z value of this Position.
+   *
    * \return The z value.
    */
   double getZ() const;
 
 private:
-  /* Members to hold values. */
+  /*! Members to hold values. */
   double x_, y_, z_;
 };
 

@@ -75,7 +75,7 @@ void GraspDemonstration::setGraspPose(const Pose grasp_pose)
   grasp_pose_ = grasp_pose;
 }
 
-uint8_t *GraspDemonstration::getPointCloud() const
+const uint8_t *GraspDemonstration::getPointCloud() const
 {
   return point_cloud_;
 }
