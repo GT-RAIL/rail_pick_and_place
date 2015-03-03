@@ -19,6 +19,11 @@ Client::Client(const string host, const uint16_t port, const string user, const 
 {
   port_ = port;
   connection_ = NULL;
+
+  // check API versions
+#ifdef PQXX_VERSION_MAJOR < 4
+  ROS_WARN("libpqxx-%s is not fully supported. Please upgrade to libpqxx-4.0 or greater.", PQXX_VERSION);
+#endif
 }
 
 Client::~Client()
@@ -144,6 +149,10 @@ bool Client::doesTypeExist(const string &type) const
 
 void Client::addGraspDemonstration(const GraspDemonstration &gd)
 {
+  // check API versions
+#ifdef PQXX_VERSION_MAJOR < 4
+  ROS_ERROR("libpqxx-%s does not support binarystring insertion. Cannot add grasp to database.", PQXX_VERSION);
+#else
   // build the SQL bits we need
   const string &objectName = gd.getObjectName();
   string graspPose = this->toSQL(gd.getGraspPose());
@@ -153,6 +162,7 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
   pqxx::work w(*connection_);
   w.prepared("grasp_demonstrations.insert")(objectName)(graspPose)(pointCloud).exec();
   w.commit();
+#endif
 }
 
 std::string Client::toSQL(const Pose &p) const

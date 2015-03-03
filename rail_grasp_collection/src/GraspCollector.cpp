@@ -1,3 +1,13 @@
+/*!
+ * \file GraspCollector.cpp
+ * \brief The main grasp collector node object.
+ *
+ * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main entry point to grasp collecting.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date March 3, 2015
+ */
+
 #include <rail_grasp_collection/GraspCollector.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
@@ -185,8 +195,8 @@ void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalCo
   // store the data
   feedback.message = "Storing grasp data...";
   as_.publishFeedback(feedback);
-  // TODO: store the data
   graspdb::GraspDemonstration demo(goal->object_name, robot_fixed_frame_, grasp.transform, object.cloud);
+  graspdb_->addGraspDemonstration(demo);
 
   // success
   result.success = true;
