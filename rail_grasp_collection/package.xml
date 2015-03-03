@@ -3,9 +3,10 @@
   <version>0.0.2</version>
   <description>Grasp Collection for Constructing a Grasping and Recognition Database</description>
 
+  <author email="rctoris@wpi.edu">Russell Toris</author>
   <author email="davidkent@wpi.edu">David Kent</author>
-  <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
   <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
+  <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
   
   <license>BSD</license>
 
