@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   tf2_sensor_msgs
 )
+find_package(Boost REQUIRED COMPONENTS thread)
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -31,6 +32,7 @@ catkin_package()
 
 ## Specify additional locations of header files
 include_directories(include
+  ${boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -42,6 +44,7 @@ add_executable(rail_grasp_collection
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rail_grasp_collection
+  ${boost_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 

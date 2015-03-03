@@ -13,6 +13,7 @@
 
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/server/simple_action_server.h>
+#include <boost/thread/mutex.hpp>
 #include <geometry_msgs/Point32.h>
 #include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/GripperAction.h>
@@ -98,6 +99,9 @@ private:
    * \return The index of the closest object to the given point or -1 if no clusters have been seen.
    */
   int determineClosestObject(const geometry_msgs::Vector3 &v);
+
+  /*! Mutex for locking on the segmented object list. */
+  boost::mutex mutex_;
 
   /*! The debug and okay check flags. */
   bool debug_, okay_;

@@ -166,37 +166,65 @@ void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalCo
   // check for the closest object
   feedback.message = "Searching for the closest segmented object...";
   as_.publishFeedback(feedback);
-  int closest = this->determineClosestObject(grasp.transform.translation);
-  if (closest < 0)
+  // lock for the vector
   {
-    as_.setSucceeded(result, "No segmented objects found.");
-    return;
-  }
-  // check if we need to transform the point cloud
-  rail_manipulation_msgs::SegmentedObject &object = object_list_.objects[closest];
-  if (object.cloud.header.frame_id != robot_fixed_frame_)
-  {
-    try
+    boost::mutex::scoped_lock lock(mutex_);
+    // check if we actually have some objects
+    int closest = 0;
+    if (object_list_.objects.size() == 0)
     {
-      sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_, tf_cache_time_);
-      object.cloud = transformed_cloud;
-    } catch (tf2::TransformException &ex)
-    {
-      as_.setSucceeded(result, "Could not transform the segemented object to the robot fixed frame.");
+      as_.setSucceeded(result, "No segmented objects found.");
       return;
+    } else if (object_list_.objects.size() > 1)
+    {
+      // find the closest point
+      float min = numeric_limits<float>::infinity();
+      geometry_msgs::Vector3 &v = grasp.transform.translation;
+      // check each segmented object
+      for (size_t i = 0; i < object_list_.objects.size(); i++)
+      {
+        //convert PointCloud2 to PointCloud to access the data easily
+        sensor_msgs::PointCloud cloud;
+        sensor_msgs::convertPointCloud2ToPointCloud(object_list_.objects[i].cloud, cloud);
+        // check each point in the cloud
+        for (size_t j = 0; j < cloud.points.size(); j++)
+        {
+          // euclidean distance to the point
+          float dist = sqrt(pow(cloud.points[j].x - v.x, 2) + pow(cloud.points[j].y - v.y, 2) + pow(cloud.points[j].z - v.z, 2));
+          if (dist < min)
+          {
+            min = dist;
+            closest = i;
+          }
+        }
+      }
     }
-  }
-  // check if we are going to publish some debug info
-  if (debug_)
-  {
-    debug_pub_.publish(object.cloud);
-  }
+    // check if we need to transform the point cloud
+    rail_manipulation_msgs::SegmentedObject &object = object_list_.objects[closest];
+    if (object.cloud.header.frame_id != robot_fixed_frame_)
+    {
+      try
+      {
+        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_, tf_cache_time_);
+        object.cloud = transformed_cloud;
+      } catch (tf2::TransformException &ex)
+      {
+        as_.setSucceeded(result, "Could not transform the segemented object to the robot fixed frame.");
+        return;
+      }
+    }
+    // check if we are going to publish some debug info
+    if (debug_)
+    {
+      debug_pub_.publish(object.cloud);
+    }
 
-  // store the data
-  feedback.message = "Storing grasp data...";
-  as_.publishFeedback(feedback);
-  graspdb::GraspDemonstration demo(goal->object_name, robot_fixed_frame_, grasp.transform, object.cloud);
-  graspdb_->addGraspDemonstration(demo);
+    // store the data
+    feedback.message = "Storing grasp data...";
+    as_.publishFeedback(feedback);
+    graspdb::GraspDemonstration demo(goal->object_name, robot_fixed_frame_, grasp.transform, object.cloud);
+    graspdb_->addGraspDemonstration(demo);
+  }
 
   // success
   result.success = true;
@@ -206,42 +234,12 @@ void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalCo
 void GraspCollector::segmentedObjectsCallback(const rail_manipulation_msgs::SegmentedObjectList &object_list)
 {
   ROS_INFO("Updated segmented object list received.");
+  // lock for the vector
+  boost::mutex::scoped_lock lock(mutex_);
   object_list_ = object_list;
 }
 
 int GraspCollector::determineClosestObject(const geometry_msgs::Vector3 &v)
 {
-  // check if we actually have some objects
-  if (object_list_.objects.size() == 0)
-  {
-    return -1;
-  } else if (object_list_.objects.size() == 1)
-  {
-    // no need to check if we only have a single object
-    return 0;
-  } else
-  {
-    // find the closest point
-    float min = numeric_limits<float>::infinity();
-    int index = 0;
-    // check each segmented object
-    for (size_t i = 0; i < object_list_.objects.size(); i++)
-    {
-      //convert PointCloud2 to PointCloud to access the data easily
-      sensor_msgs::PointCloud cloud;
-      sensor_msgs::convertPointCloud2ToPointCloud(object_list_.objects[i].cloud, cloud);
-      // check each point in the cloud
-      for (size_t j = 0; j < cloud.points.size(); j++)
-      {
-        // euclidean distance to the point
-        float dist = sqrt(pow(cloud.points[j].x - v.x, 2) + pow(cloud.points[j].y - v.y, 2) + pow(cloud.points[j].z - v.z, 2));
-        if (dist < min)
-        {
-          min = dist;
-          index = i;
-        }
-      }
-    }
-    return index;
-  }
+
 }

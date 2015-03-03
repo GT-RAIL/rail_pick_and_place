@@ -21,7 +21,7 @@ Client::Client(const string host, const uint16_t port, const string user, const 
   connection_ = NULL;
 
   // check API versions
-#ifdef PQXX_VERSION_MAJOR < 4
+#if PQXX_VERSION_MAJOR < 4
   ROS_WARN("libpqxx-%s is not fully supported. Please upgrade to libpqxx-4.0 or greater.", PQXX_VERSION);
 #endif
 }
@@ -150,7 +150,7 @@ bool Client::doesTypeExist(const string &type) const
 void Client::addGraspDemonstration(const GraspDemonstration &gd)
 {
   // check API versions
-#ifdef PQXX_VERSION_MAJOR < 4
+#if PQXX_VERSION_MAJOR < 4
   ROS_ERROR("libpqxx-%s does not support binarystring insertion. Cannot add grasp to database.", PQXX_VERSION);
 #else
   // build the SQL bits we need
