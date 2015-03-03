@@ -95,20 +95,6 @@ void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalCo
     return;
   }
 
-  // determine the finger positions
-  vector<geometry_msgs::TransformStamped> finger_positions;
-  for (size_t i = 0; i < finger_frames_.size(); i++)
-  {
-    try
-    {
-      finger_positions.push_back(tf_buffer_.lookupTransform(robot_fixed_frame_, finger_frames_[i], ros::Time(0), tf_cache_time_));
-    } catch (tf2::TransformException &ex)
-    {
-      as_.setSucceeded(result, "Could not transform from the grasp frame to the robot fixed frame.");
-      return;
-    }
-  }
-
   // check if we are doing a lift
   if (goal->lift)
   {

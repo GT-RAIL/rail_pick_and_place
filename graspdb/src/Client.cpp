@@ -8,7 +8,6 @@ Client::Client(string host, unsigned int port, string user, string password, str
     host_(host), user_(user), password_(password), db_(db)
 {
   port_ = port;
-
   connection_ = NULL;
 }
 
@@ -43,7 +42,7 @@ string Client::getDatabase() const
   return db_;
 }
 
-bool Client::connected()
+bool Client::connected() const
 {
   return connection_ != NULL && connection_->is_open();
 }
@@ -62,6 +61,12 @@ bool Client::connect()
 
     if (this->connected())
     {
+      // set up the prepared statements
+      connection_->prepare("pg_type.exists",
+          "SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname=$1)");
+      connection_->prepare("grasp_demonstrations.insert",
+          "INSERT INTO grasp_demonstrations (object_name, grasp_pose, point_cloud) VALUES ($1, $2, $3)");
+      // create the tables in the DB if they do not exist
       this->createTables();
     }
   } catch (const exception &e)
@@ -93,21 +98,9 @@ void Client::createTables()
   {
     pqxx::work w(*connection_);
     string sql = "CREATE TYPE pose AS (" \
-                   "frame_id CHAR(255)," \
+                   "frame_id VARCHAR," \
                    "position NUMERIC[3]," \
                    "orientation NUMERIC[4]" \
-                 ");";
-    w.exec(sql);
-    w.commit();
-  }
-
-  // check for and create the finger joint type
-  if (!this->doesTypeExist("finger_joint"))
-  {
-    pqxx::work w(*connection_);
-    string sql = "CREATE TYPE finger_joint AS (" \
-                   "name CHAR(255)," \
-                   "pose pose" \
                  ");";
     w.exec(sql);
     w.commit();
@@ -116,12 +109,11 @@ void Client::createTables()
   // shared worker
   pqxx::work w(*connection_);
   // create the grasp_collections table if it doesn't exist
-  string grasp_collections_sql = "CREATE TABLE IF NOT EXISTS grasp_collections (" \
-                                   "id INT PRIMARY KEY NOT NULL," \
-                                   "object_name CHAR(255) NOT NULL," \
-                                   "grasp_pose pose NOT NULL," \
-                                   "finger_joints finger_joint[]," \
-                                   "point_cloud BYTEA NOT NULL," \
+  string grasp_collections_sql = "CREATE TABLE IF NOT EXISTS grasp_demonstrations (" \
+                                   "id SERIAL PRIMARY KEY," \
+                                   "object_name VARCHAR NOT NULL," \
+                                   "grasp_pose pose," \
+                                   "point_cloud BYTEA," \
                                    "created DATE NOT NULL DEFAULT NOW()" \
                                  ");";
   w.exec(grasp_collections_sql);
@@ -130,12 +122,48 @@ void Client::createTables()
   w.commit();
 }
 
-bool Client::doesTypeExist(const std::string &type)
+bool Client::doesTypeExist(const string &type)
 {
   pqxx::work w(*connection_);
   // create and execute the query
-  pqxx::result result = w.exec("SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname='" + type + "');");
+  pqxx::result result = w.prepared("pg_type.exists")(type).exec();
   w.commit();
   // return the result
   return result[0][0].as<bool>();
+}
+
+void Client::addGraspDemonstration(GraspDemonstration &gd)
+{
+  // build the SQL bits we need
+  string &objectName = gd.getObjectName();
+  string graspPose = this->toSQL(gd.getGraspPose());
+  pqxx::binarystring pointCloud(gd.getPointCloud(), gd.getPointCloudSize());
+
+  // create and execute the query
+  pqxx::work w(*connection_);
+  w.prepared("grasp_demonstrations.insert")(objectName)(graspPose)(pointCloud).exec();
+  w.commit();
+}
+
+std::string Client::toSQL(Pose &p)
+{
+  // build the SQL
+  string sql = "(\"" + p.getFrameID() + "\", \"" + this->toSQL(p.getPosition()) + "\", \"" + this->toSQL(p.getOrientation()) + "\")";
+  return sql;
+}
+
+std::string Client::toSQL(Position &p)
+{
+  // build the SQL
+  stringstream ss;
+  ss << "{" << p.getX() << ", " << p.getY() << ", " << p.getZ() << "}";
+  return ss.str();
+}
+
+std::string Client::toSQL(Orientation &o)
+{
+  // build the SQL
+  stringstream ss;
+  ss << "{" << o.getX() << ", " << o.getY() << ", " << o.getZ() << ", " << o.getW() << "}";
+  return ss.str();
 }

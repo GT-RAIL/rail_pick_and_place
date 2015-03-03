@@ -3,6 +3,7 @@
 
 #include <string>
 #include <pqxx/pqxx>
+#include <graspdb/GraspDemonstration.h>
 
 namespace rail
 {
@@ -28,18 +29,25 @@ public:
 
   std::string getDatabase() const;
 
-  bool connected();
+  bool connected() const;
 
   bool connect();
 
   void disconnect();
 
+  void addGraspDemonstration(GraspDemonstration &gd);
+
 private:
+  std::string toSQL(Pose &p);
+  std::string toSQL(Position &p);
+  std::string toSQL(Orientation &o);
+
   std::string host_, user_, password_, db_;
   unsigned int port_;
   pqxx::connection *connection_;
 
   void createTables();
+
   bool doesTypeExist(const std::string &type);
 };
 
