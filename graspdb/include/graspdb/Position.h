@@ -106,7 +106,8 @@ public:
   double getZ() const;
 
 private:
-  double x_, y_, z_; /* Members to hold values. */
+  /* Members to hold values. */
+  double x_, y_, z_;
 };
 
 }

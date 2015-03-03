@@ -114,7 +114,8 @@ public:
   double getW() const;
 
 private:
-  double x_, y_, z_, w_; /* Members to hold values. */
+  /* Members to hold values. */
+  double x_, y_, z_, w_;
 };
 
 }
