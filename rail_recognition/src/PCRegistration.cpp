@@ -66,7 +66,7 @@ void PCRegistration::readGraspsAndModels()
     else
       count--;
   }
-  ROS_INFO("Read %d grasp demonstrations", count);
+  ROS_INFO("Read %d models", count);
 }
 
 bool PCRegistration::getModel(string filename, Model *model)
@@ -82,7 +82,6 @@ bool PCRegistration::getModel(string filename, Model *model)
     sensor_msgs::convertPointCloudToPointCloud2(srv.response.grasp.pointCloud, baseCloud);
     PCLPointCloud2 tempCloud;
     pcl_conversions::toPCL(baseCloud, tempCloud);
-    //fromROSMsg(baseCloud, *pointcloudOut);
     fromPCLPointCloud2(tempCloud, *model->pointCloud);
     baseCloudPublisher.publish(baseCloud);
 
@@ -97,12 +96,18 @@ bool PCRegistration::getModel(string filename, Model *model)
 bool PCRegistration::generateModelsService(rail_recognition::GenerateModels::Request &req, rail_recognition::GenerateModels::Response &res)
 {
   vector<Model> models;
-  models.resize(req.models.size());
-  for (unsigned int i = 0; i < req.models.size(); i ++)
+  models.resize(req.individualGraspModelIds.size() + req.mergedModelIds.size());
+  for (unsigned int i = 0; i < req.individualGraspModelIds.size(); i ++)
   {
-    models[i].copy(individualGraspModels[req.models[i]]);
+    models[i].copy(individualGraspModels[req.individualGraspModelIds[i]]);
   }
-  registerPointCloudsGraph(models, req.maxModelSize, res.unusedModelIds);
+  for (unsigned int i = 0; i < req.mergedModelIds.size(); i ++)
+  {
+    models[req.individualGraspModelIds.size() + i].copy(mergedModels[req.mergedModelIds[i]]);
+  }
+  res.newModelsTotal = registerPointCloudsGraph(models, req.maxModelSize, res.unusedModelIds);
+
+  return true;
 }
 
 bool PCRegistration::getModelNumbersService(rail_recognition::GetModelNumbers::Request &req, rail_recognition::GetModelNumbers::Response &res)
@@ -133,7 +138,7 @@ bool PCRegistration::displayModelService(rail_recognition::DisplayModel::Request
   modelGraspsPublisher.publish(displayGrasps);
 }
 
-void PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelSize, vector<int> unusedModelIds)
+int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelSize, vector<int> unusedModelIds)
 {
   PointCloud<PointXYZRGB>::Ptr baseCloudPtr(new PointCloud<PointXYZRGB>);
   PointCloud<PointXYZRGB>::Ptr targetCloudPtr(new PointCloud<PointXYZRGB>);
@@ -146,7 +151,6 @@ void PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModel
   //Filter point clouds to remove noise, translate them to the origin for easier visualization
   for (unsigned int i = 0; i < models.size(); i++)
   {
-    cout << "to filter: point cloud of size: " << models[i].pointCloud->size() << endl;
     filterCloudOutliers(models[i].pointCloud, RADIUS, NUM_NEIGHBORS);
   }
 
@@ -222,10 +226,8 @@ void PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModel
   //remove any single-grasp (unmerged) models
   for (int i = models.size() - 1; i >= 0; i --)
   {
-    ROS_INFO("i: %d", i);
     if (models[i].graspList.size() < 2)
     {
-      ROS_INFO("removing");
       models.erase(models.begin() + i);
       unusedModelIds.insert(unusedModelIds.begin(), i);
     }
@@ -306,6 +308,8 @@ void PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModel
 
   ROS_INFO("---------------------------");
   ROS_INFO("Models saved to %s, move them to the models directory of the rail_recognition package to use them for recognition.", outputDirectory.c_str());
+
+  return models.size();
 }
 
 PointCloud<PointXYZRGB>::Ptr PCRegistration::icpRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, vector<geometry_msgs::Pose> baseGrasps, vector<geometry_msgs::Pose> targetGrasps, vector<geometry_msgs::Pose> *resultGrasps)
@@ -546,15 +550,11 @@ float PCRegistration::calculateRegistrationMetricDistance(PointCloud<PointXYZRGB
 
 void PCRegistration::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, double radius, int numNeighborThreshold)
 {
-  ROS_INFO("1");
   KdTreeFLANN<PointXYZRGB> searchTree(new KdTreeFLANN<PointXYZRGB>);
-  ROS_INFO("2");
   searchTree.setInputCloud(cloudPtr);
-  ROS_INFO("3");
   vector<int> removeIndices;
   vector<int> indices;
   vector<float> distances;
-  ROS_INFO("4");
 
   for (unsigned int i = 0; i < cloudPtr->size(); i++)
   {
@@ -562,7 +562,6 @@ void PCRegistration::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, 
     if (neighbors < numNeighborThreshold)
       removeIndices.push_back(i);
   }
-  ROS_INFO("5");
 
   sort(removeIndices.begin(), removeIndices.end());
   reverse(removeIndices.begin(), removeIndices.end());
@@ -663,9 +662,6 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "pc_registration");
 
   PCRegistration pcr;
-
-  //pcr.pairwiseRegisterPointclouds();
-  //pcr.registerPointcloudsGraph();
 
   ros::Rate loop_rate(1);
   while (ros::ok())

@@ -46,8 +46,9 @@ public:
   /**
   * Registered point clouds using a graph-based approach to successive pairwise registration
   * @param models models to register with the graph method
+  * @return the number of generated models
   */
-  void registerPointCloudsGraph(std::vector<rail_recognition::Model> models, int maxModelSize, std::vector<int> unusedModelIds);
+  int registerPointCloudsGraph(std::vector<rail_recognition::Model> models, int maxModelSize, std::vector<int> unusedModelIds);
 
   /**
   * Point cloud publishing for ROS visualization
@@ -104,7 +105,6 @@ private:
    * @param baseGrasps list of grasps associated with the base point cloud
    * @param targetGrasps list of grasps associated with the target point cloud
    * @param resultGrasps pointer to the list of grasps that will be filled with transformed grasps
-   * @param scoreFiltered option to only register point clouds if the registration score exceeds a given threshold
    * @return a pointer to the merged point cloud
    */
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpRegistration(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,

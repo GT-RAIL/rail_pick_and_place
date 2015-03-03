@@ -1,9 +1,9 @@
-#include "rail_recognition/pcRecognition.h"
+#include <rail_recognition/PCRecognition.h>
 
 using namespace std;
 using namespace pcl;
 
-pcRecognition::pcRecognition()
+PCRecognition::PCRecognition()
 {
   xTrans = 0.0;
   yTrans = 0.0;
@@ -15,16 +15,16 @@ pcRecognition::pcRecognition()
   readGraspClient = n.serviceClient<rail_recognition::ReadGrasp>("grasp_reader/read_grasps");
   requestGraspClient = n.serviceClient<rail_grasping::RequestGrasp>("rail_grasping/request_grasp");
   requestReleaseClient = n.serviceClient<rail_grasping::RequestGrasp>("rail_grasping/request_release");
-  recognizeServer = n.advertiseService("rail_recognition/recognize", &pcRecognition::recognize, this);
-  recognizeAndGraspServer = n.advertiseService("rail_recognition/recognize_and_pickup", &pcRecognition::recognizeAndPickup, this);
-  graspRecognizedServer = n.advertiseService("rail_recognition/grasp_recognized", &pcRecognition::graspRecognized, this);
-  setTrainingServer = n.advertiseService("rail_recognition/set_training_mode", &pcRecognition::toggleTrainingMode, this);
-  releaseServer = n.advertiseService("rail_recognition/drop_it_carl", &pcRecognition::releaseObject, this);
+  recognizeServer = n.advertiseService("rail_recognition/recognize", &PCRecognition::recognize, this);
+  recognizeAndGraspServer = n.advertiseService("rail_recognition/recognize_and_pickup", &PCRecognition::recognizeAndPickup, this);
+  graspRecognizedServer = n.advertiseService("rail_recognition/grasp_recognized", &PCRecognition::graspRecognized, this);
+  setTrainingServer = n.advertiseService("rail_recognition/set_training_mode", &PCRecognition::toggleTrainingMode, this);
+  releaseServer = n.advertiseService("rail_recognition/drop_it_carl", &PCRecognition::releaseObject, this);
 
   readPointClouds();
 }
 
-bool pcRecognition::toggleTrainingMode(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res)
+bool PCRecognition::toggleTrainingMode(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res)
 {
   if (training == false)
   {
@@ -50,7 +50,7 @@ bool pcRecognition::toggleTrainingMode(std_srvs::Empty::Request &req, std_srvs::
   return true;
 }
 
-bool pcRecognition::releaseObject(rail_recognition::Release::Request &req, rail_recognition::Release::Response &res)
+bool PCRecognition::releaseObject(rail_recognition::Release::Request &req, rail_recognition::Release::Response &res)
 {
   geometry_msgs::PoseStamped releasePose;
   geometry_msgs::PoseStamped tempPose;
@@ -74,7 +74,7 @@ bool pcRecognition::releaseObject(rail_recognition::Release::Request &req, rail_
   ROS_INFO("Finished release.");
 }
 
-bool pcRecognition::recognize(rail_segmentation::Recognize::Request &req,
+bool PCRecognition::recognize(rail_segmentation::Recognize::Request &req,
     rail_segmentation::Recognize::Response &res)
 {
   PointCloud<PointXYZRGB>::Ptr baseCloudPtr(new PointCloud<PointXYZRGB>);
@@ -138,10 +138,22 @@ bool pcRecognition::recognize(rail_segmentation::Recognize::Request &req,
       res.name = "bowl";
       break;
     case 1:
-      res.name = "cup";
+      res.name = "bowl";
       break;
     case 2:
+      res.name = "cup";
+      break;
+    case 3:
       res.name = "fork";
+      break;
+    case 4:
+      res.name = "fork";
+      break;
+    case 5:
+      res.name = "Nerf";
+      break;
+    case 6:
+      res.name = "Plant";
       break;
     default:
       res.name = "???";
@@ -152,7 +164,7 @@ bool pcRecognition::recognize(rail_segmentation::Recognize::Request &req,
   return true;
 }
 
-bool pcRecognition::recognizeAndPickup(rail_pick_and_place_msgs::RecognizeAndGrasp::Request &req, rail_pick_and_place_msgs::RecognizeAndGrasp::Response &res)
+bool PCRecognition::recognizeAndPickup(rail_pick_and_place_msgs::RecognizeAndGrasp::Request &req, rail_pick_and_place_msgs::RecognizeAndGrasp::Response &res)
 {
   ROS_INFO("\n");
 
@@ -251,7 +263,7 @@ bool pcRecognition::recognizeAndPickup(rail_pick_and_place_msgs::RecognizeAndGra
   return true;
 }
 
-bool pcRecognition::graspRecognized(rail_pick_and_place_msgs::GraspRecognized::Request &req, rail_pick_and_place_msgs::GraspRecognized::Response &res)
+bool PCRecognition::graspRecognized(rail_pick_and_place_msgs::GraspRecognized::Request &req, rail_pick_and_place_msgs::GraspRecognized::Response &res)
 {
   //transform grasps to the base_footprint frame
   vector<geometry_msgs::Pose> transformedGrasps;
@@ -273,7 +285,7 @@ bool pcRecognition::graspRecognized(rail_pick_and_place_msgs::GraspRecognized::R
   return this->chooseGrasp(req.objectIndex, req.numAttempts, transformedGrasps);
 }
 
-bool pcRecognition::chooseGrasp(int index, int numAttempts, vector<geometry_msgs::Pose> grasps)
+bool PCRecognition::chooseGrasp(int index, int numAttempts, vector<geometry_msgs::Pose> grasps)
 {
   /******************************************************
   *********************  Training  *********************
@@ -498,7 +510,7 @@ bool pcRecognition::chooseGrasp(int index, int numAttempts, vector<geometry_msgs
   return true;
 }
 
-bool pcRecognition::graspAlreadyAttempted(int index, vector<int> list)
+bool PCRecognition::graspAlreadyAttempted(int index, vector<int> list)
 {
   if (index < 0)
     return true;
@@ -512,7 +524,7 @@ bool pcRecognition::graspAlreadyAttempted(int index, vector<int> list)
   return false;
 }
 
-bool pcRecognition::getCloud(string filename, PointCloud<PointXYZRGB>::Ptr pointcloudOut, vector<geometry_msgs::Pose> *graspListOut, vector<int> *successesListOut, vector<int> *totalAttemptsOut)
+bool PCRecognition::getCloud(string filename, PointCloud<PointXYZRGB>::Ptr pointcloudOut, vector<geometry_msgs::Pose> *graspListOut, vector<int> *successesListOut, vector<int> *totalAttemptsOut)
 {
   rail_recognition::ReadGrasp srv;
   srv.request.grasp_entry = filename;
@@ -536,7 +548,7 @@ bool pcRecognition::getCloud(string filename, PointCloud<PointXYZRGB>::Ptr point
   return srv.response.success;
 }
 
-void pcRecognition::readPointClouds()
+void PCRecognition::readPointClouds()
 {
   ROS_INFO("Reading models...");
   bool reading = true;
@@ -582,7 +594,7 @@ void pcRecognition::readPointClouds()
   ROS_INFO("Read %d Models", count);
 }
 
-float pcRecognition::scoreRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+float PCRecognition::scoreRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   IterativeClosestPoint<PointXYZRGB, PointXYZRGB> icp;
   icp.setInputSource(targetCloudPtr);
@@ -604,7 +616,7 @@ float pcRecognition::scoreRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr
   return result;
 }
 
-PointCloud<PointXYZRGB>::Ptr pcRecognition::icpRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, vector<geometry_msgs::Pose> baseGrasps, vector<geometry_msgs::Pose> targetGrasps, vector<geometry_msgs::Pose> *resultGrasps, bool scoreFiltered)
+PointCloud<PointXYZRGB>::Ptr PCRecognition::icpRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, vector<geometry_msgs::Pose> baseGrasps, vector<geometry_msgs::Pose> targetGrasps, vector<geometry_msgs::Pose> *resultGrasps, bool scoreFiltered)
 {
   //Determine which point cloud is larger, and use that as the base point cloud
   bool swapped = false;
@@ -734,7 +746,7 @@ PointCloud<PointXYZRGB>::Ptr pcRecognition::icpRegistration(PointCloud<PointXYZR
 }
 
 
-float pcRecognition::calculateRegistrationMetricDstError(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+float PCRecognition::calculateRegistrationMetricDstError(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   float score = 0;
   KdTreeFLANN<PointXYZRGB> searchTree(new KdTreeFLANN<PointXYZRGB>);
@@ -752,7 +764,7 @@ float pcRecognition::calculateRegistrationMetricDstError(PointCloud<PointXYZRGB>
   return score;
 }
 
-float pcRecognition::calculateRegistrationMetricOverlap(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, float dstThreshold)
+float PCRecognition::calculateRegistrationMetricOverlap(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, float dstThreshold)
 {
   float score = 0;
   float colorError = 0;
@@ -791,7 +803,7 @@ float pcRecognition::calculateRegistrationMetricOverlap(PointCloud<PointXYZRGB>:
   return colorError;
 }
 
-float pcRecognition::calculateRegistrationMetricColorRange(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+float PCRecognition::calculateRegistrationMetricColorRange(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   float avgr = 0, avgg = 0, avgb = 0;
 
@@ -834,7 +846,7 @@ float pcRecognition::calculateRegistrationMetricColorRange(PointCloud<PointXYZRG
   return fabs(avg1 - avg2);
 }
 
-float pcRecognition::calculateRegistrationMetricDistance(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+float PCRecognition::calculateRegistrationMetricDistance(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   float maxDst = 0;
 
@@ -875,7 +887,7 @@ float pcRecognition::calculateRegistrationMetricDistance(PointCloud<PointXYZRGB>
   return fabs(maxDst - maxDst2);
 }
 
-void pcRecognition::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, double radius, int numNeighborThreshold)
+void PCRecognition::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, double radius, int numNeighborThreshold)
 {
   KdTreeFLANN<PointXYZRGB> searchTree(new KdTreeFLANN<PointXYZRGB>);
   searchTree.setInputCloud(cloudPtr);
@@ -902,7 +914,7 @@ void pcRecognition::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, d
 
 }
 
-void pcRecognition::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr, double dstThreshold)
+void PCRecognition::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr, double dstThreshold)
 {
   KdTreeFLANN<PointXYZRGB> searchTree(new KdTreeFLANN<PointXYZRGB>);
   searchTree.setInputCloud(cloudPtr);
@@ -918,7 +930,7 @@ void pcRecognition::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr,
   }
 }
 
-void pcRecognition::translateToOrigin(PointCloud<PointXYZRGB>::Ptr cloudPtr, vector<geometry_msgs::Pose> *grasps)
+void PCRecognition::translateToOrigin(PointCloud<PointXYZRGB>::Ptr cloudPtr, vector<geometry_msgs::Pose> *grasps)
 {
   float x = 0;
   float y = 0;
@@ -958,7 +970,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "pc_recognition");
 
-  pcRecognition pcr;
+  PCRecognition pcr;
 
   ros::spin();
 

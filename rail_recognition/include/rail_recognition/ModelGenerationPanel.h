@@ -37,6 +37,8 @@ public:
 
 protected:
   // List of grasps and models
+  QLabel *model_generation_status_;
+  QLabel *busy_feedback_;
   QListWidget *models_list_;
   QComboBox *models_dropdown_;
   QSpinBox *model_size_spinbox_;
@@ -52,6 +54,8 @@ protected Q_SLOTS:
   void executeRegistration();
 
   void displayModel();
+
+  void deselectAll();
 
 private:
   void updateModelInfo();

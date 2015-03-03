@@ -21,13 +21,18 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget* parent)
   //grasp/model list
   QVBoxLayout *models_layout = new QVBoxLayout;
   QLabel *name_label = new QLabel("Model List:");
+  QPushButton *deselect_all_button = new QPushButton("Deselect All");
   models_layout->addWidget(name_label);
   models_layout->addWidget(models_list_);
+  models_layout->addWidget(deselect_all_button);
 
   //model generation instructions
   QVBoxLayout *generate_layout = new QVBoxLayout;
-  QLabel *generate_instructions = new QLabel("Models will be generated from the selected grasps and models.");
+  QLabel *generate_label = new QLabel("Model Generation:");
+  generate_label->setAlignment(Qt::AlignTop);
+  QLabel *generate_instructions = new QLabel("New models will be generated from the grasps and models selected from the list.");
   generate_instructions->setWordWrap(true);
+  generate_layout->addWidget(generate_label);
   generate_layout->addWidget(generate_instructions);
 
   //max model size setting
@@ -41,57 +46,107 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget* parent)
   model_size_layout->addWidget(model_size_spinbox_);
   generate_layout->addLayout(model_size_layout);
 
-  //generate button
+  //generate and display buttons
   QPushButton *generate_button = new QPushButton("Generate Models");
-  generate_layout->addWidget(generate_button);
-
-  //model display
   QPushButton *display_button = new QPushButton("Display Model");
+  generate_layout->addWidget(generate_button);
+  generate_layout->addWidget(display_button);
+
+  //feedback
+  model_generation_status_ = new QLabel("Ready to generate.");
+  busy_feedback_ = new QLabel("");
 
   //final layout
   QGridLayout *layout = new QGridLayout;
   layout->addLayout(models_layout, 0, 0);
   layout->addLayout(generate_layout, 0, 1);
-  layout->addWidget(models_dropdown_, 1, 0);
-  layout->addWidget(display_button, 1, 1);
+  layout->addWidget(model_generation_status_, 1, 0);
+  layout->addWidget(busy_feedback_, 1, 1);
+  //layout->addWidget(models_dropdown_, 2, 0);
+  //layout->addWidget(display_button, 2, 1);
+  layout->setColumnMinimumWidth(0, 150);
+  layout->setRowMinimumHeight(0, 185);
 
   //connect things
+  QObject::connect(deselect_all_button, SIGNAL(clicked()), this, SLOT(deselectAll()));
   QObject::connect(generate_button, SIGNAL(clicked()), this, SLOT(executeRegistration()));
   QObject::connect(display_button, SIGNAL(clicked()), this, SLOT(displayModel()));
 
   setLayout(layout);
 }
 
-void ModelGenerationPanel::executeRegistration()
+void ModelGenerationPanel::deselectAll()
 {
-  rail_recognition::GenerateModels srv;
-  //TODO: get max model size from a text input field
   for (unsigned int i = 0; i < models_list_->count(); i ++)
   {
     if (models_list_->item(i)->checkState() == Qt::Checked)
     {
-      //TODO: Determine if it's an individual grasp or a model that's selected, and update registration to use both grasps and models
-      srv.request.models.push_back(i);
+      models_list_->item(i)->setCheckState(Qt::Unchecked);
     }
   }
-  srv.request.maxModelSize = 6;
+}
+
+void ModelGenerationPanel::executeRegistration()
+{
+  //Can this display?
+  model_generation_status_->setText("Generating models...");
+  busy_feedback_->setText("Please wait.");
+  ros::spinOnce();
+  rail_recognition::GenerateModels srv;
+  for (unsigned int i = 0; i < models_list_->count(); i ++)
+  {
+    if (models_list_->item(i)->checkState() == Qt::Checked)
+    {
+      string selected_item = models_list_->item(i)->text().toStdString();
+      int id = atoi(selected_item.substr(selected_item.find('_') + 1).c_str()) - 1;
+      if (selected_item.at(0) == 'g')
+        srv.request.individualGraspModelIds.push_back(id);
+      else
+        srv.request.mergedModelIds.push_back(id);
+    }
+  }
+  srv.request.maxModelSize = model_size_spinbox_->value();
   if (!generate_models_client_.call(srv))
   {
     ROS_INFO("Could not call model generation service.");
+    model_generation_status_->setText("Could not call model generation service!");
+    busy_feedback_->setText("");
     return;
   }
 
-  //TODO: add text box for status on the interface
   ROS_INFO("Model generation complete.");
 
   updateModelInfo();
+
+  stringstream ss;
+  int new_models = srv.response.newModelsTotal;
+  if (new_models == 0)
+  {
+    ss << "No new models generated.";
+  }
+  else if (new_models == 1)
+  {
+    ss << "Added 1 new model.";
+  }
+  else
+  {
+    ss << "Added " << new_models << " new models.";
+  }
+  model_generation_status_->setText("Generation complete.");
+  busy_feedback_->setText(ss.str().c_str());
 }
 
 void ModelGenerationPanel::displayModel()
 {
   rail_recognition::DisplayModel srv;
 
-  string selected_item = models_dropdown_->currentText().toStdString();
+  //string selected_item = models_dropdown_->currentText().toStdString();
+  if (models_list_->currentItem() == NULL)
+  {
+    ROS_INFO("No item selected.");
+    return;
+  }
+  string selected_item = models_list_->currentItem()->text().toStdString();
 
   if (selected_item.size() < 3)
     return;
@@ -115,26 +170,42 @@ void ModelGenerationPanel::updateModelInfo()
     return;
   }
 
-  models_list_->clear();
-  models_dropdown_->clear();
-  for (unsigned int i = 0; i < srv.response.total_individual_grasps; i ++)
+  int prev_model_count = models_list_->count();
+  //models_list_->clear();
+  //models_dropdown_->clear();
+  if (prev_model_count == 0)
   {
-    stringstream ss;
-    ss << "grasp_" << i + 1;
-    QListWidgetItem* item = new QListWidgetItem(ss.str().c_str(), models_list_);
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
-    models_dropdown_->addItem(ss.str().c_str());
-  }
+    for (unsigned int i = 0; i < srv.response.total_individual_grasps; i++)
+    {
+      stringstream ss;
+      ss << "grasp_" << i + 1;
+      QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
+      item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+      item->setCheckState(Qt::Unchecked);
+      models_dropdown_->addItem(ss.str().c_str());
+    }
 
-  for (unsigned int i = 0; i < srv.response.total_merged_models; i ++)
+    for (unsigned int i = 0; i < srv.response.total_merged_models; i ++)
+    {
+      stringstream ss;
+      ss << "model_" << i + 1;
+      QListWidgetItem* item = new QListWidgetItem(ss.str().c_str(), models_list_);
+      item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+      item->setCheckState(Qt::Unchecked);
+      models_dropdown_->addItem(ss.str().c_str());
+    }
+  }
+  else
   {
-    stringstream ss;
-    ss << "model_" << i + 1;
-    QListWidgetItem* item = new QListWidgetItem(ss.str().c_str(), models_list_);
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
-    models_dropdown_->addItem(ss.str().c_str());
+    for (unsigned int i = prev_model_count; i < srv.response.total_individual_grasps + srv.response.total_merged_models; i++)
+    {
+      stringstream ss;
+      ss << "model_" << i - srv.response.total_individual_grasps + 1;
+      QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
+      item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+      item->setCheckState(Qt::Unchecked);
+      models_dropdown_->addItem(ss.str().c_str());
+    }
   }
 }
 
@@ -144,12 +215,16 @@ void ModelGenerationPanel::updateModelInfo()
 void ModelGenerationPanel::save(rviz::Config config) const
 {
   rviz::Panel::save(config);
+  config.mapSetValue("MaxModelSize", model_size_spinbox_->value());
 }
 
 // Load all configuration data for this panel from the given Config object.
 void ModelGenerationPanel::load(const rviz::Config& config)
 {
   rviz::Panel::load(config);
+  int max_model_size;
+  if(config.mapGetInt("MaxModelSize", &max_model_size))
+    model_size_spinbox_->setValue(max_model_size);
 }
 
 } // end namespace rail_recognition

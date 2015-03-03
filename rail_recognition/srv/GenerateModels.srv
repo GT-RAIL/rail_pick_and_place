@@ -1,4 +1,6 @@
-int32[] models
+int32[] individualGraspModelIds
+int32[] mergedModelIds
 int32 maxModelSize
 ---
 int32[] unusedModelIds
+int32 newModelsTotal
