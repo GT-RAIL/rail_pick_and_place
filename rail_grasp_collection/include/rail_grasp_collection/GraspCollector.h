@@ -48,8 +48,6 @@ public:
   static const int TF_CACHE_TIME = 5;
   /*! The default wait time for action servers in seconds. */
   static const int AC_WAIT_TIME = 10;
-  /*! The default PostgreSQL port. */
-  static const unsigned int DEFAULT_PORT = 5432;
 
   /*!
    * \brief Create a GraspCollector and associated ROS information.

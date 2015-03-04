@@ -67,3 +67,21 @@ double Position::getZ() const
   return z_;
 }
 
+geometry_msgs::Point Position::toROSPointMessage() const
+{
+  geometry_msgs::Point p;
+  p.x = x_;
+  p.y = y_;
+  p.z = z_;
+  return p;
+}
+
+geometry_msgs::Vector3 Position::toROSVector3Message() const
+{
+  geometry_msgs::Vector3 v;
+  v.x = x_;
+  v.y = y_;
+  v.z = z_;
+  return v;
+}
+

@@ -86,3 +86,20 @@ const Orientation &Pose::getOrientation() const
 {
   return orientation_;
 }
+
+geometry_msgs::Pose Pose::toROSPoseMessage() const
+{
+  geometry_msgs::Pose p;
+  p.position = position_.toROSPointMessage();
+  p.orientation = orientation_.toROSQuaternionMessage();
+  return p;
+}
+
+geometry_msgs::PoseStamped Pose::toROSPoseStampedMessage() const
+{
+  geometry_msgs::PoseStamped p;
+  p.header.frame_id = fixed_frame_id_;
+  p.pose.position = position_.toROSPointMessage();
+  p.pose.orientation = orientation_.toROSQuaternionMessage();
+  return p;
+}

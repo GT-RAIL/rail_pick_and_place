@@ -3,7 +3,8 @@
  * \brief The grasp retriever node object.
  *
  * The grasp retriever allows for loading stored grasps from the grasp database training set. An action server is
- * started as the main entry point to grasp retrieval.
+ * started as the main entry point to grasp retrieval. A latched topic is used to publish the resulting point cloud and
+ * pose.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 4, 2015
@@ -14,6 +15,7 @@
 
 #include <actionlib/server/simple_action_server.h>
 #include <graspdb/graspdb.h>
+#include <rail_pick_and_place_msgs/RetrieveGraspDemonstrationAction.h>
 #include <ros/ros.h>
 
 namespace rail
@@ -43,7 +45,7 @@ public:
    *
    * Cleans up any connections used by the GraspRetriever.
    */
-  ~GraspCollector();
+  ~GraspRetriever();
 
   /*!
    * \brief A check for a valid GraspRetriever.
@@ -56,14 +58,13 @@ public:
 
 private:
   /*!
-   * \brief Callback for the store grasp action server.
+   * \brief Callback for the retrieve grasp action server.
    *
-   * The store grasp action will close the gripper, lift the arm (if specified), verify the grasp (if specified),
-   * and store the grasp/point cloud data in the grasp database.
+   * The retrieve grasp action will attempt to load a stored grasp demonstration from the grasp database.
    *
    * \param goal The goal object specifying the parameters.
    */
-  void graspAndStore(const rail_pick_and_place_msgs::GraspAndStoreGoalConstPtr &goal);
+  void retrieveGrasp(const rail_pick_and_place_msgs::RetrieveGraspDemonstrationGoalConstPtr &goal);
 
   /*! The okay check flag. */
   bool debug_, okay_;
@@ -76,8 +77,10 @@ private:
 
   /*! The private ROS node handle. */
   ros::NodeHandle private_node_;
-  /*! The main grasp collection action server. */
-  actionlib::SimpleActionServer<rail_pick_and_place_msgs::GraspAndStoreAction> as_;
+  /*! The main action server. */
+  actionlib::SimpleActionServer<rail_pick_and_place_msgs::RetrieveGraspDemonstrationAction> as_;
+  /*! The latched publishers for retrieved data. */
+  ros::Publisher point_cloud_pub_, pose_pub_;
 };
 
 }

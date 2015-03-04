@@ -41,12 +41,21 @@ add_executable(rail_grasp_collection
   nodes/rail_grasp_collection.cpp
   src/GraspCollector.cpp
 )
+add_executable(rail_grasp_retriever
+  nodes/rail_grasp_retriever.cpp
+  src/GraspRetriever.cpp
+)
 
 ## Add message build dependencies (needed for source build)
 add_dependencies(rail_grasp_collection rail_pick_and_place_msgs_gencpp)
+add_dependencies(rail_grasp_retriever rail_pick_and_place_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rail_grasp_collection
+  ${boost_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(rail_grasp_retriever
   ${boost_LIBRARIES}
   ${catkin_LIBRARIES}
 )
@@ -56,7 +65,7 @@ target_link_libraries(rail_grasp_collection
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS rail_grasp_collection
+install(TARGETS rail_grasp_collection rail_grasp_retriever
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

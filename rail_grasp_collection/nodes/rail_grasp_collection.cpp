@@ -10,7 +10,6 @@
  */
 
 #include <rail_grasp_collection/GraspCollector.h>
-#include <graspdb/graspdb.h>
 
 using namespace std;
 using namespace rail::pick_and_place;

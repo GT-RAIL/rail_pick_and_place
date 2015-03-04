@@ -31,6 +31,9 @@ namespace graspdb
 class Client
 {
 public:
+  /*! The default PostgreSQL port. */
+  static const unsigned int DEFAULT_PORT = 5432;
+  
   /*!
    * \brief Create a new Client.
    *

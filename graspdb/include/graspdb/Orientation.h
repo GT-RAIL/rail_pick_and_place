@@ -123,6 +123,13 @@ public:
    */
   double getW() const;
 
+  /*!
+   * Converts this Orientation object into a ROS Quaternion message.
+   *
+   * \return The ROS Quaternion message with this orientation data.
+   */
+  geometry_msgs::Quaternion toROSQuaternionMessage() const;
+
 private:
   /*! Members to hold values. */
   double x_, y_, z_, w_;

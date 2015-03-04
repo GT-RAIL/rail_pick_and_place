@@ -111,6 +111,20 @@ const uint8_t *GraspDemonstration::getPointCloud() const
   return point_cloud_;
 }
 
+sensor_msgs::PointCloud2 GraspDemonstration::createPointCloud2() const
+{
+  sensor_msgs::PointCloud2 pc;
+
+  // deserialize from memory
+  if (point_cloud_size_ > 0)
+  {
+    ros::serialization::OStream stream(point_cloud_, point_cloud_size_);
+    ros::serialization::Serializer<sensor_msgs::PointCloud2>::read(stream, pc);
+  }
+
+  return pc;
+}
+
 void GraspDemonstration::setPointCloud(const uint8_t *point_cloud, const uint32_t point_cloud_size)
 {
   // perform the copy and clear the old data
@@ -136,6 +150,20 @@ time_t GraspDemonstration::getCreated() const
 void GraspDemonstration::setCreated(const time_t created)
 {
   created_ = created;
+}
+
+rail_pick_and_place_msgs::GraspDemonstration GraspDemonstration::toROSPGraspDemonstrationMessage() const
+{
+  rail_pick_and_place_msgs::GraspDemonstration gd;
+  gd.id = id_;
+  gd.object_name = object_name_;
+  gd.grasp_pose_fixed_frame_id = grasp_pose_.getFixedFrameID();
+  gd.grasp_pose_grasp_frame_id = grasp_pose_.getGraspFrameID();
+  gd.grasp_pose = grasp_pose_.toROSPoseMessage();
+  gd.point_cloud = this->createPointCloud2();
+  gd.created.nsec = 0;
+  gd.created.sec = created_;
+  return gd;
 }
 
 void GraspDemonstration::copyPointCloudBuffer(const uint8_t *point_cloud, const uint32_t point_cloud_size,

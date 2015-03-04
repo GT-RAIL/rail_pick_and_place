@@ -114,6 +114,20 @@ public:
    */
   double getZ() const;
 
+  /*!
+   * Converts this Position object into a ROS Point message.
+   *
+   * \return The ROS Point message with this position data.
+   */
+  geometry_msgs::Point toROSPointMessage() const;
+
+  /*!
+   * Converts this Position object into a ROS Vector3 message.
+   *
+   * \return The ROS Vector3 message with this position data.
+   */
+  geometry_msgs::Vector3 toROSVector3Message() const;
+
 private:
   /*! Members to hold values. */
   double x_, y_, z_;

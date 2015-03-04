@@ -31,11 +31,11 @@ GraspCollector::GraspCollector()
       gripper_action_server_("/manipulation/gripper"),
       lift_action_server_("/manipulation/lift"),
       verify_grasp_action_server_("/manipulation/verify_grasp"),
-      as_(private_node_, "store_grasp", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
+      as_(private_node_, "grasp_and_store", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
   // set defaults
   debug_ = DEFAULT_DEBUG;
-  port_ = DEFAULT_PORT;
+  port_ = graspdb::Client::DEFAULT_PORT;
 
   // grab any parameters we need
   private_node_.getParam("debug", debug_);
@@ -235,6 +235,8 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
   }
 
   // success
+  feedback.message = "Sucecss!";
+  as_.publishFeedback(feedback);
   result.success = true;
   as_.setSucceeded(result, "Sucecss!");
 }

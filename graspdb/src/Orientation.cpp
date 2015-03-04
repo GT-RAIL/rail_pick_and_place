@@ -71,3 +71,13 @@ double Orientation::getW() const
   return w_;
 }
 
+geometry_msgs::Quaternion Orientation::toROSQuaternionMessage() const
+{
+  geometry_msgs::Quaternion q;
+  q.x = x_;
+  q.y = y_;
+  q.z = z_;
+  q.w = w_;
+  return q;
+}
+

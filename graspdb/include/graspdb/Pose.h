@@ -13,6 +13,7 @@
 
 #include <string>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Transform.h>
 #include <graspdb/Position.h>
 #include <graspdb/Orientation.h>
@@ -165,6 +166,20 @@ public:
    * \return The orientation value.
    */
   const Orientation &getOrientation() const;
+
+  /*!
+   * Converts this Pose object into a ROS Pose message.
+   *
+   * \return The ROS Pose message with this pose data.
+   */
+  geometry_msgs::Pose toROSPoseMessage() const;
+
+  /*!
+   * Converts this Pose object into a ROS PoseStamped message. The frame_id field is set to the Pose's fixed frame.
+   *
+   * \return The ROS PoseStamped message with this pose data.
+   */
+  geometry_msgs::PoseStamped toROSPoseStampedMessage() const;
 
 private:
   /*! Frame identifiers. */
