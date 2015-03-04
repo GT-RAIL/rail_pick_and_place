@@ -71,7 +71,8 @@ bool Client::connect()
   {
     // build the connection
     stringstream ss;
-    ss << "dbname=" << db_ << " user=" << user_ << " password=" << password_ << " hostaddr=" << host_ << " port=" << port_;
+    ss << "dbname=" << db_ << " user=" << user_ << " password=" << password_;
+    ss << " hostaddr=" << host_ << " port=" << port_;
     connection_ = new pqxx::connection(ss.str());
 
     if (this->connected())
@@ -168,7 +169,8 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
 std::string Client::toSQL(const Pose &p) const
 {
   // build the SQL
-  string sql = "(\"" + p.getFrameID() + "\", \"" + this->toSQL(p.getPosition()) + "\", \"" + this->toSQL(p.getOrientation()) + "\")";
+  string sql = "(\"" + p.getFrameID() + "\", \"" + this->toSQL(p.getPosition()) + "\", \""
+      + this->toSQL(p.getOrientation()) + "\")";
   return sql;
 }
 

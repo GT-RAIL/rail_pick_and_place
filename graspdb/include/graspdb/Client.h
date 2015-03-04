@@ -42,7 +42,8 @@ public:
    * \param password The password for the user of the database.
    * \param db The database name.
    */
-  Client(const std::string host, const uint16_t port, const std::string user, const std::string password, const std::string db);
+  Client(const std::string host, const uint16_t port, const std::string user, const std::string password,
+      const std::string db);
 
   /*!
    * \brief Cleans up a Client.
@@ -125,7 +126,8 @@ private:
   /*!
    * \brief Creates tables and types.
    *
-   * Creates the initial table and composite type schemas needed for the database. If these already exist, no action is taken.
+   * Creates the initial table and composite type schemas needed for the database. If these already exist, no action
+    * is taken.
    */
   void createTables() const;
 

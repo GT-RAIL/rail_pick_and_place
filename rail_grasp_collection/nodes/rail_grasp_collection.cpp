@@ -2,7 +2,8 @@
  * \file rail_grasp_collection.cpp
  * \brief The main grasp collector node.
  *
- * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main entry point to grasp collecting.
+ * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main
+ * entry point to grasp collecting.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 3, 2015

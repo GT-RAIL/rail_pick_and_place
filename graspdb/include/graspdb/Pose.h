@@ -42,7 +42,8 @@ public:
    * \param position The position values (defaults are 0).
    * \param orientation The orientation values (defaults are 0).
    */
-  Pose(const std::string frame_id = "", const Position position = Position(), const Orientation orientation = Orientation());
+  Pose(const std::string frame_id = "", const Position position = Position(),
+      const Orientation orientation = Orientation());
 
   /*!
    * \brief Create a new Pose.
@@ -84,7 +85,8 @@ public:
    * \param position The ROS Vector3 message to extract position data from.
    * \param orientation The ROS Quaternion message to extract orientation data from.
    */
-  Pose(const std::string frame_id, const geometry_msgs::Vector3 &position, const geometry_msgs::Quaternion &orientation);
+  Pose(const std::string frame_id, const geometry_msgs::Vector3 &position,
+      const geometry_msgs::Quaternion &orientation);
 
   /*!
    * \brief Frame ID value mutator.

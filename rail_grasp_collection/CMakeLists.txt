@@ -42,6 +42,9 @@ add_executable(rail_grasp_collection
   src/GraspCollector.cpp
 )
 
+## Add message build dependencies (needed for source build)
+add_dependencies(rail_grasp_collection rail_pick_and_place_msgs_gencpp)
+
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rail_grasp_collection
   ${boost_LIBRARIES}

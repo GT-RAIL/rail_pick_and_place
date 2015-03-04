@@ -23,7 +23,8 @@
   <arg name="segmented_objects_topic" default="/rail_segmentation/segmented_objects" />
 
   <!-- Main Node -->
-  <node name="rail_grasp_collection" pkg="rail_grasp_collection" type="rail_grasp_collection" respawn="false" output="screen">
+  <node name="rail_grasp_collection" pkg="rail_grasp_collection" type="rail_grasp_collection" respawn="false"
+        output="screen">
     <param name="host" value="$(arg host)" />
     <param name="port" value="$(arg port)" />
     <param name="user" value="$(arg user)" />

@@ -2,7 +2,8 @@
  * \file GraspCollector.cpp
  * \brief The main grasp collector node object.
  *
- * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main entry point to grasp collecting.
+ * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main
+ * entry point to grasp collecting.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \author David Kent, WPI - davidkent@wpi.edu
@@ -30,7 +31,7 @@ GraspCollector::GraspCollector()
       gripper_action_server_("/manipulation/gripper"),
       lift_action_server_("/manipulation/lift"),
       verify_grasp_action_server_("/manipulation/verify_grasp"),
-      as_(private_node_, "store_grasp", boost::bind(&GraspCollector::storeGrasp, this, _1), false)
+      as_(private_node_, "store_grasp", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
   // set defaults
   debug_ = DEFAULT_DEBUG;
@@ -60,12 +61,15 @@ GraspCollector::GraspCollector()
   }
 
   // subscribe to the list of segmented objects
-  segmented_objects_sub_ = node_.subscribe("/rail_segmentation/segmented_objects", 1, &GraspCollector::segmentedObjectsCallback, this);
+  segmented_objects_sub_ = node_.subscribe("/rail_segmentation/segmented_objects", 1,
+      &GraspCollector::segmentedObjectsCallback, this);
 
   // setup action clients
   gripper_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction>(gripper_action_server_, true);
   lift_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::LiftAction>(lift_action_server_, true);
-  verify_grasp_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::VerifyGraspAction>(verify_grasp_action_server_, true);
+  verify_grasp_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::VerifyGraspAction>(
+      verify_grasp_action_server_, true
+  );
 
   // start the action server
   as_.start();
@@ -92,12 +96,12 @@ bool GraspCollector::okay() const
   return okay_;
 }
 
-void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalConstPtr &goal)
+void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStoreGoalConstPtr &goal)
 {
   ROS_INFO("Store grasp requset received.");
 
-  rail_pick_and_place_msgs::StoreGraspFeedback feedback;
-  rail_pick_and_place_msgs::StoreGraspResult result;
+  rail_pick_and_place_msgs::GraspAndStoreFeedback feedback;
+  rail_pick_and_place_msgs::GraspAndStoreResult result;
   // default to false
   result.success = false;
 
@@ -191,7 +195,9 @@ void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalCo
         for (size_t j = 0; j < cloud.points.size(); j++)
         {
           // euclidean distance to the point
-          float dist = sqrt(pow(cloud.points[j].x - v.x, 2) + pow(cloud.points[j].y - v.y, 2) + pow(cloud.points[j].z - v.z, 2));
+          float dist = sqrt(
+              pow(cloud.points[j].x - v.x, 2) + pow(cloud.points[j].y - v.y, 2) + pow(cloud.points[j].z - v.z, 2)
+          );
           if (dist < min)
           {
             min = dist;
@@ -206,7 +212,8 @@ void GraspCollector::storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalCo
     {
       try
       {
-        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_, tf_cache_time_);
+        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_,
+            tf_cache_time_);
         object.cloud = transformed_cloud;
       } catch (tf2::TransformException &ex)
       {

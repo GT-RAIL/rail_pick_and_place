@@ -2,7 +2,8 @@
  * \file GraspCollector.h
  * \brief The main grasp collector node object.
  *
- * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main entry point to grasp collecting.
+ * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main entry
+ * point to grasp collecting.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \author David Kent, WPI - davidkent@wpi.edu
@@ -21,7 +22,7 @@
 #include <rail_manipulation_msgs/LiftAction.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
 #include <rail_manipulation_msgs/VerifyGraspAction.h>
-#include <rail_pick_and_place_msgs/StoreGraspAction.h>
+#include <rail_pick_and_place_msgs/GraspAndStoreAction.h>
 #include <ros/ros.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <tf2_ros/transform_listener.h>
@@ -35,7 +36,8 @@ namespace pick_and_place
  * \class GraspCollector
  * \brief The main grasp collector node object.
  *
- * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main entry point to grasp collecting.
+ * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main entry
+ * point to grasp collecting.
  */
 class GraspCollector
 {
@@ -52,7 +54,8 @@ public:
   /*!
    * \brief Create a GraspCollector and associated ROS information.
    *
-   * Creates a ROS node handle, subscribes to the relevant topics and servers, and creates a client to the grasp database.
+   * Creates a ROS node handle, subscribes to the relevant topics and servers, and creates a client to the grasp
+   * database.
    */
   GraspCollector();
 
@@ -76,11 +79,12 @@ private:
   /*!
    * \brief Callback for the store grasp action server.
    *
-   * The store grasp action will close the gripper, lift the arm (if specified), verify the grasp (if specified), and store the grasp/point cloud data in the grasp database.
+   * The store grasp action will close the gripper, lift the arm (if specified), verify the grasp (if specified),
+   * and store the grasp/point cloud data in the grasp database.
    *
    * \param goal The goal object specifying the parameters.
    */
-  void storeGrasp(const rail_pick_and_place_msgs::StoreGraspGoalConstPtr &goal);
+  void graspAndStore(const rail_pick_and_place_msgs::GraspAndStoreGoalConstPtr &goal);
 
   /*!
    * \brief Callback for the segmented objects topic.
@@ -97,7 +101,8 @@ private:
   /*! The debug and okay check flags. */
   bool debug_, okay_;
   /*! Various parameters loaded from ROS. */
-  std::string robot_fixed_frame_, grasp_frame_, gripper_action_server_, lift_action_server_, verify_grasp_action_server_, host_, user_, password_, db_;
+  std::string robot_fixed_frame_, grasp_frame_, gripper_action_server_, lift_action_server_,
+      verify_grasp_action_server_, host_, user_, password_, db_;
   /* The grasp database connection port. */
   int port_;
   /* The grasp database connection. */
@@ -112,7 +117,7 @@ private:
   /*! The most recent segmented objects. */
   rail_manipulation_msgs::SegmentedObjectList object_list_;
   /*! The main grasp collection action server. */
-  actionlib::SimpleActionServer<rail_pick_and_place_msgs::StoreGraspAction> as_;
+  actionlib::SimpleActionServer<rail_pick_and_place_msgs::GraspAndStoreAction> as_;
   /*! The gripper action client. */
   actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction> *gripper_ac_;
   /*! The lift action client. */

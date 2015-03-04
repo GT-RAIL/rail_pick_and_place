@@ -2,7 +2,8 @@
  * \file GraspDemonstration.h
  * \brief A grasp demonstration database entry.
  *
- * A grasp demonstration contains information about a single grasp demonstration in the grasp database. This contains information about the grasp pose, object name, and serialized segmented point cloud.
+ * A grasp demonstration contains information about a single grasp demonstration in the grasp database. This
+ * contains information about the grasp pose, object name, and serialized segmented point cloud.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 3, 2015
@@ -28,7 +29,8 @@ namespace graspdb
  * \class GraspDemonstration
  * \brief A grasp demonstration database entry.
  *
- * A grasp demonstration contains information about a single grasp demonstration in the grasp database. This contains information about the grasp pose, object name, and serialized segmented point cloud.
+ * A grasp demonstration contains information about a single grasp demonstration in the grasp database. This
+ * contains information about the grasp pose, object name, and serialized segmented point cloud.
  */
 class GraspDemonstration
 {
@@ -41,7 +43,8 @@ public:
   /*!
    * \brief Create a new GraspDemonstration.
    *
-   * Creates a new GraspDemonstration with the given values. This constructor assumes a valid ID and timestamp are known.
+   * Creates a new GraspDemonstration with the given values. This constructor assumes a valid ID and timestamp are
+   * known.
    *
    * \param id The unique ID of the database entry.
    * \param object_name The name of the object grasped.
@@ -50,43 +53,50 @@ public:
    * \param point_cloud_size The size of the serialized point cloud buffer.
    * \param created The created timestamp.
    */
-  GraspDemonstration(const uint32_t id, const std::string object_name, const Pose grasp_pose, const uint8_t *point_cloud, const uint32_t point_cloud_size, const time_t created);
+  GraspDemonstration(const uint32_t id, const std::string object_name, const Pose grasp_pose,
+      const uint8_t *point_cloud, const uint32_t point_cloud_size, const time_t created);
 
   /*!
    * \brief Create a new GraspDemonstration.
    *
-   * Creates a new GraspDemonstration with the given values. This constructor assumes no valid ID and timestamp are known (e.g., for use when inserting into the database).
+   * Creates a new GraspDemonstration with the given values. This constructor assumes no valid ID and timestamp are
+   * known (e.g., for use when inserting into the database).
    *
    * \param object_name The name of the object grasped.
    * \param grasp_pose The pose of the grasp.
    * \param point_cloud The serialized ROS sensor_msgs/PointCloud2 message of the segmented object.
    * \param point_cloud_size The size of the serialized point cloud buffer.
    */
-  GraspDemonstration(const std::string object_name, const Pose grasp_pose, const uint8_t *point_cloud, const uint32_t point_cloud_size);
+  GraspDemonstration(const std::string object_name, const Pose grasp_pose, const uint8_t *point_cloud,
+      const uint32_t point_cloud_size);
 
   /*!
    * \brief Create a new GraspDemonstration.
    *
-   * Creates a new GraspDemonstration with the given values from ROS messages. This constructor assumes no valid ID and timestamp are known (e.g., for use when inserting into the database).
+   * Creates a new GraspDemonstration with the given values from ROS messages. This constructor assumes no valid ID
+   * and timestamp are known (e.g., for use when inserting into the database).
    *
    * \param object_name The name of the object grasped.
    * \param grasp_pose_frame_id The name of the frame the grasp pose is in reference to.
    * \param grasp_pose The ROS Pose message to extract pose data of the grasp from.
    * \param point_cloud The ROS sensor_msgs/PointCloud2 message of the segmented object to be serialized into a buffer.
    */
-  GraspDemonstration(const std::string object_name, const std::string grasp_pose_frame_id, const geometry_msgs::Pose &grasp_pose, const sensor_msgs::PointCloud2 &point_cloud);
+  GraspDemonstration(const std::string object_name, const std::string grasp_pose_frame_id,
+      const geometry_msgs::Pose &grasp_pose, const sensor_msgs::PointCloud2 &point_cloud);
 
   /*!
    * \brief Create a new GraspDemonstration.
    *
-   * Creates a new GraspDemonstration with the given values from ROS messages. This constructor assumes no valid ID and timestamp are known (e.g., for use when inserting into the database).
+   * Creates a new GraspDemonstration with the given values from ROS messages. This constructor assumes no valid ID
+   * and timestamp are known (e.g., for use when inserting into the database).
    *
    * \param object_name The name of the object grasped.
    * \param grasp_pose_frame_id The name of the frame the grasp pose is in reference to.
    * \param grasp_pose The ROS Transform message to extract pose data of the grasp from.
    * \param point_cloud The ROS sensor_msgs/PointCloud2 message of the segmented object to be serialized into a buffer.
    */
-  GraspDemonstration(const std::string object_name, const std::string grasp_pose_frame_id, const geometry_msgs::Transform &grasp_pose, const sensor_msgs::PointCloud2 &point_cloud);
+  GraspDemonstration(const std::string object_name, const std::string grasp_pose_frame_id,
+      const geometry_msgs::Transform &grasp_pose, const sensor_msgs::PointCloud2 &point_cloud);
 
   /*!
    * \brief Cleans up a GraspDemonstration.
@@ -171,7 +181,8 @@ public:
   /*!
    * \brief Serialized point cloud buffer mutator.
    *
-   * Set the serialized point cloud buffer to the given value based on the ROS message. This method will serialize and copy the data.
+   * Set the serialized point cloud buffer to the given value based on the ROS message. This method will serialize
+   * and copy the data.
    *
    * \param point_cloud The ROS PointCloud2 messsage to serialize and store in a buffer.
    */
@@ -208,7 +219,8 @@ private:
   /*!
    * \brief Copy the point cloud buffer internally.
    *
-   * Copy the serialized point cloud buffer to an internal buffer. An optional flag can be set if the old buffer should be cleaned.
+   * Copy the serialized point cloud buffer to an internal buffer. An optional flag can be set if the old buffer
+   * should be cleaned.
    *
    * \param point_cloud The serialized ROS sensor_msgs/PointCloud2 message of the segmented object.
    * \param point_cloud_size The size of the serialized point cloud buffer.
@@ -219,7 +231,8 @@ private:
   /*!
    * \brief Serialize and copy a ROS point cloud internally.
    *
-   * Serialize a ROS PointCloud2 message and copy the serialized point cloud buffer to an internal buffer. An optional flag can be set if the old buffer should be cleaned.
+   * Serialize a ROS PointCloud2 message and copy the serialized point cloud buffer to an internal buffer. An
+   * optional flag can be set if the old buffer should be cleaned.
    *
    * \param point_cloud The ROS sensor_msgs/PointCloud2 messageto serialize and store.
    * \param clean If the old buffer should be cleaned (defaults to false).
