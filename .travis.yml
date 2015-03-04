@@ -47,7 +47,7 @@ script:
   - source /opt/ros/hydro/setup.bash
   - catkin_make -j1
   - catkin_make install
-  - rm -rf build/rail_pick_and_place* devel/include/rail_pick_and_place* devel/lib/rail_pick_and_place* devel/share/rail_pick_and_place* install
+  - rm -rf build/ devel/ install/
   - sudo apt-get purge libpqxx3-dev libpqxx-3.1
   - mkdir libpqxx
   - cd libpqxx/
