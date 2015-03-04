@@ -3,8 +3,8 @@
 using namespace std;
 
 graspObject::graspObject() :
-    acPickup("jaco_arm/manipulation/pickup"),
-    acGrasp("jaco_arm/manipulation/grasp"),
+    acLift("jaco_arm/manipulation/lift"),
+    acGripper("jaco_arm/manipulation/gripper"),
     acJointTrajectory("jaco_arm/joint_velocity_controller/trajectory"),
     acMoveArm("carl_moveit_wrapper/move_to_pose")
 {
@@ -24,8 +24,8 @@ graspObject::graspObject() :
   armJointPos.resize(NUM_JACO_JOINTS);
   armJointNames.resize(NUM_JACO_JOINTS);
 
-  while (!acPickup.waitForServer(ros::Duration(5.0)) &&
-      !acGrasp.waitForServer(ros::Duration(5.0)) &&
+  while (!acLift.waitForServer(ros::Duration(5.0)) &&
+      !acGripper.waitForServer(ros::Duration(5.0)) &&
       !acJointTrajectory.waitForServer(ros::Duration(5.0)))
   {
     ROS_INFO("Waiting for grasp, pickup, and arm trajectory action servers...");
@@ -181,20 +181,17 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
 
   //Open gripper
   ROS_INFO("Fully opening gripper...");
-  wpi_jaco_msgs::ExecuteGraspGoal openGripperGoal;
-  openGripperGoal.closeGripper = false;
-  openGripperGoal.limitFingerVelocity = false;
-  acGrasp.sendGoal(openGripperGoal);
-  acGrasp.waitForResult(ros::Duration(5.0));
+  rail_manipulation_msgs::GripperGoal openGripperGoal;
+  openGripperGoal.close = false;
+  acGripper.sendGoal(openGripperGoal);
+  acGripper.waitForResult(ros::Duration(5.0));
   ROS_INFO("Gripper opened.");
 
   //*********** lift hand ***********
   ROS_INFO("Lifting hand...");
-  wpi_jaco_msgs::ExecutePickupGoal pickupGoal;
-  pickupGoal.limitFingerVelocity = false;
-  pickupGoal.setLiftVelocity = false;
-  acPickup.sendGoal(pickupGoal);
-  acPickup.waitForResult(ros::Duration(10));
+  rail_manipulation_msgs::LiftGoal liftGoal;
+  acLift.sendGoal(liftGoal);
+  acLift.waitForResult(ros::Duration(10));
   ROS_INFO("hand lifting complete.");
 }
 
@@ -221,11 +218,10 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
 
   //Open gripper
   ROS_INFO("Fully opening gripper...");
-  wpi_jaco_msgs::ExecuteGraspGoal openGripperGoal;
-  openGripperGoal.closeGripper = false;
-  openGripperGoal.limitFingerVelocity = false;
-  acGrasp.sendGoal(openGripperGoal);
-  acGrasp.waitForResult(ros::Duration(5.0));
+  rail_manipulation_msgs::GripperGoal openGripperGoal;
+  openGripperGoal.close = false;
+  acGripper.sendGoal(openGripperGoal);
+  acGripper.waitForResult(ros::Duration(5.0));
   ROS_INFO("Gripper opened.");
 
   //*********** Align gripper on approach angle ***********
@@ -283,11 +279,10 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
 
   //Close gripper
   ROS_INFO("Closing gripper...");
-  wpi_jaco_msgs::ExecuteGraspGoal closeGripperGoal;
-  closeGripperGoal.closeGripper = true;
-  closeGripperGoal.limitFingerVelocity = false;
-  acGrasp.sendGoal(closeGripperGoal);
-  acGrasp.waitForResult(ros::Duration(5.0));
+  rail_manipulation_msgs::GripperGoal closeGripperGoal;
+  closeGripperGoal.close = true;
+  acGripper.sendGoal(closeGripperGoal);
+  acGripper.waitForResult(ros::Duration(5.0));
   ROS_INFO("Gripper closed.");
 
   //*********** lift object ***********

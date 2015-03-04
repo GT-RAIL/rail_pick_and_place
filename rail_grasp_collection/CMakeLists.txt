@@ -4,7 +4,7 @@ project(rail_grasp_collection)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp actionlib actionlib_msgs wpi_jaco_msgs pcl_conversions pcl_ros rail_segmentation sensor_msgs std_msgs tf trajectory_msgs geometry_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp actionlib actionlib_msgs pcl_conversions pcl_ros rail_segmentation sensor_msgs std_msgs tf trajectory_msgs geometry_msgs rail_manipulation_msgs)
 
 ################################################
 ## Declare ROS messages, services and actions ##

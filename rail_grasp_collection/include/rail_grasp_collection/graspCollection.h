@@ -1,10 +1,10 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/server/simple_action_server.h>
-#include <wpi_jaco_msgs/ExecuteGraspAction.h>
-#include <wpi_jaco_msgs/ExecutePickupAction.h>
 #include <rail_grasp_collection/PickupAction.h>
 #include <rail_grasp_collection/ClosestObject.h>
+#include <rail_manipulation_msgs/GripperAction.h>
+#include <rail_manipulation_msgs/LiftAction.h>
 #include <sensor_msgs/JointState.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <std_msgs/Bool.h>
@@ -41,8 +41,8 @@ public:
   ros::ServiceClient closestObjectClient;
 
   //action clients for arm movement
-  actionlib::SimpleActionClient<wpi_jaco_msgs::ExecuteGraspAction> acGrasp;
-  actionlib::SimpleActionClient<wpi_jaco_msgs::ExecutePickupAction> acPickup;
+  actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction> acGripper;
+  actionlib::SimpleActionClient<rail_manipulation_msgs::LiftAction> acLift;
 
   //action server
   actionlib::SimpleActionServer<rail_grasp_collection::PickupAction> as;

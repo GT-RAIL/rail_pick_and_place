@@ -5,12 +5,12 @@
 #include <carl_moveit/CallIK.h>
 #include <carl_moveit/CartesianPath.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
+#include <rail_manipulation_msgs/GripperAction.h>
+#include <rail_manipulation_msgs/LiftAction.h>
 #include <rail_grasping/RequestGrasp.h>
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
-#include <wpi_jaco_msgs/ExecutePickupAction.h>
-#include <wpi_jaco_msgs/ExecuteGraspAction.h>
 #include <wpi_jaco_msgs/GetCartesianPosition.h>
 #include <wpi_jaco_msgs/CartesianCommand.h>
 
@@ -34,8 +34,8 @@ public:
   ros::ServiceServer requestReleaseServer;
 
   //action clients
-  actionlib::SimpleActionClient<wpi_jaco_msgs::ExecutePickupAction> acPickup;
-  actionlib::SimpleActionClient<wpi_jaco_msgs::ExecuteGraspAction> acGrasp;
+  actionlib::SimpleActionClient<rail_manipulation_msgs::LiftAction> acLift;
+  actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction> acGripper;
   actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> acJointTrajectory;
   actionlib::SimpleActionClient<carl_moveit::MoveToPoseAction> acMoveArm;
 

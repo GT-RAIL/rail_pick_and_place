@@ -3,16 +3,16 @@
 using namespace std;
 
 graspCollection::graspCollection(string name) :
-    acGrasp("/jaco_arm/manipulation/grasp", true),
-    acPickup("/jaco_arm/manipulation/pickup", true),
+    acGripper("/jaco_arm/manipulation/gripper", true),
+    acLift("/jaco_arm/manipulation/lift", true),
     as(n, name, boost::bind(&graspCollection::executePickup, this, _1), false), actionName(name)
 {
   armJoints.resize(NUM_ARM_JOINTS);
   fingerJoints.resize(NUM_FINGERS);
 
   ROS_INFO("Waiting for JACO manipulation action servers...");
-  acGrasp.waitForServer();
-  acPickup.waitForServer();
+  acGripper.waitForServer();
+  acLift.waitForServer();
   ROS_INFO("Finished waiting for JACO manipulation action servers");
 
   //temporarily unused as the JACO arm does not have a good method of grasp verification
@@ -51,11 +51,10 @@ void graspCollection::executePickup(const rail_grasp_collection::PickupGoalConst
   as.publishFeedback(asFeedback);
 
   //call grasp server
-  wpi_jaco_msgs::ExecuteGraspGoal executeGrasp;
-  executeGrasp.closeGripper = true;
-  executeGrasp.limitFingerVelocity = false;
-  acGrasp.sendGoal(executeGrasp);
-  acGrasp.waitForResult(ros::Duration(10));
+  rail_manipulation_msgs::GripperGoal executeGripper;
+  executeGripper.close = true;
+  acGripper.sendGoal(executeGripper);
+  acGripper.waitForResult(ros::Duration(10));
 
   //update resulting positions of gripper and fingers
 
@@ -111,14 +110,12 @@ void graspCollection::executePickup(const rail_grasp_collection::PickupGoalConst
     asFeedback.currentStep = "Lifting object to test grasp strength";
     as.publishFeedback(asFeedback);
 
-    wpi_jaco_msgs::ExecutePickupGoal pickupGoal;
-    wpi_jaco_msgs::ExecutePickupResultConstPtr pickupResultPtr;
-    pickupGoal.limitFingerVelocity = false;
-    pickupGoal.setLiftVelocity = false;
+    rail_manipulation_msgs::LiftGoal liftGoal;
+    rail_manipulation_msgs::LiftResultConstPtr liftResultPtr;
 
-    acPickup.sendGoal(pickupGoal);
-    acPickup.waitForResult(ros::Duration(6.0));
-    pickupResultPtr = acPickup.getResult();
+    acLift.sendGoal(liftGoal);
+    acLift.waitForResult(ros::Duration(6.0));
+    liftResultPtr = acLift.getResult();
 
     //actionSucceeded = pickupResultPtr->success;
     actionSucceeded = true; //temporary, set to true while Cartesian arm control is being buggy
@@ -212,11 +209,10 @@ void graspCollection::executePickup(const rail_grasp_collection::PickupGoalConst
   else
   {
     //Open gripper
-    wpi_jaco_msgs::ExecuteGraspGoal executeRelease;
-    executeRelease.closeGripper = false;
-    executeRelease.limitFingerVelocity = false;
-    acGrasp.sendGoal(executeRelease);
-    acGrasp.waitForResult(ros::Duration(10));
+    rail_manipulation_msgs::GripperGoal executeRelease;
+    executeRelease.close = false;
+    acGripper.sendGoal(executeRelease);
+    acGripper.waitForResult(ros::Duration(10));
   }
 
   as.setSucceeded(asResult);
