@@ -91,16 +91,6 @@ private:
    */
   void segmentedObjectsCallback(const rail_manipulation_msgs::SegmentedObjectList &object_list);
 
-  /*!
-   * \brief Check for the closest object to the given point.
-   *
-   * Check for the closest object (cluster of points) to the given point. This will use the most recent list of segmented objects. The index of the closest object is returned or -1 if no clusters have been seen.
-   *
-   * \param v The vector representing the point to check the distance to.
-   * \return The index of the closest object to the given point or -1 if no clusters have been seen.
-   */
-  int determineClosestObject(const geometry_msgs::Vector3 &v);
-
   /*! Mutex for locking on the segmented object list. */
   boost::mutex mutex_;
 

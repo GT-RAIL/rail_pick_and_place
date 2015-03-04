@@ -239,8 +239,3 @@ void GraspCollector::segmentedObjectsCallback(const rail_manipulation_msgs::Segm
   boost::mutex::scoped_lock lock(mutex_);
   object_list_ = object_list;
 }
-
-int GraspCollector::determineClosestObject(const geometry_msgs::Vector3 &v)
-{
-
-}

@@ -16,10 +16,11 @@
   <arg name="robot_fixed_frame" default="base_footprint" />
   <arg name="grasp_frame" default="grasp_link" />
 
-  <!-- Grasp Collector Action Server Client Params -->
+  <!-- Grasp Collector Action Server Client and Topic Params -->
   <arg name="gripper_action_server" default="/manipulation/gripper" />
   <arg name="lift_action_server" default="/manipulation/lift" />
   <arg name="verify_grasp_action_server" default="/manipulation/verify_grasp" />
+  <arg name="segmented_objects_topic" default="/rail_segmentation/segmented_objects" />
 
   <!-- Main Node -->
   <node name="rail_grasp_collection" pkg="rail_grasp_collection" type="rail_grasp_collection" respawn="false" output="screen">
@@ -34,5 +35,6 @@
     <param name="gripper_action_server" value="$(arg gripper_action_server)" />
     <param name="lift_action_server" value="$(arg lift_action_server)" />
     <param name="verify_grasp_action_server" value="$(arg verify_grasp_action_server)" />
+    <remap from="/rail_segmentation/segmented_objects" to="$(arg segmented_objects_topic)"/>
   </node>
 </launch>
