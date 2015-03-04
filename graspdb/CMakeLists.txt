@@ -5,9 +5,10 @@ project(graspdb)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
+  geometry_msgs
+  rail_pick_and_place_msgs
   roscpp
   roscpp_serialization
-  geometry_msgs
   sensor_msgs
 )
 
@@ -32,6 +33,7 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
+# Source files for the library
 set(GRASPDB_SOURCE
   src/Client.cpp
   src/GraspDemonstration.cpp
@@ -42,6 +44,9 @@ set(GRASPDB_SOURCE
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME} ${GRASPDB_SOURCE})
+
+## Add message build dependencies (needed for source build)
+add_dependencies(${PROJECT_NAME} rail_pick_and_place_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}

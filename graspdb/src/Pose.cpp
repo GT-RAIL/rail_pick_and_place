@@ -13,40 +13,58 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
-Pose::Pose(const string frame_id, const Position position, const Orientation orientation) : frame_id_(frame_id),
-                                                                                            position_(position),
-                                                                                            orientation_(orientation)
+Pose::Pose(const string fixed_frame_id, const string grasp_frame_id, const Position position,
+    const Orientation orientation)
+    : fixed_frame_id_(fixed_frame_id), grasp_frame_id_(grasp_frame_id), position_(position), orientation_(orientation)
 {
 }
 
-Pose::Pose(const std::string frame_id, const geometry_msgs::Point &position,
-    const geometry_msgs::Quaternion &orientation) : frame_id_(frame_id), position_(position), orientation_(orientation)
+Pose::Pose(const std::string fixed_frame_id, const string grasp_frame_id, const geometry_msgs::Point &position,
+    const geometry_msgs::Quaternion &orientation)
+    : fixed_frame_id_(fixed_frame_id), grasp_frame_id_(grasp_frame_id), position_(position), orientation_(orientation)
 {
 }
 
-Pose::Pose(const std::string frame_id, const geometry_msgs::Pose &pose) : frame_id_(frame_id), position_(pose
-    .position), orientation_(pose.orientation)
+Pose::Pose(const std::string fixed_frame_id, const string grasp_frame_id, const geometry_msgs::Pose &pose)
+    : fixed_frame_id_(fixed_frame_id),
+      grasp_frame_id_(grasp_frame_id),
+      position_(pose.position),
+      orientation_(pose.orientation)
 {
 }
 
-Pose::Pose(const std::string frame_id, const geometry_msgs::Transform &transform) : frame_id_(frame_id), position_
-    (transform.translation), orientation_(transform.rotation)
+Pose::Pose(const std::string fixed_frame_id, const string grasp_frame_id, const geometry_msgs::Transform &transform)
+    : fixed_frame_id_(fixed_frame_id),
+      grasp_frame_id_(grasp_frame_id),
+      position_(transform.translation),
+      orientation_(transform.rotation)
 {
 }
 
-Pose::Pose(const std::string frame_id, const geometry_msgs::Vector3 &position,
-    const geometry_msgs::Quaternion &orientation) : frame_id_(frame_id), position_(position), orientation_(orientation)
+Pose::Pose(const std::string fixed_frame_id, const string grasp_frame_id, const geometry_msgs::Vector3 &position,
+    const geometry_msgs::Quaternion &orientation)
+    : fixed_frame_id_(fixed_frame_id), grasp_frame_id_(grasp_frame_id), position_(position), orientation_(orientation)
 {
 }
 
-void Pose::setFrameID(const std::string frame_id)
+void Pose::setFixedFrameID(const std::string fixed_frame_id)
 {
-  frame_id_ = frame_id;
+  fixed_frame_id_ = fixed_frame_id;
 }
 
-const string &Pose::getFrameID() const
+const string &Pose::getFixedFrameID() const
 {
-  return frame_id_;
+  return fixed_frame_id_;
+}
+
+void Pose::setGraspFrameID(const std::string grasp_frame_id)
+{
+  grasp_frame_id_ = grasp_frame_id;
+}
+
+const string &Pose::getGraspFrameID() const
+{
+  return grasp_frame_id_;
 }
 
 void Pose::setPosition(const Position position)

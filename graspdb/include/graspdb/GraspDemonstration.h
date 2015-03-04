@@ -15,6 +15,7 @@
 #include <geometry_msgs/Pose.h>
 #include <graspdb/Pose.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <rail_pick_and_place_msgs/GraspDemonstration.h>
 #include <stdint.h>
 #include <string>
 
@@ -77,12 +78,14 @@ public:
    * and timestamp are known (e.g., for use when inserting into the database).
    *
    * \param object_name The name of the object grasped.
-   * \param grasp_pose_frame_id The name of the frame the grasp pose is in reference to.
+   * \param grasp_pose_fixed_frame_id The name of the frame the grasp pose is in reference to.
+   * \param grasp_pose_grasp_frame_id The name of the frame for the grasp pose.
    * \param grasp_pose The ROS Pose message to extract pose data of the grasp from.
    * \param point_cloud The ROS sensor_msgs/PointCloud2 message of the segmented object to be serialized into a buffer.
    */
-  GraspDemonstration(const std::string object_name, const std::string grasp_pose_frame_id,
-      const geometry_msgs::Pose &grasp_pose, const sensor_msgs::PointCloud2 &point_cloud);
+  GraspDemonstration(const std::string object_name, const std::string grasp_pose_fixed_frame_id,
+      const std::string grasp_pose_grasp_frame_id, const geometry_msgs::Pose &grasp_pose,
+      const sensor_msgs::PointCloud2 &point_cloud);
 
   /*!
    * \brief Create a new GraspDemonstration.
@@ -91,12 +94,23 @@ public:
    * and timestamp are known (e.g., for use when inserting into the database).
    *
    * \param object_name The name of the object grasped.
-   * \param grasp_pose_frame_id The name of the frame the grasp pose is in reference to.
+   * \param grasp_pose_fixed_frame_id The name of the frame the grasp pose is in reference to.
+   * \param grasp_pose_grasp_frame_id The name of the frame for the grasp pose.
    * \param grasp_pose The ROS Transform message to extract pose data of the grasp from.
    * \param point_cloud The ROS sensor_msgs/PointCloud2 message of the segmented object to be serialized into a buffer.
    */
-  GraspDemonstration(const std::string object_name, const std::string grasp_pose_frame_id,
-      const geometry_msgs::Transform &grasp_pose, const sensor_msgs::PointCloud2 &point_cloud);
+  GraspDemonstration(const std::string object_name, const std::string grasp_pose_fixed_frame_id,
+      const std::string grasp_pose_grasp_frame_id, const geometry_msgs::Transform &grasp_pose,
+      const sensor_msgs::PointCloud2 &point_cloud);
+
+  /*!
+   * \brief Create a new GraspDemonstration.
+   *
+   * Creates a new GraspDemonstration with the given values the ROS message.
+   *
+   * \param gd The ROS grasp demonstration message to extract values from.
+   */
+  GraspDemonstration(const rail_pick_and_place_msgs::GraspDemonstration &gd);
 
   /*!
    * \brief Cleans up a GraspDemonstration.

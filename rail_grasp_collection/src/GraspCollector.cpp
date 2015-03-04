@@ -230,8 +230,8 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     // store the data
     feedback.message = "Storing grasp data...";
     as_.publishFeedback(feedback);
-    graspdb::GraspDemonstration demo(goal->object_name, robot_fixed_frame_, grasp.transform, object.cloud);
-    graspdb_->addGraspDemonstration(demo);
+    graspdb::GraspDemonstration gd(goal->object_name, robot_fixed_frame_, grasp_frame_, grasp.transform, object.cloud);
+    graspdb_->addGraspDemonstration(gd);
   }
 
   // success

@@ -114,7 +114,8 @@ void Client::createTables() const
   {
     pqxx::work w(*connection_);
     string sql = "CREATE TYPE pose AS (" \
-                   "frame_id VARCHAR," \
+                   "fixed_frame_id VARCHAR," \
+                   "grasp_frame_id VARCHAR," \
                    "position NUMERIC[3]," \
                    "orientation NUMERIC[4]" \
                  ");";
@@ -169,8 +170,8 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
 std::string Client::toSQL(const Pose &p) const
 {
   // build the SQL
-  string sql = "(\"" + p.getFrameID() + "\", \"" + this->toSQL(p.getPosition()) + "\", \""
-      + this->toSQL(p.getOrientation()) + "\")";
+  string sql = "(\"" + p.getFixedFrameID() + "\", \"" + p.getGraspFrameID() + "\", " + this->toSQL(p.getPosition())
+      + "\", \"" + this->toSQL(p.getOrientation()) + "\")";
   return sql;
 }
 

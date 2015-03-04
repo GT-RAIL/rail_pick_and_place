@@ -38,73 +38,97 @@ public:
    *
    * Creates a new Pose with the given frame identifier, position, and orientation (defaults are 0).
    *
-   * \param frame_id The frame identifier (defaults to the empty string).
+   * \param fixed_frame_id The fixed (reference) frame identifier (defaults to the empty string).
+   * \param grasp_frame_id The grasp frame identifier (defaults to the empty string).
    * \param position The position values (defaults are 0).
    * \param orientation The orientation values (defaults are 0).
    */
-  Pose(const std::string frame_id = "", const Position position = Position(),
-      const Orientation orientation = Orientation());
+  Pose(const std::string fixed_frame_id = "", const std::string grasp_frame_id = "",
+      const Position position = Position(), const Orientation orientation = Orientation());
 
   /*!
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier, position, and orientation from ROS messages.
    *
-   * \param frame_id The frame identifier.
+   * \param fixed_frame_id The fixed (reference) frame identifier.
+   * \param grasp_frame_id The grasp frame identifier.
    * \param position The ROS Point message to extract position data from.
    * \param orientation The ROS Quaternion message to extract orientation data from.
    */
-  Pose(const std::string frame_id, const geometry_msgs::Point &position, const geometry_msgs::Quaternion &orientation);
+  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Point &position,
+      const geometry_msgs::Quaternion &orientation);
 
   /*!
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier and pose data from the given ROS message.
    *
-   * \param frame_id The frame identifier.
+   * \param fixed_frame_id The fixed (reference) frame identifier.
+   * \param grasp_frame_id The grasp frame identifier.
    * \param position The ROS Pose message to extract position and orientation data from.
    */
-  Pose(const std::string frame_id, const geometry_msgs::Pose &pose);
+  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Pose &pose);
 
   /*!
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier and pose data from the given ROS message.
    *
-   * \param frame_id The frame identifier.
+   * \param fixed_frame_id The fixed (reference) frame identifier.
+   * \param grasp_frame_id The grasp frame identifier.
    * \param position The ROS Transform message to extract position and orientation data from.
    */
-  Pose(const std::string frame_id, const geometry_msgs::Transform &transform);
+  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Transform &transform);
 
   /*!
    * \brief Create a new Pose.
    *
    * Creates a new Pose with the given frame identifier, position, and orientation from ROS messages.
    *
-   * \param frame_id The frame identifier.
+   * \param fixed_frame_id The fixed (reference) frame identifier.
+   * \param grasp_frame_id The grasp frame identifier.
    * \param position The ROS Vector3 message to extract position data from.
    * \param orientation The ROS Quaternion message to extract orientation data from.
    */
-  Pose(const std::string frame_id, const geometry_msgs::Vector3 &position,
+  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Vector3 &position,
       const geometry_msgs::Quaternion &orientation);
 
   /*!
-   * \brief Frame ID value mutator.
+   * \brief Fixed frame ID value mutator.
    *
-   * Set the frame ID value of this Pose.
+   * Set the fixed frame ID value of this Pose.
    *
-   * \param frame_id The new frame ID value.
+   * \param fixed_frame_id The new frame ID value.
    */
-  void setFrameID(const std::string frame_id);
+  void setFixedFrameID(const std::string fixed_frame_id);
 
   /*!
-   * \brief Frame ID value accessor.
+   * \brief Fixed frame ID value accessor.
    *
-   * Get the frame ID value of this Pose.
+   * Get the fixed frame ID value of this Pose.
    *
-   * \return The frame ID value.
+   * \return The fixed frame ID value.
    */
-  const std::string &getFrameID() const;
+  const std::string &getFixedFrameID() const;
+
+  /*!
+   * \brief Grasp frame ID value mutator.
+   *
+   * Set the grasp frame ID value of this Pose.
+   *
+   * \param grasp_frame_id The new frame ID value.
+   */
+  void setGraspFrameID(const std::string grasp_frame_id);
+
+  /*!
+   * \brief Grasp frame ID value accessor.
+   *
+   * Get the grasp frame ID value of this Pose.
+   *
+   * \return The grasp frame ID value.
+   */
+  const std::string &getGraspFrameID() const;
 
   /*!
    * \brief Position value mutator.
@@ -143,8 +167,8 @@ public:
   const Orientation &getOrientation() const;
 
 private:
-  /*! Frame identifier. */
-  std::string frame_id_;
+  /*! Frame identifiers. */
+  std::string fixed_frame_id_, grasp_frame_id_;
   /*! Position data. */
   Position position_;
   /*! Orientation data. */
