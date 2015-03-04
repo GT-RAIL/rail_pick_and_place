@@ -55,13 +55,17 @@ GraspDemonstration::GraspDemonstration(const string object_name, const string gr
   // serialize and copy the point cloud data
   this->copyPointCloudBuffer(point_cloud);
 }
-//
-//GraspDemonstration::GraspDemonstration(const rail_pick_and_place_msgs::GraspDemonstration &gd)
-//    : object_name_(gd.object_name), grasp_pose_(gd., grasp_pose_fixed_frame_id, grasp_pose)
-//{
-//  // serialize and copy the point cloud data
-//  this->copyPointCloudBuffer(point_cloud);
-//}
+
+GraspDemonstration::GraspDemonstration(const rail_pick_and_place_msgs::GraspDemonstration &gd)
+    : object_name_(gd.object_name),
+      grasp_pose_(gd.grasp_pose_fixed_frame_id, gd.grasp_pose_grasp_frame_id, gd.grasp_pose)
+{
+  // set the ID and timestamp
+  id_ = gd.id;
+  created_ = gd.created.sec;
+  // serialize and copy the point cloud data
+  this->copyPointCloudBuffer(gd.point_cloud);
+}
 
 GraspDemonstration::~GraspDemonstration()
 {
