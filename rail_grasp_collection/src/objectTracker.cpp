@@ -9,7 +9,7 @@ objectTracker::objectTracker()
   closestObjectServer = n.advertiseService("rail_grasp_collection/determine_closest_object", &objectTracker::determineClosestObject, this);
 }
 
-void objectTracker::objectCallback(const rail_segmentation::SegmentedObjectList &objects)
+void objectTracker::objectCallback(const rail_manipulation_msgs::SegmentedObjectList &objects)
 {
   ROS_INFO("Received new object data");
   objectList = objects;
@@ -39,7 +39,7 @@ bool objectTracker::determineClosestObject(rail_grasp_collection::ClosestObject:
       float minPointDst = 999;
       //convert PointCloud2 to PointCloud to access the data
       sensor_msgs::PointCloud tempCloud;
-      sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[i].objectCloud, tempCloud);
+      sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[i].cloud, tempCloud);
       for (unsigned int j = 0; j < tempCloud.points.size(); j++)
       {
         float dst = sqrt(
@@ -58,7 +58,7 @@ bool objectTracker::determineClosestObject(rail_grasp_collection::ClosestObject:
   }
 
   res.reference_frame_id = objectList.header.frame_id;
-  sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[objectIndex].objectCloud, res.pointCloud);
+  sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[objectIndex].cloud, res.pointCloud);
 
   return true;
 }

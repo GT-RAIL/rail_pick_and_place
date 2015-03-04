@@ -105,7 +105,7 @@ bool pickAndPlace::pickup(rail_pick_and_place_msgs::PickupObject::Request &req, 
   return true;
 }
 
-void pickAndPlace::objectCallback(const rail_segmentation::SegmentedObjectList& list)
+void pickAndPlace::objectCallback(const rail_manipulation_msgs::SegmentedObjectList& list)
 {
   ROS_INFO("Received new objects");
   objectList = list;
@@ -129,8 +129,8 @@ bool pickAndPlace::pickupSegmented(rail_pick_and_place_msgs::PickupSegmentedObje
     rail_pick_and_place_msgs::GraspRecognized::Request graspReq;
     rail_pick_and_place_msgs::GraspRecognized::Response graspRes;
     graspReq.numAttempts = 6;
-    graspReq.grasps = objectList.objects[req.objectIndex].graspPoses;
-    graspReq.objectIndex = objectList.objects[req.objectIndex].model;
+    graspReq.grasps = objectList.objects[req.objectIndex].grasps;
+    graspReq.objectIndex = objectList.objects[req.objectIndex].model_id;
     
     if (!graspRecognizedClient.call(graspReq, graspRes))
     {
@@ -160,7 +160,7 @@ bool pickAndPlace::pickupSegmented(rail_pick_and_place_msgs::PickupSegmentedObje
     rail_pick_and_place_msgs::RecognizeAndGrasp::Response pickupRes;
     
     pickupReq.objectIndices.clear();
-    sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[req.objectIndex].objectCloud, pickupReq.cloud);
+    sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[req.objectIndex].cloud, pickupReq.cloud);
     pickupReq.numAttempts = 6;
     
     recognizeAndGraspClient.call(pickupReq, pickupRes);
