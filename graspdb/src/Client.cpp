@@ -82,6 +82,9 @@ bool Client::connect()
           "SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname=$1)");
       connection_->prepare("grasp_demonstrations.insert",
           "INSERT INTO grasp_demonstrations (object_name, grasp_pose, point_cloud) VALUES ($1, $2, $3)");
+      connection_->prepare("grasp_demonstrations.select",
+          "SELECT id, object_name, (grasp_pose).fixed_frame_id, (grasp_pose).grasp_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
       // create the tables in the DB if they do not exist
       this->createTables();
     }
@@ -129,9 +132,9 @@ void Client::createTables() const
   string grasp_collections_sql = "CREATE TABLE IF NOT EXISTS grasp_demonstrations (" \
                                    "id SERIAL PRIMARY KEY," \
                                    "object_name VARCHAR NOT NULL," \
-                                   "grasp_pose pose," \
-                                   "point_cloud BYTEA," \
-                                   "created DATE NOT NULL DEFAULT NOW()" \
+                                   "grasp_pose pose NOT NULL," \
+                                   "point_cloud BYTEA NOT NULL," \
+                                   "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
                                  ");";
   w.exec(grasp_collections_sql);
 
@@ -167,11 +170,90 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
 #endif
 }
 
+bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd)
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_demonstrations.select")(id).exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // create the Position element
+    vector<double> position_values;
+    this->extractArrayFromString(result[0]["position"].as<string>(), position_values);
+    Position p(position_values[0], position_values[1], position_values[2]);
+
+    // create the Orientation element
+    vector<double> orientation_values;
+    this->extractArrayFromString(result[0]["orientation"].as<string>(), orientation_values);
+    Orientation o(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
+
+    // create the Pose element
+    Pose pose(result[0]["fixed_frame_id"].as<string>(), result[0]["grasp_frame_id"].as<string>(), p, o);
+
+    // set our easy fields
+    gd.setID(result[0]["id"].as<uint32_t>());
+    gd.setObjectName(result[0]["object_name"].as<string>());
+    gd.setGraspPose(pose);
+    gd.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
+
+    // extract the point cloud
+    pqxx::binarystring blob(result[0]["point_cloud"]);
+    gd.setPointCloud(blob.data(), blob.size());
+
+    return true;
+  }
+}
+
+void Client::extractArrayFromString(string array, vector<double> &values) const
+{
+  // remove the brackets and spaces
+  array.erase(std::remove(array.begin(), array.end(), '{'), array.end());
+  array.erase(std::remove(array.begin(), array.end(), '}'), array.end());
+  array.erase(std::remove(array.begin(), array.end(), ' '), array.end());
+
+  // split on the ','
+  stringstream ss(array);
+  string str;
+  double dbl;
+  while (std::getline(ss, str, ','))
+  {
+    // store as the double value
+    istringstream i(str);
+    i >> dbl;
+    values.push_back(dbl);
+  }
+}
+
+time_t Client::extractTimeFromString(const string &str) const
+{
+  // set values we don't need to be 0
+  struct tm t;
+  bzero(&t, sizeof(t));
+  // extract values in a datetime object and the timezone offset into an int
+  int tz;
+  sscanf(str.c_str(), "%d-%d-%d %d:%d:%d%d", &t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec, &tz);
+  // correct the information for C time
+  t.tm_year -= 1900;
+  t.tm_mon -= 1;
+  // fix the timezone offset
+  t.tm_hour += tz;
+  // convert to a time_t object
+  return mktime(&t);
+}
+
+
 std::string Client::toSQL(const Pose &p) const
 {
   // build the SQL
-  string sql = "(\"" + p.getFixedFrameID() + "\", \"" + p.getGraspFrameID() + "\", " + this->toSQL(p.getPosition())
-      + "\", \"" + this->toSQL(p.getOrientation()) + "\")";
+  string sql = "(\"" + p.getFixedFrameID() + "\",\"" + p.getGraspFrameID() + "\",\"" + this->toSQL(p.getPosition())
+      + "\",\"" + this->toSQL(p.getOrientation()) + "\")";
+  cout << sql << endl;
   return sql;
 }
 
@@ -179,7 +261,7 @@ std::string Client::toSQL(const Position &p) const
 {
   // build the SQL
   stringstream ss;
-  ss << "{" << p.getX() << ", " << p.getY() << ", " << p.getZ() << "}";
+  ss << "{" << p.getX() << "," << p.getY() << "," << p.getZ() << "}";
   return ss.str();
 }
 
@@ -187,6 +269,6 @@ std::string Client::toSQL(const Orientation &o) const
 {
   // build the SQL
   stringstream ss;
-  ss << "{" << o.getX() << ", " << o.getY() << ", " << o.getZ() << ", " << o.getW() << "}";
+  ss << "{" << o.getX() << "," << o.getY() << ", " << o.getZ() << "," << o.getW() << "}";
   return ss.str();
 }

@@ -235,8 +235,6 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
   }
 
   // success
-  feedback.message = "Sucecss!";
-  as_.publishFeedback(feedback);
   result.success = true;
   as_.setSucceeded(result, "Sucecss!");
 }

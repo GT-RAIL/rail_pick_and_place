@@ -33,7 +33,7 @@ class Client
 public:
   /*! The default PostgreSQL port. */
   static const unsigned int DEFAULT_PORT = 5432;
-  
+
   /*!
    * \brief Create a new Client.
    *
@@ -123,7 +123,25 @@ public:
    */
   void disconnect();
 
+  /*!
+   * \brief Add a grasp demonstration to the database.
+   *
+   * Stores the given grasp demonstration data to the database.
+   *
+   * \param gd The GraspDemonstration with the data to store.
+   */
   void addGraspDemonstration(const GraspDemonstration &gd);
+
+  /*!
+   * \brief Load a grasp demonstration from the database.
+   *
+   * Load the grasp demonstration data from the database with the given ID and store it in the given GraspDemonstration.
+   *
+   * \param id The ID of the grasp demonstration to load.
+   * \param gd The GraspDemonstration object to fill with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGraspDemonstration(uint32_t id, GraspDemonstration &gd);
 
 private:
   /*!
@@ -173,6 +191,27 @@ private:
    * \return The converted PostgreSQL object string.
    */
   std::string toSQL(const Orientation &o) const;
+
+  /*!
+   * \brief Extract array values from a string array.
+   *
+   * Extracts double values from the given PostgreSQL array string (e.g., "{1,2,3}") and places them in the given
+   * vector.
+   *
+   * \param array The array string representation of the array.
+   * \param values The vector to populate with values from the string.
+   */
+  void extractArrayFromString(std::string array, std::vector<double> &values) const;
+
+  /*!
+   * \brief Extract a time from a timestamp.
+   *
+   * Extracts a time value from the given PostgreSQL
+   *
+   * \param str The timestamp to parse.
+   * \return The time value from the string.
+   */
+  time_t extractTimeFromString(const std::string &str) const;
 
   /*! Database connection information. */
   std::string host_, user_, password_, db_;

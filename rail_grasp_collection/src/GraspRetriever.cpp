@@ -71,7 +71,7 @@ void GraspRetriever::retrieveGrasp(const rail_pick_and_place_msgs::RetrieveGrasp
   as_.publishFeedback(feedback);
   // TODO load the thing
   graspdb::GraspDemonstration gd;
-  if (false)
+  if (!graspdb_->loadGraspDemonstration(goal->id, gd))
   {
     result.success = false;
     as_.setSucceeded(result, "Could not load grasp from database.");
@@ -90,8 +90,6 @@ void GraspRetriever::retrieveGrasp(const rail_pick_and_place_msgs::RetrieveGrasp
     pose_pub_.publish(gd.getGraspPose().toROSPoseStampedMessage());
 
     // success
-    feedback.message = "Sucecss!";
-    as_.publishFeedback(feedback);
     result.success = true;
     as_.setSucceeded(result, "Sucecss!");
   }
