@@ -39,9 +39,9 @@ GraspRetriever::GraspRetriever()
 
   vector<graspdb::GraspDemonstration> gds;
   graspdb_->loadGraspDemonstrationsByObjectName("object name", gds);
-//  for (size_t i = 0; i < gds.size(); i++) {
-//    cout << gds[i].getObjectName() << endl;
-//  }
+  for (size_t i = 0; i < gds.size(); i++) {
+    cout << gds[i].getObjectName() << endl;
+  }
 
   // start the action server
   as_.start();

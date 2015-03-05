@@ -37,6 +37,15 @@ public:
   /*!
    * \brief Create a new Client.
    *
+   * Creates a new Client by copying the values from the given Client. A new connection is made if one exists.
+   *
+   * \param gd The Client to copy.
+   */
+  Client(const Client &c);
+
+  /*!
+   * \brief Create a new Client.
+   *
    * Creates a new Client with the given connection information. A connection is not made by default.
    *
    * \param host The host IP of the database.
@@ -166,6 +175,14 @@ public:
   bool getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names);
 
 private:
+  /*!
+   * \brief Check for a supported version of the libpqxx API.
+   *
+   * Checks for a valid version of the libpqxx API (4.0.0 or greater). If one is not found an error message is
+   * printed to ROS_WARN. If a valid version is found during compile time, this function has no effect.
+   */
+  void checkAPIVersion() const;
+
   /*!
    * \brief Creates tables and types.
    *

@@ -14,6 +14,23 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
+
+Client::Client(const Client &c)
+    : host_(c.getHost()), user_(c.getUser()), password_(c.getPassword()), db_(c.getDatabase())
+{
+  port_ = c.getPort();
+  connection_ = NULL;
+
+  // check if a connection was made
+  if (c.connected())
+  {
+    this->connect();
+  }
+
+  // check API versions
+  this->checkAPIVersion();
+}
+
 Client::Client(const string host, const uint16_t port, const string user, const string password, const string db) :
     host_(host), user_(user), password_(password), db_(db)
 {
@@ -21,15 +38,21 @@ Client::Client(const string host, const uint16_t port, const string user, const 
   connection_ = NULL;
 
   // check API versions
-#if PQXX_VERSION_MAJOR < 4
-  ROS_WARN("libpqxx-%s is not fully supported. Please upgrade to libpqxx-4.0 or greater.", PQXX_VERSION);
-#endif
+  this->checkAPIVersion();
 }
 
 Client::~Client()
 {
   // check for an existing connection
   this->disconnect();
+}
+
+void Client::checkAPIVersion() const
+{
+  // check API versions
+#if PQXX_VERSION_MAJOR < 4
+  ROS_WARN("libpqxx-%s is not fully supported. Please upgrade to libpqxx-4.0 or greater.", PQXX_VERSION);
+#endif
 }
 
 uint16_t Client::getPort() const
@@ -210,11 +233,7 @@ bool Client::loadGraspDemonstrationsByObjectName(const std::string &object_name,
     // extract each result
     for (size_t i = 0; i < result.size(); i++)
     {
-      cout << result[i]["id"].as<int>() << endl;
-      GraspDemonstration gd;
-      this->extractGraspDemonstrationFromTuple(result[i], gd);
-      cout << gd.getObjectName() << endl;
-      gds.push_back(gd);
+      gds.push_back(this->extractGraspDemonstrationFromTuple(result[i]));
     }
     return true;
   }
