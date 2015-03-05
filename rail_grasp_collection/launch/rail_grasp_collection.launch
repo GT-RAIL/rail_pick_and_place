@@ -20,7 +20,7 @@
   <arg name="gripper_action_server" default="/manipulation/gripper" />
   <arg name="lift_action_server" default="/manipulation/lift" />
   <arg name="verify_grasp_action_server" default="/manipulation/verify_grasp" />
-  <arg name="segmented_objects_topic" default="/rail_segmentation/segmented_objects" />
+  <arg name="segmented_objects_topic" default="/segmentation/segmented_objects" />
 
   <!-- Main Node -->
   <node name="rail_grasp_collection" pkg="rail_grasp_collection" type="rail_grasp_collection" respawn="false"
@@ -36,6 +36,6 @@
     <param name="gripper_action_server" value="$(arg gripper_action_server)" />
     <param name="lift_action_server" value="$(arg lift_action_server)" />
     <param name="verify_grasp_action_server" value="$(arg verify_grasp_action_server)" />
-    <remap from="/rail_segmentation/segmented_objects" to="$(arg segmented_objects_topic)"/>
+    <param name="segmented_objects_topic" value="$(arg segmented_objects_topic)"/>
   </node>
 </launch>

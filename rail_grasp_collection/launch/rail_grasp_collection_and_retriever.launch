@@ -20,7 +20,7 @@
   <arg name="gripper_action_server" default="/manipulation/gripper" />
   <arg name="lift_action_server" default="/manipulation/lift" />
   <arg name="verify_grasp_action_server" default="/manipulation/verify_grasp" />
-  <arg name="segmented_objects_topic" default="/rail_segmentation/segmented_objects" />
+  <arg name="segmented_objects_topic" default="/segmentation/segmented_objects" />
 
   <!-- Main Collection Node -->
   <include file="$(find rail_grasp_collection)/launch/rail_grasp_collection.launch">

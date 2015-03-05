@@ -21,6 +21,7 @@ GraspCollector::GraspCollector()
       tf_cache_time_(TF_CACHE_TIME), tf_buffer_(tf_cache_time_), tf_listener_(tf_buffer_),
       robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"), gripper_action_server_("/manipulation/gripper"),
       lift_action_server_("/manipulation/lift"), verify_grasp_action_server_("/manipulation/verify_grasp"),
+      segmented_objects_topic_("/segmentation/segmented_objects"),
       as_(private_node_, "grasp_and_store", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
   // set defaults
@@ -31,6 +32,7 @@ GraspCollector::GraspCollector()
   private_node_.getParam("debug", debug_);
   private_node_.getParam("robot_fixed_frame", robot_fixed_frame_);
   private_node_.getParam("grasp_frame", grasp_frame_);
+  private_node_.getParam("segmented_objects_topic", segmented_objects_topic_);
   private_node_.getParam("gripper_action_server", gripper_action_server_);
   private_node_.getParam("lift_action_server", lift_action_server_);
   private_node_.getParam("verify_grasp_action_server", verify_grasp_action_server_);
@@ -51,8 +53,9 @@ GraspCollector::GraspCollector()
   }
 
   // subscribe to the list of segmented objects
-  segmented_objects_sub_ = node_.subscribe("/rail_segmentation/segmented_objects", 1,
-      &GraspCollector::segmentedObjectsCallback, this);
+  cout << segmented_objects_topic_ << endl;
+  segmented_objects_sub_ = node_.subscribe(segmented_objects_topic_, 1, &GraspCollector::segmentedObjectsCallback,
+      this);
 
   // setup action clients
   gripper_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction>(gripper_action_server_, true);
@@ -95,30 +98,42 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
   // default to false
   result.success = false;
 
+  // used for action server checks
+  bool completed, succeeded, success;
+
   // request a grasp from the arm
   feedback.message = "Requesting a close gripper action...";
   as_.publishFeedback(feedback);
   rail_manipulation_msgs::GripperGoal gripper_goal;
   gripper_goal.close = true;
+  cout << "GOT HERE 1" << endl;
   gripper_ac_->sendGoal(gripper_goal);
-  if (!gripper_ac_->waitForResult(ac_wait_time_)
-      || gripper_ac_->getState() != actionlib::SimpleClientGoalState::SUCCEEDED
-      || !gripper_ac_->getResult()->success)
+  completed = gripper_ac_->waitForResult(ac_wait_time_);
+  succeeded = (gripper_ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  success = gripper_ac_->getResult()->success;
+  cout << "GOT HERE 2" << endl;
+  if (!completed || !succeeded || !success)
   {
     as_.setSucceeded(result, "Could not close the gripper.");
     return;
   }
+  cout << "GOT HERE 3" << endl;
 
   // get the grasp position information
   feedback.message = "Determinging grasp position...";
   as_.publishFeedback(feedback);
+  cout << "GOT HERE 4" << endl;
   // get the TF from the buffer
   geometry_msgs::TransformStamped grasp;
   try
   {
-    grasp = tf_buffer_.lookupTransform(robot_fixed_frame_, grasp_frame_, ros::Time(0), tf_cache_time_);
+    cout << "GOT HERE 5" << endl;
+    cout << "TRYING " << grasp_frame_ << " TO " << robot_fixed_frame_ << endl;
+    grasp = tf_buffer_.lookupTransform(robot_fixed_frame_, grasp_frame_, ros::Time(0), ros::Duration(TF_CACHE_TIME + 1));
   } catch (tf2::TransformException &ex)
   {
+    cout << "GOT HERE 5.6" << endl;
+    cout << ex.what() << endl;
     as_.setSucceeded(result, "Could not transform from the grasp frame to the robot fixed frame.");
     return;
   }
@@ -131,9 +146,10 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     as_.publishFeedback(feedback);
     rail_manipulation_msgs::LiftGoal lift_goal;
     lift_ac_->sendGoal(lift_goal);
-    if (!lift_ac_->waitForResult(ac_wait_time_)
-        || lift_ac_->getState() != actionlib::SimpleClientGoalState::SUCCEEDED
-        || !lift_ac_->getResult()->success)
+    completed = lift_ac_->waitForResult(ac_wait_time_);
+    succeeded = (lift_ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+    success = lift_ac_->getResult()->success;
+    if (!completed || !succeeded || !success)
     {
       as_.setSucceeded(result, "Could not execute lift.");
       return;
@@ -143,17 +159,23 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
   // check if we are doing a grasp verification check
   if (goal->verify)
   {
-    // request a lift from the arm
+    // request a grasp verification from the arm
     feedback.message = "Requesting grasp verification...";
     as_.publishFeedback(feedback);
     rail_manipulation_msgs::VerifyGraspGoal verify_grasp_goal;
     verify_grasp_ac_->sendGoal(verify_grasp_goal);
-    if (!verify_grasp_ac_->waitForResult(ac_wait_time_)
-        || verify_grasp_ac_->getState() != actionlib::SimpleClientGoalState::SUCCEEDED
-        || !verify_grasp_ac_->getResult()->success
-        || !verify_grasp_ac_->getResult()->grasping)
+    completed = verify_grasp_ac_->waitForResult(ac_wait_time_);
+    succeeded = (verify_grasp_ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+    rail_manipulation_msgs::VerifyGraspResultConstPtr verify_result = verify_grasp_ac_->getResult();
+    success = verify_result->success;
+    if (!completed || !succeeded || !success)
     {
-      as_.setSucceeded(result, "Could not execute lift.");
+      as_.setSucceeded(result, "Could not verify grasp.");
+      return;
+    } else if (!verify_result->grasping)
+    {
+
+      as_.setSucceeded(result, "Grasp is not verified.");
       return;
     }
   }
