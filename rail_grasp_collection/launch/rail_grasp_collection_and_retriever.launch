@@ -1,0 +1,49 @@
+<!--
+   Author: Russell Toris, Worcester Polytechnic Institute
+  Version: March 3, 2015
+-->
+
+<launch>
+  <!-- Grasp Database Connection Params -->
+  <arg name="host" default="127.0.0.1" />
+  <arg name="port" default="5432" />
+  <arg name="user" default="ros" />
+  <arg name="password" default="" />
+  <arg name="db" default="graspdb" />
+
+  <!-- General Grasp Collector Params -->
+  <arg name="debug" default="false" />
+  <arg name="robot_fixed_frame" default="base_footprint" />
+  <arg name="grasp_frame" default="grasp_link" />
+
+  <!-- Grasp Collector Action Server Client and Topic Params -->
+  <arg name="gripper_action_server" default="/manipulation/gripper" />
+  <arg name="lift_action_server" default="/manipulation/lift" />
+  <arg name="verify_grasp_action_server" default="/manipulation/verify_grasp" />
+  <arg name="segmented_objects_topic" default="/rail_segmentation/segmented_objects" />
+
+  <!-- Main Collection Node -->
+  <include file="$(find rail_grasp_collection)/launch/rail_grasp_collection.launch">
+    <arg name="host" value="$(arg host)" />
+    <arg name="port" value="$(arg port)" />
+    <arg name="user" value="$(arg user)" />
+    <arg name="password" value="$(arg password)" />
+    <arg name="db" value="$(arg db)" />
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="robot_fixed_frame" value="$(arg robot_fixed_frame)" />
+    <arg name="grasp_frame" value="$(arg grasp_frame)" />
+    <arg name="gripper_action_server" value="$(arg gripper_action_server)" />
+    <arg name="lift_action_server" value="$(arg lift_action_server)" />
+    <arg name="verify_grasp_action_server" value="$(arg verify_grasp_action_server)" />
+    <arg name="segmented_objects_topic" value="$(arg segmented_objects_topic)"/>
+  </include>
+
+  <!-- Main Retriever Node -->
+  <include file="$(find rail_grasp_collection)/launch/rail_grasp_retriever.launch">
+    <arg name="host" value="$(arg host)" />
+    <arg name="port" value="$(arg port)" />
+    <arg name="user" value="$(arg user)" />
+    <arg name="password" value="$(arg password)" />
+    <arg name="db" value="$(arg db)" />
+  </include>
+</launch>

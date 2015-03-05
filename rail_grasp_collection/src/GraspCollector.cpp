@@ -17,20 +17,10 @@ using namespace std;
 using namespace rail::pick_and_place;
 
 GraspCollector::GraspCollector()
-    : private_node_("~"),
-      host_("127.0.0.1"),
-      user_("ros"),
-      password_(""),
-      db_("graspdb"),
-      ac_wait_time_(AC_WAIT_TIME),
-      tf_cache_time_(TF_CACHE_TIME),
-      tf_buffer_(tf_cache_time_),
-      tf_listener_(tf_buffer_),
-      robot_fixed_frame_("base_footprint"),
-      grasp_frame_("grasp_link"),
-      gripper_action_server_("/manipulation/gripper"),
-      lift_action_server_("/manipulation/lift"),
-      verify_grasp_action_server_("/manipulation/verify_grasp"),
+    : private_node_("~"), host_("127.0.0.1"), user_("ros"), password_(""), db_("graspdb"), ac_wait_time_(AC_WAIT_TIME),
+      tf_cache_time_(TF_CACHE_TIME), tf_buffer_(tf_cache_time_), tf_listener_(tf_buffer_),
+      robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"), gripper_action_server_("/manipulation/gripper"),
+      lift_action_server_("/manipulation/lift"), verify_grasp_action_server_("/manipulation/verify_grasp"),
       as_(private_node_, "grasp_and_store", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
   // set defaults
