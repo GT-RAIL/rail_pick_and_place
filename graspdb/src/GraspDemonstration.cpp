@@ -14,6 +14,18 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
+
+GraspDemonstration::GraspDemonstration(const GraspDemonstration &gd)
+    : object_name_(gd.getObjectName()), grasp_pose_(gd.getGraspPose())
+{
+  // copy values
+  id_ = gd.getID();
+  created_ = gd.getCreated();
+
+  // create a deep copy of the point cloud
+  this->copyPointCloudBuffer(gd.getPointCloud(), gd.getPointCloudSize());
+}
+
 GraspDemonstration::GraspDemonstration(const uint32_t id, const string object_name, const Pose grasp_pose,
     const uint8_t *point_cloud, const uint32_t point_cloud_size, const time_t created) : object_name_(object_name),
                                                                                          grasp_pose_(grasp_pose)

@@ -143,6 +143,28 @@ public:
    */
   bool loadGraspDemonstration(uint32_t id, GraspDemonstration &gd);
 
+  /*!
+   * \brief Load grasp demonstrations from the database from an object name.
+   *
+   * Load the grasp demonstrations data from the database with the given object names and store them in the given
+   * vector.
+   *
+   * \param object_name The object name of the grasp demonstrations to load.
+   * \param gds The vector to fill with GraspDemonstration objects with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds);
+
+  /*!
+   * \brief Load the unique demonstration object names from the database.
+   *
+   * Load a list of the unique object names from the grasp demonstrations.
+   *
+   * \param names The vector to fill with the unique names.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names);
+
 private:
   /*!
    * \brief Creates tables and types.
@@ -202,6 +224,36 @@ private:
    * \param values The vector to populate with values from the string.
    */
   void extractArrayFromString(std::string array, std::vector<double> &values) const;
+
+  /*!
+   * \brief Extract array values from a string array with vector creation.
+   *
+   * Extracts double values from the given PostgreSQL array string (e.g., "{1,2,3}") and places them in a new vector.
+   *
+   * \param array The array string representation of the array.
+   * \return The vector to populated with values from the string.
+   */
+  std::vector<double> extractArrayFromString(std::string array) const;
+
+  /*!
+   * \brief Extract grasp demonstration information from the SQL result tuple.
+   *
+   * Extracts values from the given SQL result tuple and places them in the given GraspDemonstration object.
+   *
+   * \param result The SQL result tuple containing the correct values.
+   * \param gd The GraspDemonstration to populate with values from the SQL result tuple.
+   */
+  void extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple, GraspDemonstration &gd) const;
+
+  /*!
+   * \brief Extract grasp demonstration information from the SQL result tuple.
+   *
+   * Extracts values from the given SQL result tuple and places them in a new GraspDemonstration object.
+   *
+   * \param result The SQL result tuple containing the correct values.
+   * \return The GraspDemonstration populated with values from the SQL result tuple.
+   */
+  GraspDemonstration extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const;
 
   /*!
    * \brief Extract a time from a timestamp.

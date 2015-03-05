@@ -85,6 +85,11 @@ bool Client::connect()
       connection_->prepare("grasp_demonstrations.select",
           "SELECT id, object_name, (grasp_pose).fixed_frame_id, (grasp_pose).grasp_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
+      connection_->prepare("grasp_demonstrations.select_object_name",
+          "SELECT id, object_name, (grasp_pose).fixed_frame_id, (grasp_pose).grasp_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, point_cloud, created FROM grasp_demonstrations WHERE object_name=$1");
+      connection_->prepare("grasp_demonstrations.unique",
+          "SELECT DISTINCT object_name FROM grasp_demonstrations");
       // create the tables in the DB if they do not exist
       this->createTables();
     }
@@ -183,31 +188,89 @@ bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd)
     return false;
   } else
   {
-    // create the Position element
-    vector<double> position_values;
-    this->extractArrayFromString(result[0]["position"].as<string>(), position_values);
-    Position p(position_values[0], position_values[1], position_values[2]);
-
-    // create the Orientation element
-    vector<double> orientation_values;
-    this->extractArrayFromString(result[0]["orientation"].as<string>(), orientation_values);
-    Orientation o(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
-
-    // create the Pose element
-    Pose pose(result[0]["fixed_frame_id"].as<string>(), result[0]["grasp_frame_id"].as<string>(), p, o);
-
-    // set our easy fields
-    gd.setID(result[0]["id"].as<uint32_t>());
-    gd.setObjectName(result[0]["object_name"].as<string>());
-    gd.setGraspPose(pose);
-    gd.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
-
-    // extract the point cloud
-    pqxx::binarystring blob(result[0]["point_cloud"]);
-    gd.setPointCloud(blob.data(), blob.size());
-
+    // extract the information
+    this->extractGraspDemonstrationFromTuple(result[0], gd);
     return true;
   }
+}
+
+bool Client::loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds)
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_demonstrations.select_object_name")(object_name).exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      cout << result[i]["id"].as<int>() << endl;
+      GraspDemonstration gd;
+      this->extractGraspDemonstrationFromTuple(result[i], gd);
+      cout << gd.getObjectName() << endl;
+      gds.push_back(gd);
+    }
+    return true;
+  }
+}
+
+bool Client::getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names)
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_demonstrations.unique").exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      names.push_back(result[i]["object_name"].as<string>());
+    }
+    return true;
+  }
+}
+
+void Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple, GraspDemonstration &gd) const
+{
+  // create the Position element
+  vector<double> position_values = this->extractArrayFromString(tuple["position"].as<string>());
+  Position p(position_values[0], position_values[1], position_values[2]);
+
+  // create the Orientation element
+  vector<double> orientation_values = this->extractArrayFromString(tuple["orientation"].as<string>());
+  Orientation o(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
+
+  // create the Pose element
+  Pose pose(tuple["fixed_frame_id"].as<string>(), tuple["grasp_frame_id"].as<string>(), p, o);
+
+  // set our easy fields
+  gd.setID(tuple["id"].as<uint32_t>());
+  gd.setObjectName(tuple["object_name"].as<string>());
+  gd.setGraspPose(pose);
+  gd.setCreated(this->extractTimeFromString(tuple["created"].as<string>()));
+
+  // extract the point cloud
+  pqxx::binarystring blob(tuple["point_cloud"]);
+  gd.setPointCloud(blob.data(), blob.size());
+}
+
+GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const
+{
+  GraspDemonstration gd;
+  this->extractGraspDemonstrationFromTuple(tuple, gd);
+  return gd;
 }
 
 void Client::extractArrayFromString(string array, vector<double> &values) const
@@ -228,6 +291,13 @@ void Client::extractArrayFromString(string array, vector<double> &values) const
     i >> dbl;
     values.push_back(dbl);
   }
+}
+
+vector<double> Client::extractArrayFromString(string array) const
+{
+  vector<double> values;
+  this->extractArrayFromString(array, values);
+  return values;
 }
 
 time_t Client::extractTimeFromString(const string &str) const

@@ -44,6 +44,15 @@ public:
   /*!
    * \brief Create a new GraspDemonstration.
    *
+   * Creates a new GraspDemonstration by copying the values from the given GraspDemonstration.
+   *
+   * \param gd The GraspDemonstration to copy.
+   */
+  GraspDemonstration(const GraspDemonstration &gd);
+
+  /*!
+   * \brief Create a new GraspDemonstration.
+   *
    * Creates a new GraspDemonstration with the given values. This constructor assumes a valid ID and timestamp are
    * known.
    *

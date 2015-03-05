@@ -13,7 +13,7 @@
 
   <!-- Main Node -->
   <node name="rail_grasp_retriever" pkg="rail_grasp_collection" type="rail_grasp_retriever" respawn="false"
-        output="screen">
+        output="screen" >
     <param name="host" value="$(arg host)" />
     <param name="port" value="$(arg port)" />
     <param name="user" value="$(arg user)" />

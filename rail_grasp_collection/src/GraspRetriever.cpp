@@ -37,6 +37,12 @@ GraspRetriever::GraspRetriever()
   point_cloud_pub_ = private_node_.advertise<sensor_msgs::PointCloud2>("point_cloud", 1, true);
   pose_pub_ = private_node_.advertise<geometry_msgs::PoseStamped>("pose", 1, true);
 
+  vector<graspdb::GraspDemonstration> gds;
+  graspdb_->loadGraspDemonstrationsByObjectName("object name", gds);
+//  for (size_t i = 0; i < gds.size(); i++) {
+//    cout << gds[i].getObjectName() << endl;
+//  }
+
   // start the action server
   as_.start();
 
