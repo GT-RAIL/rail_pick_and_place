@@ -18,9 +18,9 @@ using namespace rail::pick_and_place;
 
 GraspCollector::GraspCollector()
     : private_node_("~"), host_("127.0.0.1"), user_("ros"), password_(""), db_("graspdb"), ac_wait_time_(AC_WAIT_TIME),
-      tf_cache_time_(TF_CACHE_TIME), tf_buffer_(tf_cache_time_), tf_listener_(tf_buffer_),
-      robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"), gripper_action_server_("/manipulation/gripper"),
-      lift_action_server_("/manipulation/lift"), verify_grasp_action_server_("/manipulation/verify_grasp"),
+      tf_listener_(tf_buffer_), robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"),
+      gripper_action_server_("/manipulation/gripper"), lift_action_server_("/manipulation/lift"),
+      verify_grasp_action_server_("/manipulation/verify_grasp"),
       segmented_objects_topic_("/segmentation/segmented_objects"),
       as_(private_node_, "grasp_and_store", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
@@ -53,7 +53,6 @@ GraspCollector::GraspCollector()
   }
 
   // subscribe to the list of segmented objects
-  cout << segmented_objects_topic_ << endl;
   segmented_objects_sub_ = node_.subscribe(segmented_objects_topic_, 1, &GraspCollector::segmentedObjectsCallback,
       this);
 
@@ -106,34 +105,27 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
   as_.publishFeedback(feedback);
   rail_manipulation_msgs::GripperGoal gripper_goal;
   gripper_goal.close = true;
-  cout << "GOT HERE 1" << endl;
   gripper_ac_->sendGoal(gripper_goal);
   completed = gripper_ac_->waitForResult(ac_wait_time_);
   succeeded = (gripper_ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
   success = gripper_ac_->getResult()->success;
-  cout << "GOT HERE 2" << endl;
   if (!completed || !succeeded || !success)
   {
     as_.setSucceeded(result, "Could not close the gripper.");
     return;
   }
-  cout << "GOT HERE 3" << endl;
 
   // get the grasp position information
   feedback.message = "Determinging grasp position...";
   as_.publishFeedback(feedback);
-  cout << "GOT HERE 4" << endl;
   // get the TF from the buffer
   geometry_msgs::TransformStamped grasp;
   try
   {
-    cout << "GOT HERE 5" << endl;
-    cout << "TRYING " << grasp_frame_ << " TO " << robot_fixed_frame_ << endl;
-    grasp = tf_buffer_.lookupTransform(robot_fixed_frame_, grasp_frame_, ros::Time(0), ros::Duration(TF_CACHE_TIME + 1));
+    grasp = tf_buffer_.lookupTransform(robot_fixed_frame_, grasp_frame_, ros::Time(0));
   } catch (tf2::TransformException &ex)
   {
-    cout << "GOT HERE 5.6" << endl;
-    cout << ex.what() << endl;
+    ROS_WARN("%s", ex.what());
     as_.setSucceeded(result, "Could not transform from the grasp frame to the robot fixed frame.");
     return;
   }
@@ -174,7 +166,6 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
       return;
     } else if (!verify_result->grasping)
     {
-
       as_.setSucceeded(result, "Grasp is not verified.");
       return;
     }
@@ -224,11 +215,11 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     {
       try
       {
-        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_,
-            tf_cache_time_);
+        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_);
         object.cloud = transformed_cloud;
       } catch (tf2::TransformException &ex)
       {
+        ROS_WARN("%s", ex.what());
         as_.setSucceeded(result, "Could not transform the segemented object to the robot fixed frame.");
         return;
       }

@@ -127,8 +127,8 @@ private:
   tf2_ros::Buffer tf_buffer_;
   /*! The trasnform client. */
   tf2_ros::TransformListener tf_listener_;
-  /*! The TF cache time and action client timeout. */
-  ros::Duration tf_cache_time_, ac_wait_time_;
+  /*! The action client timeout. */
+  ros::Duration ac_wait_time_;
 };
 
 }

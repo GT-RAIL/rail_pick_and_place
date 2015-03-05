@@ -126,11 +126,10 @@ const uint8_t *GraspDemonstration::getPointCloud() const
 sensor_msgs::PointCloud2 GraspDemonstration::createPointCloud2() const
 {
   sensor_msgs::PointCloud2 pc;
-
   // deserialize from memory
   if (point_cloud_size_ > 0)
   {
-    ros::serialization::OStream stream(point_cloud_, point_cloud_size_);
+    ros::serialization::IStream stream(point_cloud_, point_cloud_size_);
     ros::serialization::Serializer<sensor_msgs::PointCloud2>::read(stream, pc);
   }
 
@@ -192,7 +191,7 @@ void GraspDemonstration::copyPointCloudBuffer(const uint8_t *point_cloud, const 
   if (point_cloud_size > 0)
   {
     point_cloud_ = new uint8_t[point_cloud_size_];
-    std::copy(point_cloud_, point_cloud_ + point_cloud_size_, point_cloud_);
+    memcpy(point_cloud_, point_cloud, point_cloud_size);
   } else
   {
     point_cloud_ = NULL;

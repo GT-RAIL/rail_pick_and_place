@@ -324,9 +324,10 @@ time_t Client::extractTimeFromString(const string &str) const
   // set values we don't need to be 0
   struct tm t;
   bzero(&t, sizeof(t));
-  // extract values in a datetime object and the timezone offset into an int
-  int tz;
-  sscanf(str.c_str(), "%d-%d-%d %d:%d:%d%d", &t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec, &tz);
+  // extract values in a datetime object and the timezone offset into an int (ignore nsec)
+  int nsec, tz;
+  sscanf(str.c_str(), "%d-%d-%d %d:%d:%d.%d%d", &t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec,
+      &nsec, &tz);
   // correct the information for C time
   t.tm_year -= 1900;
   t.tm_mon -= 1;
@@ -342,7 +343,6 @@ std::string Client::toSQL(const Pose &p) const
   // build the SQL
   string sql = "(\"" + p.getFixedFrameID() + "\",\"" + p.getGraspFrameID() + "\",\"" + this->toSQL(p.getPosition())
       + "\",\"" + this->toSQL(p.getOrientation()) + "\")";
-  cout << sql << endl;
   return sql;
 }
 
