@@ -1,12 +1,12 @@
 //ROS
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
+#include <rail_manipulation_msgs/SegmentedObjectList.h>
 #include <rail_pick_and_place_msgs/GraspRecognized.h>
 #include <rail_pick_and_place_msgs/PickupObject.h>
 #include <rail_pick_and_place_msgs/PickupSegmentedObject.h>
 #include <rail_pick_and_place_msgs/RecognizeAndGrasp.h>
 #include <rail_segmentation/Segment.h>
-#include <rail_segmentation/SegmentedObjectList.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <wpi_jaco_msgs/HomeArmAction.h>
 
@@ -27,7 +27,7 @@ public:
 
   actionlib::SimpleActionClient<wpi_jaco_msgs::HomeArmAction> acHome;
 
-  rail_segmentation::SegmentedObjectList objectList;
+  rail_manipulation_msgs::SegmentedObjectList objectList;
 
   /**
   * Constructor
@@ -56,5 +56,5 @@ public:
   * Callback for segmented object list
   * @param objectList the list of segmented objects
   */
-  void objectCallback(const rail_segmentation::SegmentedObjectList &list);
+  void objectCallback(const rail_manipulation_msgs::SegmentedObjectList &list);
 };

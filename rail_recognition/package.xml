@@ -22,7 +22,7 @@
   <build_depend>std_srvs</build_depend>
   <build_depend>pcl_conversions</build_depend>
   <build_depend>pcl_ros</build_depend>
-  <build_depend>manipulation_msgs</build_depend>
+  <build_depend>rail_manipulation_msgs</build_depend>
   <build_depend>rail_grasping</build_depend>
   <build_depend>rail_pick_and_place_msgs</build_depend>
   <build_depend>rail_segmentation</build_depend>
@@ -37,7 +37,7 @@
   <run_depend>std_srvs</run_depend>
   <run_depend>pcl_conversions</run_depend>
   <run_depend>pcl_ros</run_depend>
-  <run_depend>manipulation_msgs</run_depend>
+  <run_depend>rail_manipulation_msgs</run_depend>
   <run_depend>rail_grasping</run_depend>
   <run_depend>rail_pick_and_place_msgs</run_depend>
   <run_depend>rail_segmentation</run_depend>

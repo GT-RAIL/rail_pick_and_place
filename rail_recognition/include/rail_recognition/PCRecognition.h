@@ -1,11 +1,11 @@
 //ROS
 #include <ros/ros.h>
+#include <rail_manipulation_msgs/SegmentedObjectList.h>
 #include <rail_recognition/ReadGrasp.h>
 #include <rail_pick_and_place_msgs/RecognizeAndGrasp.h>
 #include <rail_pick_and_place_msgs/GraspRecognized.h>
 #include <rail_recognition/Release.h>
 #include <rail_segmentation/Recognize.h>
-#include <rail_segmentation/SegmentedObjectList.h>
 #include <rail_grasping/RequestGrasp.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <sensor_msgs/PointCloud.h>
@@ -59,7 +59,7 @@ public:
   std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> models;
 
   //Point clouds in
-  rail_segmentation::SegmentedObjectList objectList;
+  rail_manipulation_msgs::SegmentedObjectList objectList;
 
   //Grasp info
   std::vector<std::vector<geometry_msgs::Pose> > graspLists;

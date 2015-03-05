@@ -4,7 +4,7 @@ project(rail_pick_and_place_wrapper)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp actionlib message_generation rail_pick_and_place_msgs rail_recognition rail_segmentation sensor_msgs wpi_jaco_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp actionlib message_generation rail_manipulation_msgs rail_pick_and_place_msgs rail_recognition rail_segmentation sensor_msgs wpi_jaco_msgs)
 
 ###################################################
 ## Declare things to be passed to other projects ##
