@@ -1,8 +1,9 @@
 //ROS
 #include <ros/ros.h>
+#include <actionlib/server/simple_action_server.h>
 #include <geometry_msgs/PoseArray.h>
 #include <rail_recognition/DisplayModel.h>
-#include <rail_recognition/GenerateModels.h>
+#include <rail_recognition/GenerateModelsAction.h>
 #include <rail_recognition/GetModelNumbers.h>
 #include <rail_recognition/Model.h>
 #include <rail_recognition/ReadGrasp.h>
@@ -65,9 +66,10 @@ private:
   ros::Publisher targetCloudPublisher;
 
   ros::ServiceServer displayModel;
-  ros::ServiceServer generateModels;
   ros::ServiceServer getModelNumbers;
   ros::ServiceClient readGraspClient;
+
+  actionlib::SimpleActionServer<rail_recognition::GenerateModelsAction> asGenerateModels;
 
   //Point clouds
   sensor_msgs::PointCloud2 baseCloud;
@@ -92,7 +94,7 @@ private:
    */
   bool getModel(std::string filename, rail_recognition::Model *model);
 
-  bool generateModelsService(rail_recognition::GenerateModels::Request &req, rail_recognition::GenerateModels::Response &res);
+  void executeGenerateModels(const rail_recognition::GenerateModelsGoalConstPtr &goal);
 
   bool getModelNumbersService(rail_recognition::GetModelNumbers::Request &req, rail_recognition::GetModelNumbers::Response &res);
 

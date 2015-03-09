@@ -4,8 +4,10 @@
 # include <ros/ros.h>
 # include <rviz/panel.h>
 
+#include <actionlib/client/simple_action_client.h>
 #include <rail_recognition/DisplayModel.h>
-#include <rail_recognition/GenerateModels.h>
+#include <rail_recognition/GenerateModelsAction.h>
+//#include <rail_recognition/GenerateModels.h>
 #include <rail_recognition/GetModelNumbers.h>
 
 #include <QComboBox>
@@ -40,15 +42,8 @@ protected:
   QLabel *model_generation_status_;
   QLabel *busy_feedback_;
   QListWidget *models_list_;
-  QComboBox *models_dropdown_;
   QSpinBox *model_size_spinbox_;
-
-  ros::ServiceClient display_model_client_;
-  ros::ServiceClient get_model_numbers_client_;
-  ros::ServiceClient generate_models_client_;
-
-  // The ROS node handle.
-  ros::NodeHandle nh_;
+  QPushButton *generate_button_;
 
 protected Q_SLOTS:
   void executeRegistration();
@@ -58,9 +53,20 @@ protected Q_SLOTS:
   void deselectAll();
 
 private:
+  actionlib::SimpleActionClient<rail_recognition::GenerateModelsAction> acGenerateModels;
+
+  ros::ServiceClient display_model_client_;
+  ros::ServiceClient get_model_numbers_client_;
+  //ros::ServiceClient generate_models_client_;
+
+  // The ROS node handle.
+  ros::NodeHandle nh_;
+
   void updateModelInfo();
 
+  void doneCb(const actionlib::SimpleClientGoalState& state, const rail_recognition::GenerateModelsResultConstPtr& result);
 
+  void feedbackCb(const rail_recognition::GenerateModelsFeedbackConstPtr& feedback);
 
 };
 

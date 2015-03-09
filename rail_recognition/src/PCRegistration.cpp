@@ -4,7 +4,8 @@ using namespace std;
 using namespace pcl;
 using namespace rail_recognition;
 
-PCRegistration::PCRegistration()
+PCRegistration::PCRegistration() :
+    asGenerateModels(n, "pc_registration/generate_models", boost::bind(&PCRegistration::executeGenerateModels, this, _1), false)
 {
   // private node handle
   ros::NodeHandle private_nh("~");
@@ -20,9 +21,10 @@ PCRegistration::PCRegistration()
   modelGraspsPublisher = n.advertise<geometry_msgs::PoseArray>("pc_registration/model_grasps", 1);
 
   readGraspClient = n.serviceClient<rail_recognition::ReadGrasp>("grasp_reader/read_grasps");
-  generateModels = n.advertiseService("pc_registration/generate_models", &PCRegistration::generateModelsService, this);
   getModelNumbers = n.advertiseService("pc_registration/get_model_numbers", &PCRegistration::getModelNumbersService, this);
   displayModel = n.advertiseService("pc_registration/display_model", &PCRegistration::displayModelService, this);
+
+  asGenerateModels.start();
 
   readGraspsAndModels();
 }
@@ -93,21 +95,28 @@ bool PCRegistration::getModel(string filename, Model *model)
   return srv.response.success;
 }
 
-bool PCRegistration::generateModelsService(rail_recognition::GenerateModels::Request &req, rail_recognition::GenerateModels::Response &res)
+void PCRegistration::executeGenerateModels(const rail_recognition::GenerateModelsGoalConstPtr &goal)
 {
+  rail_recognition::GenerateModelsResult result;
+  rail_recognition::GenerateModelsFeedback feedback;
+  feedback.message = "Populating model generation graph...";
+  asGenerateModels.publishFeedback(feedback);
   vector<Model> models;
-  models.resize(req.individualGraspModelIds.size() + req.mergedModelIds.size());
-  for (unsigned int i = 0; i < req.individualGraspModelIds.size(); i ++)
+  models.resize(goal->individualGraspModelIds.size() + goal->mergedModelIds.size());
+  for (unsigned int i = 0; i < goal->individualGraspModelIds.size(); i ++)
   {
-    models[i].copy(individualGraspModels[req.individualGraspModelIds[i]]);
+    models[i].copy(individualGraspModels[goal->individualGraspModelIds[i]]);
   }
-  for (unsigned int i = 0; i < req.mergedModelIds.size(); i ++)
+  for (unsigned int i = 0; i < goal->mergedModelIds.size(); i ++)
   {
-    models[req.individualGraspModelIds.size() + i].copy(mergedModels[req.mergedModelIds[i]]);
+    models[goal->individualGraspModelIds.size() + i].copy(mergedModels[goal->mergedModelIds[i]]);
   }
-  res.newModelsTotal = registerPointCloudsGraph(models, req.maxModelSize, res.unusedModelIds);
-
-  return true;
+  feedback.message = "Registering models, please wait...";
+  asGenerateModels.publishFeedback(feedback);
+  result.newModelsTotal = registerPointCloudsGraph(models, goal->maxModelSize, result.unusedModelIds);
+  feedback.message = "Model generation complete.";
+  asGenerateModels.publishFeedback(feedback);
+  asGenerateModels.setSucceeded(result);
 }
 
 bool PCRegistration::getModelNumbersService(rail_recognition::GetModelNumbers::Request &req, rail_recognition::GetModelNumbers::Response &res)
