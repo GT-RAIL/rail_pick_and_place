@@ -67,11 +67,7 @@ private:
   void retrieveGrasp(const rail_pick_and_place_msgs::RetrieveGraspDemonstrationGoalConstPtr &goal);
 
   /*! The okay check flag. */
-  bool debug_, okay_;
-  /*! Various parameters loaded from ROS for connection to the grasp database. */
-  std::string host_, user_, password_, db_;
-  /* The grasp database connection port. */
-  int port_;
+  bool okay_;
   /* The grasp database connection. */
   graspdb::Client *graspdb_;
 

@@ -98,11 +98,8 @@ private:
 
   /*! The debug and okay check flags. */
   bool debug_, okay_;
-  /*! Various parameters loaded from ROS. */
-  std::string segmented_objects_topic_, robot_fixed_frame_, grasp_frame_, gripper_action_server_, lift_action_server_,
-      verify_grasp_action_server_, host_, user_, password_, db_;
-  /* The grasp database connection port. */
-  int port_;
+  /*! Frame IDs to use. */
+  std::string robot_fixed_frame_, grasp_frame_;
   /* The grasp database connection. */
   graspdb::Client *graspdb_;
 

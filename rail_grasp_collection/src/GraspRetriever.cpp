@@ -16,21 +16,24 @@ using namespace std;
 using namespace rail::pick_and_place;
 
 GraspRetriever::GraspRetriever()
-    : private_node_("~"), host_("127.0.0.1"), user_("ros"), password_(""), db_("graspdb"),
-      as_(private_node_, "retrieve_grasp", boost::bind(&GraspRetriever::retrieveGrasp, this, _1), false)
+    : as_(private_node_, "retrieve_grasp", boost::bind(&GraspRetriever::retrieveGrasp, this, _1), false)
 {
   // set defaults
-  port_ = graspdb::Client::DEFAULT_PORT;
+  int port = graspdb::Client::DEFAULT_PORT;
+  string host("127.0.0.1");
+  string user("ros");
+  string password("");
+  string db("graspdb");
 
   // grab any parameters we need
-  private_node_.getParam("host", host_);
-  private_node_.getParam("port", port_);
-  private_node_.getParam("user", user_);
-  private_node_.getParam("password", password_);
-  private_node_.getParam("db", db_);
+  private_node_.getParam("host", host);
+  private_node_.getParam("port", port);
+  private_node_.getParam("user", user);
+  private_node_.getParam("password", password);
+  private_node_.getParam("db", db);
 
   // set up a connection to the grasp database
-  graspdb_ = new graspdb::Client(host_, port_, user_, password_, db_);
+  graspdb_ = new graspdb::Client(host, port, user, password, db);
   okay_ = graspdb_->connect();
 
   // set up the latched publishers we need
@@ -69,7 +72,6 @@ void GraspRetriever::retrieveGrasp(const rail_pick_and_place_msgs::RetrieveGrasp
   // attempt to load the grasp from the database
   feedback.message = "Requesting grasp demonstration from database...";
   as_.publishFeedback(feedback);
-  // TODO load the thing
   graspdb::GraspDemonstration gd;
   if (!graspdb_->loadGraspDemonstration(goal->id, gd))
   {

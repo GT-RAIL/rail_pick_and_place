@@ -17,33 +17,38 @@ using namespace std;
 using namespace rail::pick_and_place;
 
 GraspCollector::GraspCollector()
-    : private_node_("~"), host_("127.0.0.1"), user_("ros"), password_(""), db_("graspdb"), ac_wait_time_(AC_WAIT_TIME),
-      tf_listener_(tf_buffer_), robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"),
-      gripper_action_server_("/manipulation/gripper"), lift_action_server_("/manipulation/lift"),
-      verify_grasp_action_server_("/manipulation/verify_grasp"),
-      segmented_objects_topic_("/segmentation/segmented_objects"),
+    : ac_wait_time_(AC_WAIT_TIME), tf_listener_(tf_buffer_),
+      robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"),
       as_(private_node_, "grasp_and_store", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
   // set defaults
   debug_ = DEFAULT_DEBUG;
-  port_ = graspdb::Client::DEFAULT_PORT;
+  int port = graspdb::Client::DEFAULT_PORT;
+  string segmented_objects_topic("/segmentation/segmented_objects");
+  string gripper_action_server("/manipulation/gripper");
+  string lift_action_server("/manipulation/lift");
+  string verify_grasp_action_server("/manipulation/verify_grasp");
+  string host("127.0.0.1");
+  string user("ros");
+  string password("");
+  string db("graspdb");
 
   // grab any parameters we need
   private_node_.getParam("debug", debug_);
   private_node_.getParam("robot_fixed_frame", robot_fixed_frame_);
   private_node_.getParam("grasp_frame", grasp_frame_);
-  private_node_.getParam("segmented_objects_topic", segmented_objects_topic_);
-  private_node_.getParam("gripper_action_server", gripper_action_server_);
-  private_node_.getParam("lift_action_server", lift_action_server_);
-  private_node_.getParam("verify_grasp_action_server", verify_grasp_action_server_);
-  private_node_.getParam("host", host_);
-  private_node_.getParam("port", port_);
-  private_node_.getParam("user", user_);
-  private_node_.getParam("password", password_);
-  private_node_.getParam("db", db_);
+  private_node_.getParam("segmented_objects_topic", segmented_objects_topic);
+  private_node_.getParam("gripper_action_server", gripper_action_server);
+  private_node_.getParam("lift_action_server", lift_action_server);
+  private_node_.getParam("verify_grasp_action_server", verify_grasp_action_server);
+  private_node_.getParam("host", host);
+  private_node_.getParam("port", port);
+  private_node_.getParam("user", user);
+  private_node_.getParam("password", password);
+  private_node_.getParam("db", db);
 
   // set up a connection to the grasp database
-  graspdb_ = new graspdb::Client(host_, port_, user_, password_, db_);
+  graspdb_ = new graspdb::Client(host, port, user, password, db);
   okay_ = graspdb_->connect();
 
   // setup a debug publisher if we need it
@@ -53,14 +58,14 @@ GraspCollector::GraspCollector()
   }
 
   // subscribe to the list of segmented objects
-  segmented_objects_sub_ = node_.subscribe(segmented_objects_topic_, 1, &GraspCollector::segmentedObjectsCallback,
+  segmented_objects_sub_ = node_.subscribe(segmented_objects_topic, 1, &GraspCollector::segmentedObjectsCallback,
       this);
 
   // setup action clients
-  gripper_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction>(gripper_action_server_, true);
-  lift_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::LiftAction>(lift_action_server_, true);
+  gripper_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction>(gripper_action_server, true);
+  lift_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::LiftAction>(lift_action_server, true);
   verify_grasp_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::VerifyGraspAction>(
-      verify_grasp_action_server_, true
+      verify_grasp_action_server, true
   );
 
   // start the action server
