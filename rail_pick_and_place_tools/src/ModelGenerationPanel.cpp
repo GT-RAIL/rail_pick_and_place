@@ -1,18 +1,19 @@
 
-#include <rail_recognition/ModelGenerationPanel.h>
+#include <rail_pick_and_place_tools/ModelGenerationPanel.h>
 
 using namespace std;
 
-namespace rail_recognition
+namespace rail
+{
+namespace pick_and_place
 {
 
-ModelGenerationPanel::ModelGenerationPanel(QWidget* parent) :
+ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
     rviz::Panel(parent),
     acGenerateModels("pc_registration/generate_models", true)
 {
   display_model_client_ = nh_.serviceClient<rail_recognition::DisplayModel>("pc_registration/display_model");
   get_model_numbers_client_ = nh_.serviceClient<rail_recognition::GetModelNumbers>("pc_registration/get_model_numbers");
-  //generate_models_client_ = nh_.serviceClient<rail_recognition::GenerateModels>("pc_registration/generate_models");
 
   models_list_ = new QListWidget;
 
@@ -75,7 +76,7 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget* parent) :
 
 void ModelGenerationPanel::deselectAll()
 {
-  for (unsigned int i = 0; i < models_list_->count(); i ++)
+  for (unsigned int i = 0; i < models_list_->count(); i++)
   {
     if (models_list_->item(i)->checkState() == Qt::Checked)
     {
@@ -87,7 +88,7 @@ void ModelGenerationPanel::deselectAll()
 void ModelGenerationPanel::executeRegistration()
 {
   rail_recognition::GenerateModelsGoal generateModelsGoal;
-  for (unsigned int i = 0; i < models_list_->count(); i ++)
+  for (unsigned int i = 0; i < models_list_->count(); i++)
   {
     if (models_list_->item(i)->checkState() == Qt::Checked)
     {
@@ -107,7 +108,7 @@ void ModelGenerationPanel::executeRegistration()
   generate_button_->setEnabled(false);
 }
 
-void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState& state, const rail_recognition::GenerateModelsResultConstPtr& result)
+void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState &state, const rail_recognition::GenerateModelsResultConstPtr &result)
 {
   int new_models = result->newModelsTotal;
   stringstream ss;
@@ -130,7 +131,7 @@ void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState& state,
   generate_button_->setEnabled(true);
 }
 
-void ModelGenerationPanel::feedbackCb(const rail_recognition::GenerateModelsFeedbackConstPtr& feedback)
+void ModelGenerationPanel::feedbackCb(const rail_recognition::GenerateModelsFeedbackConstPtr &feedback)
 {
   model_generation_status_->setText(feedback->message.c_str());
 }
@@ -161,7 +162,7 @@ void ModelGenerationPanel::displayModel()
 
 void ModelGenerationPanel::updateModelInfo()
 {
-  GetModelNumbers srv;
+  rail_recognition::GetModelNumbers srv;
   if (!get_model_numbers_client_.call(srv))
   {
     ROS_INFO("Could not call get model numbers service.");
@@ -181,11 +182,11 @@ void ModelGenerationPanel::updateModelInfo()
       item->setCheckState(Qt::Unchecked);
     }
 
-    for (unsigned int i = 0; i < srv.response.total_merged_models; i ++)
+    for (unsigned int i = 0; i < srv.response.total_merged_models; i++)
     {
       stringstream ss;
       ss << "model_" << i + 1;
-      QListWidgetItem* item = new QListWidgetItem(ss.str().c_str(), models_list_);
+      QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
       item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
       item->setCheckState(Qt::Unchecked);
     }
@@ -213,18 +214,19 @@ void ModelGenerationPanel::save(rviz::Config config) const
 }
 
 // Load all configuration data for this panel from the given Config object.
-void ModelGenerationPanel::load(const rviz::Config& config)
+void ModelGenerationPanel::load(const rviz::Config &config)
 {
   rviz::Panel::load(config);
   int max_model_size;
-  if(config.mapGetInt("MaxModelSize", &max_model_size))
+  if (config.mapGetInt("MaxModelSize", &max_model_size))
     model_size_spinbox_->setValue(max_model_size);
 }
 
-} // end namespace rail_recognition
+}
+}
 
 // Tell pluginlib about this class.  Every class which should be
 // loadable by pluginlib::ClassLoader must have these two lines
 // compiled in its .cpp file, outside of any namespace scope.
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(rail_recognition::ModelGenerationPanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rail::pick_and_place::ModelGenerationPanel,rviz::Panel )

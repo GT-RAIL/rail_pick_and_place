@@ -316,7 +316,7 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
   }
 
   ROS_INFO("---------------------------");
-  ROS_INFO("Models saved to %s, move them to the models directory of the rail_recognition package to use them for recognition.", outputDirectory.c_str());
+  ROS_INFO("Models saved to %s, move them to the models directory of the rail_pick_and_place_tools package to use them for recognition.", outputDirectory.c_str());
 
   return models.size();
 }

@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rail_recognition)/rviz/model_generation.rviz" />
-</launch>

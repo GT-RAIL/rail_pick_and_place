@@ -9,7 +9,7 @@ GraspReader::GraspReader()
 
   //set location of models
   stringstream ss;
-  ss << ros::package::getPath("rail_recognition") << "/models";
+  ss << ros::package::getPath("rail_pick_and_place_tools") << "/models";
   private_nh.param("model_dir", modelDirectory, ss.str());
 
   //Advertise and subscribe to everything required

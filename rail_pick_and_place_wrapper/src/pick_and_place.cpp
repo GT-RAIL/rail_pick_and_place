@@ -9,8 +9,8 @@ pickAndPlace::pickAndPlace() : acHome("jaco_arm/home_arm", true)
   pickupServer = n.advertiseService("rail_pick_and_place/pickup_object", &pickAndPlace::pickup, this);
   pickupSegmentedServer = n.advertiseService("rail_pick_and_place/pickup_segmented_object", &pickAndPlace::pickupSegmented, this);
 
-  recognizeAndGraspClient = n.serviceClient<rail_pick_and_place_msgs::RecognizeAndGrasp>("rail_recognition/recognize_and_pickup");
-  graspRecognizedClient = n.serviceClient<rail_pick_and_place_msgs::GraspRecognized>("rail_recognition/grasp_recognized");
+  recognizeAndGraspClient = n.serviceClient<rail_pick_and_place_msgs::RecognizeAndGrasp>("rail_pick_and_place_tools/recognize_and_pickup");
+  graspRecognizedClient = n.serviceClient<rail_pick_and_place_msgs::GraspRecognized>("rail_pick_and_place_tools/grasp_recognized");
   segmentClient = n.serviceClient<rail_segmentation::Segment>("rail_segmentation/segment");
   
   ROS_INFO("Waiting for arm action server...");

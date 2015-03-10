@@ -11,15 +11,15 @@ PCRecognition::PCRecognition()
 
   training = false;
 
-  releasePosePublisher = n.advertise<geometry_msgs::PoseStamped>("rail_recognition/release_pose", 1);
+  releasePosePublisher = n.advertise<geometry_msgs::PoseStamped>("rail_pick_and_place_tools/release_pose", 1);
   readGraspClient = n.serviceClient<rail_recognition::ReadGrasp>("grasp_reader/read_grasps");
   requestGraspClient = n.serviceClient<rail_grasping::RequestGrasp>("rail_grasping/request_grasp");
   requestReleaseClient = n.serviceClient<rail_grasping::RequestGrasp>("rail_grasping/request_release");
-  recognizeServer = n.advertiseService("rail_recognition/recognize", &PCRecognition::recognize, this);
-  recognizeAndGraspServer = n.advertiseService("rail_recognition/recognize_and_pickup", &PCRecognition::recognizeAndPickup, this);
-  graspRecognizedServer = n.advertiseService("rail_recognition/grasp_recognized", &PCRecognition::graspRecognized, this);
-  setTrainingServer = n.advertiseService("rail_recognition/set_training_mode", &PCRecognition::toggleTrainingMode, this);
-  releaseServer = n.advertiseService("rail_recognition/drop_it_carl", &PCRecognition::releaseObject, this);
+  recognizeServer = n.advertiseService("rail_pick_and_place_tools/recognize", &PCRecognition::recognize, this);
+  recognizeAndGraspServer = n.advertiseService("rail_pick_and_place_tools/recognize_and_pickup", &PCRecognition::recognizeAndPickup, this);
+  graspRecognizedServer = n.advertiseService("rail_pick_and_place_tools/grasp_recognized", &PCRecognition::graspRecognized, this);
+  setTrainingServer = n.advertiseService("rail_pick_and_place_tools/set_training_mode", &PCRecognition::toggleTrainingMode, this);
+  releaseServer = n.advertiseService("rail_pick_and_place_tools/drop_it_carl", &PCRecognition::releaseObject, this);
 
   readPointClouds();
 }

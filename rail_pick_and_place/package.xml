@@ -18,6 +18,7 @@
   <run_depend>rail_grasp_collection</run_depend>
   <run_depend>rail_grasping</run_depend>
   <run_depend>rail_pick_and_place_msgs</run_depend>
+  <run_depend>rail_pick_and_place_tools</run_depend>
   <run_depend>rail_pick_and_place_wrapper</run_depend>
   <run_depend>rail_recognition</run_depend>
 
