@@ -1,0 +1,23 @@
+<!--
+   Author: Russell Toris, Worcester Polytechnic Institute
+  Version: March 4, 2015
+-->
+
+<launch>
+  <!-- Grasp Database Connection Params -->
+  <arg name="host" default="127.0.0.1" />
+  <arg name="port" default="5432" />
+  <arg name="user" default="ros" />
+  <arg name="password" default="" />
+  <arg name="db" default="graspdb" />
+
+  <!-- Main Node -->
+  <node name="rail_grasp_retriever" pkg="rail_grasp_collection" type="rail_grasp_retriever" respawn="false"
+        output="screen" >
+    <param name="host" value="$(arg host)" />
+    <param name="port" value="$(arg port)" />
+    <param name="user" value="$(arg user)" />
+    <param name="password" value="$(arg password)" />
+    <param name="db" value="$(arg db)" />
+  </node>
+</launch>

@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rail_pick_and_place_wrapper)
+project(graspdb)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp actionlib message_generation rail_manipulation_msgs rail_pick_and_place_msgs rail_recognition rail_segmentation sensor_msgs wpi_jaco_msgs)
+find_package(catkin REQUIRED
+  geometry_msgs
+  rail_pick_and_place_msgs
+  roscpp
+  roscpp_serialization
+  sensor_msgs
+)
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -13,7 +19,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp actionlib message_generation rail
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package()
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME} pqxx roscpp roscpp_serialization
+)
 
 ###########
 ## Build ##
@@ -24,33 +33,39 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a cpp executable
-add_executable(pick_and_place src/pick_and_place.cpp)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(pick_and_place
-  ${catkin_LIBRARIES}
+# Source files for the library
+set(GRASPDB_SOURCE
+  src/Client.cpp
+  src/GraspDemonstration.cpp
+  src/Orientation.cpp
+  src/Pose.cpp
+  src/Position.cpp
 )
 
-add_dependencies(pick_and_place rail_segmentation_generate_messages_cpp)
-add_dependencies(pick_and_place rail_pick_and_place_messages_cpp)
+## Declare a cpp library
+add_library(${PROJECT_NAME} ${GRASPDB_SOURCE})
+
+## Add message build dependencies (needed for source build)
+add_dependencies(${PROJECT_NAME} rail_pick_and_place_msgs_gencpp)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+  pqxx
+)
 
 #############
 ## Install ##
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS pick_and_place
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 ## Copy header files
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/rms
   FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
-)
-
-## Copy launch files
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
