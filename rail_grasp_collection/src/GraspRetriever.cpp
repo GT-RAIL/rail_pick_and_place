@@ -16,7 +16,8 @@ using namespace std;
 using namespace rail::pick_and_place;
 
 GraspRetriever::GraspRetriever()
-    : as_(private_node_, "retrieve_grasp", boost::bind(&GraspRetriever::retrieveGrasp, this, _1), false)
+    : private_node_("~"),
+      as_(private_node_, "retrieve_grasp", boost::bind(&GraspRetriever::retrieveGrasp, this, _1), false)
 {
   // set defaults
   int port = graspdb::Client::DEFAULT_PORT;

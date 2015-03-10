@@ -17,7 +17,7 @@ using namespace std;
 using namespace rail::pick_and_place;
 
 GraspCollector::GraspCollector()
-    : ac_wait_time_(AC_WAIT_TIME), tf_listener_(tf_buffer_),
+    : private_node_("~"), ac_wait_time_(AC_WAIT_TIME), tf_listener_(tf_buffer_),
       robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"),
       as_(private_node_, "grasp_and_store", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
