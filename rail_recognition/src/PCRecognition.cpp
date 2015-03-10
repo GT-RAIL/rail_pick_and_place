@@ -53,19 +53,17 @@ bool PCRecognition::toggleTrainingMode(std_srvs::Empty::Request &req, std_srvs::
 bool PCRecognition::releaseObject(rail_recognition::Release::Request &req, rail_recognition::Release::Response &res)
 {
   geometry_msgs::PoseStamped releasePose;
-  geometry_msgs::PoseStamped tempPose;
+  //geometry_msgs::PoseStamped tempPose;
   releasePose.header.frame_id = req.releaseFrame;
   releasePose.pose = currentGrasp;
   releasePose.pose.position.z += .19;
   rail_grasping::RequestGrasp::Request releaseReq;
   rail_grasping::RequestGrasp::Response releaseRes;
 
-  ROS_INFO("transforming pose");
-  tfListener.transformPose("base_footprint", releasePose, tempPose);
-  ROS_INFO("Pose transformed");
-  releaseReq.graspPose = tempPose.pose;
+  //tfListener.transformPose("base_footprint", releasePose, tempPose);
+  releaseReq.graspPose = releasePose;
 
-  releasePosePublisher.publish(tempPose);
+  releasePosePublisher.publish(releasePose);
 
   ROS_INFO("Calling release service");
   requestReleaseClient.call(releaseReq, releaseRes);
@@ -376,7 +374,8 @@ bool PCRecognition::chooseGrasp(int index, int numAttempts, vector<geometry_msgs
         graspsAttempted.push_back(graspIndex);
 
         rail_grasping::RequestGrasp srv;
-        srv.request.graspPose = grasps[graspIndex];
+        srv.request.graspPose.header.frame_id = "base_footprint";
+        srv.request.graspPose.pose = grasps[graspIndex];
         requestGraspClient.call(srv);
 
         if (srv.response.result)
@@ -477,7 +476,8 @@ bool PCRecognition::chooseGrasp(int index, int numAttempts, vector<geometry_msgs
         graspsAttempted.push_back(graspIndex);
 
         rail_grasping::RequestGrasp srv;
-        srv.request.graspPose = grasps[graspIndex];
+        srv.request.graspPose.header.frame_id = "base_footprint";
+        srv.request.graspPose.pose = grasps[graspIndex];
         requestGraspClient.call(srv);
 
         if (srv.response.result)
