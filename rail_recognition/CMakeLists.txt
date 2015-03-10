@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rail_recognition)
 
-find_package(catkin REQUIRED COMPONENTS roscpp roslib std_msgs std_srvs pcl_conversions pcl_ros rail_manipulation_msgs message_generation rail_grasping rail_pick_and_place_msgs rail_segmentation sensor_msgs rviz)
+find_package(catkin REQUIRED COMPONENTS roscpp roslib actionlib actionlib_msgs std_msgs std_srvs pcl_conversions pcl_ros rail_manipulation_msgs message_generation rail_grasping rail_pick_and_place_msgs rail_segmentation sensor_msgs rviz)
 
 #######################################
 ## Declare ROS messages and services ##
@@ -11,15 +11,21 @@ find_package(catkin REQUIRED COMPONENTS roscpp roslib std_msgs std_srvs pcl_conv
 add_service_files(
   FILES
   DisplayModel.srv
-  GenerateModels.srv
   GetModelNumbers.srv
   ReadGrasp.srv
   Release.srv
 )
 
+## Generate actions in the 'action' folder
+add_action_files(
+  FILES
+  GenerateModels.action
+)
+
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
+  actionlib_msgs
   rail_grasping
   sensor_msgs
 )

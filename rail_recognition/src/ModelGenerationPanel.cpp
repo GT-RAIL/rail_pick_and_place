@@ -6,15 +6,15 @@ using namespace std;
 namespace rail_recognition
 {
 
-ModelGenerationPanel::ModelGenerationPanel(QWidget* parent)
-  : rviz::Panel(parent)
+ModelGenerationPanel::ModelGenerationPanel(QWidget* parent) :
+    rviz::Panel(parent),
+    acGenerateModels("pc_registration/generate_models", true)
 {
   display_model_client_ = nh_.serviceClient<rail_recognition::DisplayModel>("pc_registration/display_model");
   get_model_numbers_client_ = nh_.serviceClient<rail_recognition::GetModelNumbers>("pc_registration/get_model_numbers");
-  generate_models_client_ = nh_.serviceClient<rail_recognition::GenerateModels>("pc_registration/generate_models");
+  //generate_models_client_ = nh_.serviceClient<rail_recognition::GenerateModels>("pc_registration/generate_models");
 
   models_list_ = new QListWidget;
-  models_dropdown_ = new QComboBox;
 
   updateModelInfo();
 
@@ -47,29 +47,27 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget* parent)
   generate_layout->addLayout(model_size_layout);
 
   //generate and display buttons
-  QPushButton *generate_button = new QPushButton("Generate Models");
+  generate_button_ = new QPushButton("Generate Models");
   QPushButton *display_button = new QPushButton("Display Model");
-  generate_layout->addWidget(generate_button);
+  generate_layout->addWidget(generate_button_);
   generate_layout->addWidget(display_button);
 
   //feedback
-  model_generation_status_ = new QLabel("Ready to generate.");
-  busy_feedback_ = new QLabel("");
+  model_generation_status_ = new QLabel("Ready to generate models.");
 
-  //final layout
-  QGridLayout *layout = new QGridLayout;
-  layout->addLayout(models_layout, 0, 0);
-  layout->addLayout(generate_layout, 0, 1);
-  layout->addWidget(model_generation_status_, 1, 0);
-  layout->addWidget(busy_feedback_, 1, 1);
-  //layout->addWidget(models_dropdown_, 2, 0);
-  //layout->addWidget(display_button, 2, 1);
-  layout->setColumnMinimumWidth(0, 150);
-  layout->setRowMinimumHeight(0, 185);
+  //build final layout
+  QGridLayout *grid_layout = new QGridLayout;
+  grid_layout->addLayout(models_layout, 0, 0);
+  grid_layout->addLayout(generate_layout, 0, 1);
+  grid_layout->setColumnMinimumWidth(0, 150);
+  grid_layout->setRowMinimumHeight(0, 185);
+  QVBoxLayout *layout = new QVBoxLayout;
+  layout->addLayout(grid_layout);
+  layout->addWidget(model_generation_status_);
 
   //connect things
   QObject::connect(deselect_all_button, SIGNAL(clicked()), this, SLOT(deselectAll()));
-  QObject::connect(generate_button, SIGNAL(clicked()), this, SLOT(executeRegistration()));
+  QObject::connect(generate_button_, SIGNAL(clicked()), this, SLOT(executeRegistration()));
   QObject::connect(display_button, SIGNAL(clicked()), this, SLOT(displayModel()));
 
   setLayout(layout);
@@ -88,11 +86,7 @@ void ModelGenerationPanel::deselectAll()
 
 void ModelGenerationPanel::executeRegistration()
 {
-  //Can this display?
-  model_generation_status_->setText("Generating models...");
-  busy_feedback_->setText("Please wait.");
-  ros::spinOnce();
-  rail_recognition::GenerateModels srv;
+  rail_recognition::GenerateModelsGoal generateModelsGoal;
   for (unsigned int i = 0; i < models_list_->count(); i ++)
   {
     if (models_list_->item(i)->checkState() == Qt::Checked)
@@ -100,26 +94,23 @@ void ModelGenerationPanel::executeRegistration()
       string selected_item = models_list_->item(i)->text().toStdString();
       int id = atoi(selected_item.substr(selected_item.find('_') + 1).c_str()) - 1;
       if (selected_item.at(0) == 'g')
-        srv.request.individualGraspModelIds.push_back(id);
+        generateModelsGoal.individualGraspModelIds.push_back(id);
       else
-        srv.request.mergedModelIds.push_back(id);
+        generateModelsGoal.mergedModelIds.push_back(id);
     }
   }
-  srv.request.maxModelSize = model_size_spinbox_->value();
-  if (!generate_models_client_.call(srv))
-  {
-    ROS_INFO("Could not call model generation service.");
-    model_generation_status_->setText("Could not call model generation service!");
-    busy_feedback_->setText("");
-    return;
-  }
+  generateModelsGoal.maxModelSize = model_size_spinbox_->value();
+  acGenerateModels.sendGoal(generateModelsGoal, boost::bind(&ModelGenerationPanel::doneCb, this, _1, _2),
+      actionlib::SimpleActionClient<rail_recognition::GenerateModelsAction>::SimpleActiveCallback(),
+      boost::bind(&ModelGenerationPanel::feedbackCb, this, _1));
 
-  ROS_INFO("Model generation complete.");
+  generate_button_->setEnabled(false);
+}
 
-  updateModelInfo();
-
+void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState& state, const rail_recognition::GenerateModelsResultConstPtr& result)
+{
+  int new_models = result->newModelsTotal;
   stringstream ss;
-  int new_models = srv.response.newModelsTotal;
   if (new_models == 0)
   {
     ss << "No new models generated.";
@@ -132,15 +123,22 @@ void ModelGenerationPanel::executeRegistration()
   {
     ss << "Added " << new_models << " new models.";
   }
-  model_generation_status_->setText("Generation complete.");
-  busy_feedback_->setText(ss.str().c_str());
+  model_generation_status_->setText(ss.str().c_str());
+
+  updateModelInfo();
+
+  generate_button_->setEnabled(true);
+}
+
+void ModelGenerationPanel::feedbackCb(const rail_recognition::GenerateModelsFeedbackConstPtr& feedback)
+{
+  model_generation_status_->setText(feedback->message.c_str());
 }
 
 void ModelGenerationPanel::displayModel()
 {
   rail_recognition::DisplayModel srv;
 
-  //string selected_item = models_dropdown_->currentText().toStdString();
   if (models_list_->currentItem() == NULL)
   {
     ROS_INFO("No item selected.");
@@ -172,7 +170,6 @@ void ModelGenerationPanel::updateModelInfo()
 
   int prev_model_count = models_list_->count();
   //models_list_->clear();
-  //models_dropdown_->clear();
   if (prev_model_count == 0)
   {
     for (unsigned int i = 0; i < srv.response.total_individual_grasps; i++)
@@ -182,7 +179,6 @@ void ModelGenerationPanel::updateModelInfo()
       QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
       item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
       item->setCheckState(Qt::Unchecked);
-      models_dropdown_->addItem(ss.str().c_str());
     }
 
     for (unsigned int i = 0; i < srv.response.total_merged_models; i ++)
@@ -192,7 +188,6 @@ void ModelGenerationPanel::updateModelInfo()
       QListWidgetItem* item = new QListWidgetItem(ss.str().c_str(), models_list_);
       item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
       item->setCheckState(Qt::Unchecked);
-      models_dropdown_->addItem(ss.str().c_str());
     }
   }
   else
@@ -204,7 +199,6 @@ void ModelGenerationPanel::updateModelInfo()
       QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
       item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
       item->setCheckState(Qt::Unchecked);
-      models_dropdown_->addItem(ss.str().c_str());
     }
   }
 }

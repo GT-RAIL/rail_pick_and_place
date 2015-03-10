@@ -1,0 +1,11 @@
+# Define the goal
+int32[] individualGraspModelIds
+int32[] mergedModelIds
+int32 maxModelSize
+---
+# Define the result
+int32[] unusedModelIds
+int32 newModelsTotal
+---
+# Define feedback message
+string message
