@@ -244,7 +244,7 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
 
   // success
   result.success = true;
-  as_.setSucceeded(result, "Sucecss!");
+  as_.setSucceeded(result, "Success!");
 }
 
 void GraspCollector::segmentedObjectsCallback(const rail_manipulation_msgs::SegmentedObjectList &object_list)
