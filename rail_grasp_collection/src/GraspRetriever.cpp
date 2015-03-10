@@ -94,6 +94,6 @@ void GraspRetriever::retrieveGrasp(const rail_pick_and_place_msgs::RetrieveGrasp
 
     // success
     result.success = true;
-    as_.setSucceeded(result, "Sucecss!");
+    as_.setSucceeded(result, "Success!");
   }
 }
