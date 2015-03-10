@@ -50,7 +50,7 @@ GraspDemonstration::GraspDemonstration(const string object_name, const string gr
     const string grasp_pose_grasp_frame_id, const geometry_msgs::Pose &grasp_pose,
     const sensor_msgs::PointCloud2 &point_cloud) : object_name_(object_name),
                                                    grasp_pose_(
-                                                       grasp_pose_grasp_frame_id, grasp_pose_fixed_frame_id, grasp_pose
+                                                       grasp_pose_fixed_frame_id, grasp_pose_grasp_frame_id, grasp_pose
                                                    )
 {
   // serialize and copy the point cloud data
@@ -61,7 +61,7 @@ GraspDemonstration::GraspDemonstration(const string object_name, const string gr
     const string grasp_pose_grasp_frame_id, const geometry_msgs::Transform &grasp_pose,
     const sensor_msgs::PointCloud2 &point_cloud) : object_name_(object_name),
                                                    grasp_pose_(
-                                                       grasp_pose_grasp_frame_id, grasp_pose_fixed_frame_id, grasp_pose
+                                                       grasp_pose_fixed_frame_id, grasp_pose_grasp_frame_id, grasp_pose
                                                    )
 {
   // serialize and copy the point cloud data
