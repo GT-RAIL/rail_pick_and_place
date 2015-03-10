@@ -57,44 +57,11 @@ void graspObject::armJointStatesCallback(const sensor_msgs::JointState &msg)
 bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail_grasping::RequestGrasp::Response &res)
 {
   ROS_INFO("Received new release request...");
-  //set release position
-  /*
-  graspTransform.setOrigin(tf::Vector3(req.graspPose.position.x, req.graspPose.position.y, req.graspPose.position.z));
-  graspTransform.setRotation(tf::Quaternion(req.graspPose.orientation.x, req.graspPose.orientation.y, req.graspPose.orientation.z, req.graspPose.orientation.w));
-  tfBroadcaster.sendTransform(tf::StampedTransform(graspTransform, ros::Time::now(), "base_footprint", "grasp_frame"));
-  
-  ros::Duration(1).sleep();
-  
-  //*********** Align gripper on approach angle ***********
-  //Calculate pose on approach angle
-  geometry_msgs::PoseStamped approachPose;
-  geometry_msgs::PoseStamped poseOut;
-  //approachPose.header.stamp = ros::Time::now();
-  approachPose.header.frame_id = "grasp_frame";
-  approachPose.pose.position.x = 0.0;
-  approachPose.pose.position.y = 0.0;
-  //approachPose.pose.position.z = 0.1; //note: disabled to see how close the arm will plan to
-  approachPose.pose.position.z = 0.0;
-  approachPose.pose.orientation.x = 0.0;
-  approachPose.pose.orientation.y = 0.0;
-  approachPose.pose.orientation.z = 0.0;
-  approachPose.pose.orientation.w = 1.0;
-  
-  //adjustment to put approach pose from centered at fingers to jaco_link_hand
-  approachPose.pose.position.z += .19;
-  
-  tfListener.transformPose("base_footprint", approachPose, poseOut);
-  
-  //!!!!!!!!!! test code !!!!!!!!!!!!!
-  poseOut.pose.position.z += .05;
-  //!!!!!!!!!! end test  !!!!!!!!!!!!!
-  */
 
   //Send goal to move arm service
-
-  //try
-  geometry_msgs::Pose releasePose = req.graspPose;
-  releasePose.position.z += .05;
+  geometry_msgs::PoseStamped releasePose;
+  tfListener.transformPose("base_footprint", req.graspPose, releasePose);
+  releasePose.pose.position.z += .05;
   //end try
 
   bool success = false;
@@ -107,38 +74,38 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
     switch (counter)
     {
       case 0:
-        movePoseGoal.pose.position.x += .005;
+        movePoseGoal.pose.pose.position.x += .005;
         break;
       case 1:
-        movePoseGoal.pose.position.x -= .005;
+        movePoseGoal.pose.pose.position.x -= .005;
         break;
       case 2:
-        movePoseGoal.pose.position.y += .005;
+        movePoseGoal.pose.pose.position.y += .005;
         break;
       case 3:
-        movePoseGoal.pose.position.y -= .005;
+        movePoseGoal.pose.pose.position.y -= .005;
         break;
       case 4:
-        movePoseGoal.pose.position.z += .005;
+        movePoseGoal.pose.pose.position.z += .005;
         break;
       case 5:
-        movePoseGoal.pose.position.z -= .005;
+        movePoseGoal.pose.pose.position.z -= .005;
         break;
       case 6:
-        movePoseGoal.pose.position.x += .005;
-        movePoseGoal.pose.position.y += .005;
+        movePoseGoal.pose.pose.position.x += .005;
+        movePoseGoal.pose.pose.position.y += .005;
         break;
       case 7:
-        movePoseGoal.pose.position.x += .005;
-        movePoseGoal.pose.position.y -= .005;
+        movePoseGoal.pose.pose.position.x += .005;
+        movePoseGoal.pose.pose.position.y -= .005;
         break;
       case 8:
-        movePoseGoal.pose.position.x -= .005;
-        movePoseGoal.pose.position.y += .005;
+        movePoseGoal.pose.pose.position.x -= .005;
+        movePoseGoal.pose.pose.position.y += .005;
         break;
       case 9:
-        movePoseGoal.pose.position.x -= .005;
-        movePoseGoal.pose.position.y -= .005;
+        movePoseGoal.pose.pose.position.x -= .005;
+        movePoseGoal.pose.pose.position.y -= .005;
         break;
     }
     acMoveArm.sendGoal(movePoseGoal);
@@ -162,11 +129,10 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
     }
   }
 
-  //!!!!!!!!!! test code !!!!!!!!!!!!!
+  //TODO: Switch out with moveit cartesian planner...
   wpi_jaco_msgs::GetCartesianPosition::Request ikReq;
   wpi_jaco_msgs::GetCartesianPosition::Response ikRes;
   cartesianPositionClient.call(ikReq, ikRes);
-
   wpi_jaco_msgs::CartesianCommand cartesianCmd;
   cartesianCmd.position = true;
   cartesianCmd.armCommand = true;
@@ -177,7 +143,6 @@ bool graspObject::requestRelease(rail_grasping::RequestGrasp::Request &req, rail
   cartesianCommandPub.publish(cartesianCmd);
 
   ros::Duration(5.0).sleep(); //wait for cartesian trajectory execution
-  //!!!!!!!!!! end test  !!!!!!!!!!!!!
 
   //Open gripper
   ROS_INFO("Fully opening gripper...");
@@ -199,10 +164,10 @@ bool graspObject::requestGrasp(rail_grasping::RequestGrasp::Request &req, rail_g
 {
   ROS_INFO("Received new grasp request...");
   //set new grasp position
-  graspTransform.setOrigin(tf::Vector3(req.graspPose.position.x, req.graspPose.position.y, req.graspPose.position.z));
-  graspTransform.setRotation(tf::Quaternion(req.graspPose.orientation.x, req.graspPose.orientation.y, req.graspPose.orientation.z, req.graspPose.orientation.w));
-  tfBroadcaster.sendTransform(tf::StampedTransform(graspTransform, ros::Time::now(), "base_footprint", "grasp_frame"));
-
+  graspTransform.setOrigin(tf::Vector3(req.graspPose.pose.position.x, req.graspPose.pose.position.y, req.graspPose.pose.position.z));
+  graspTransform.setRotation(tf::Quaternion(req.graspPose.pose.orientation.x, req.graspPose.pose.orientation.y, req.graspPose.pose.orientation.z, req.graspPose.pose.orientation.w));
+  tfBroadcaster.sendTransform(tf::StampedTransform(graspTransform, ros::Time::now(), req.graspPose.header.frame_id, "grasp_frame"));
+  tfListener.waitForTransform("grasp_frame", req.graspPose.header.frame_id, ros::Time(0), ros::Duration(1));
   ros::Duration(1).sleep();
 
   bool earlyFailureDetected;
@@ -227,7 +192,7 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   //*********** Align gripper on approach angle ***********
   //Calculate pose on approach angle
   geometry_msgs::PoseStamped approachPose;
-  geometry_msgs::PoseStamped poseOut;
+  //geometry_msgs::PoseStamped poseOut;
   approachPose.header.frame_id = "grasp_frame";
   approachPose.pose.position.z = 0.1; //adjust this to increase/decrease distance of approach
   approachPose.pose.orientation.w = 1.0;
@@ -235,12 +200,12 @@ bool graspObject::executeGrasp(bool *earlyFailureFlag)
   //adjustment to put approach pose from centered at fingers to jaco_link_hand
   approachPose.pose.position.z += .19;
 
-  tfListener.transformPose("base_footprint", approachPose, poseOut);
+  //tfListener.transformPose("base_footprint", approachPose, poseOut);
 
   //Send goal to move arm service
   ROS_INFO("Moving to approach angle...");
   carl_moveit::MoveToPoseGoal movePoseGoal;
-  movePoseGoal.pose = poseOut.pose;
+  movePoseGoal.pose = approachPose;
   acMoveArm.sendGoal(movePoseGoal);
   ROS_INFO("Approach angle arm move initiated.");
   acMoveArm.waitForResult(ros::Duration(20.0));
