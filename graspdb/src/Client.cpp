@@ -106,12 +106,12 @@ bool Client::connect()
           "INSERT INTO grasp_demonstrations (object_name, grasp_pose, eef_frame_id, point_cloud) " \
           "VALUES ($1, $2, $3, $4)");
       connection_->prepare("grasp_demonstrations.select",
-          "SELECT id, object_name, (grasp_pose).fixed_frame_id, (grasp_pose).grasp_frame_id, (grasp_pose).position, " \
+          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
       connection_->prepare("grasp_demonstrations.select_object_name",
-          "SELECT id, object_name, (grasp_pose).fixed_frame_id, (grasp_pose).grasp_frame_id, (grasp_pose).position, " \
-          "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations " \
-          "WHERE object_name=$1");
+          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, point_cloud, created " \
+          "FROM grasp_demonstrations WHERE object_name=$1");
       connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
       // create the tables in the DB if they do not exist
       this->createTables();
@@ -259,6 +259,7 @@ bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names)
 // check API versions
 #if PQXX_VERSION_MAJOR >= 4
 /* Only pqxx 4.0.0 or greater support insert with binary strings */
+
 void Client::addGraspDemonstration(const GraspDemonstration &gd)
 {
   // build the SQL bits we need
@@ -272,10 +273,8 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
   w.prepared("grasp_demonstrations.insert")(object_name)(grasp_pose)(eef_frame_id)(point_cloud).exec();
   w.commit();
 }
-#endif
 
-
-//TODOvoid Client::addModel(const Model &m)
+//TODO void Client::addModel(const Model &m)
 //{
 //  // check API versions
 //#if PQXX_VERSION_MAJOR < 4
@@ -293,6 +292,8 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
 //#endif
 //}
 
+#endif
+
 GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const
 {
   // to return
@@ -309,7 +310,7 @@ GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result
   Orientation ori(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
 
   // create the Pose element
-  Pose pose(tuple["robot_fixed_frame"].as<string>(), pos, ori);
+  Pose pose(tuple["robot_fixed_frame_id"].as<string>(), pos, ori);
 
   // set our fields
   gd.setID(tuple["id"].as<uint32_t>());

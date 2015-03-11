@@ -181,7 +181,6 @@ public:
    * \param gd The GraspDemonstration with the data to store.
    */
   void addGraspDemonstration(const GraspDemonstration &gd);
-#endif
 
   /*!
    * \brief Add a model to the database.
@@ -191,6 +190,7 @@ public:
    * \param gd The Model with the data to store.
    */
   //TODO void addModel(const Model &m);
+#endif
 
 private:
   /*!
