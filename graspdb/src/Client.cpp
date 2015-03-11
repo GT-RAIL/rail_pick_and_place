@@ -392,21 +392,6 @@ time_t Client::extractTimeFromString(const string &str) const
   return mktime(&t);
 }
 
-pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc) const
-{
-  // determine the size for the buffer
-  uint32_t size = ros::serialization::serializationLength(pc);
-  uint8_t buffer[size];
-
-  // serilize the message
-  ros::serialization::OStream stream(buffer, size);
-  ros::serialization::serialize(stream, pc);
-
-  // construct a binary string
-  pqxx::binarystring binary(buffer, size);
-  return binary;
-}
-
 bool Client::getStringArrayFromPrepared(const string &prepared_name, const string &column_name,
     vector<string> &strings) const
 {
@@ -453,3 +438,25 @@ string Client::toSQL(const Orientation &o) const
   ss << "{" << o.getX() << "," << o.getY() << ", " << o.getZ() << "," << o.getW() << "}";
   return ss.str();
 }
+
+// check API versions
+#if PQXX_VERSION_MAJOR >= 4
+
+/* Only pqxx 4.0.0 or greater support insert with binary strings */
+
+pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc) const
+{
+  // determine the size for the buffer
+  uint32_t size = ros::serialization::serializationLength(pc);
+  uint8_t buffer[size];
+
+  // serilize the message
+  ros::serialization::OStream stream(buffer, size);
+  ros::serialization::serialize(stream, pc);
+
+  // construct a binary string
+  pqxx::binarystring binary(buffer, size);
+  return binary;
+}
+
+#endif

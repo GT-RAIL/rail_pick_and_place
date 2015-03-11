@@ -13,7 +13,6 @@
 #ifndef RAIL_GRASPDB_GRASP_DEMONSTRATION_H_
 #define RAIL_GRASPDB_GRASP_DEMONSTRATION_H_
 
-#include <geometry_msgs/Pose.h>
 #include <rail_pick_and_place_msgs/GraspDemonstration.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -130,7 +129,7 @@ public:
    *
    * Set the end effector frame ID value of this GraspDemonstration.
    *
-   * \param object_name The new object name value.
+   * \param eef_frame_id The new object name value.
    */
   void setEefFrameID(const std::string &eef_frame_id);
 

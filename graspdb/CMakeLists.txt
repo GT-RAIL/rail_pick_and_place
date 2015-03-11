@@ -37,8 +37,8 @@ include_directories(include
 set(GRASPDB_SOURCE
   src/Client.cpp
   src/Entity.cpp
+  src/Grasp.cpp
   src/GraspDemonstration.cpp
-  src/Model.cpp
   src/Orientation.cpp
   src/Pose.cpp
   src/Position.cpp

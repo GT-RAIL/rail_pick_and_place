@@ -277,15 +277,6 @@ private:
   std::string toSQL(const Orientation &o) const;
 
   /*!
-   * \brief Convert a ROS PointCloud2 to a PostgreSQL binary string.
-   *
-   * Converts the given ROS PointCloud2 message to a PostgreSQL binary string for use in SQL queries.
-   *
-   * \param pc The ROS PointCloud2 message to convert to a PostgreSQL binary string.
-   */
-  pqxx::binarystring toBinaryString(const sensor_msgs::PointCloud2 &pc) const;
-
-  /*!
    * \brief Extract PointCloud2 values from a binary string.
    *
    * Extracts PointCloud2 values from the given PostgreSQL binary string and places them in a new ROS PointCloud2
@@ -325,6 +316,21 @@ private:
    * \return The time value from the string.
    */
   time_t extractTimeFromString(const std::string &str) const;
+
+// check API versions
+#if PQXX_VERSION_MAJOR >= 4
+/* Only pqxx 4.0.0 or greater support insert with binary strings */
+
+  /*!
+   * \brief Convert a ROS PointCloud2 to a PostgreSQL binary string.
+   *
+   * Converts the given ROS PointCloud2 message to a PostgreSQL binary string for use in SQL queries.
+   *
+   * \param pc The ROS PointCloud2 message to convert to a PostgreSQL binary string.
+   */
+  pqxx::binarystring toBinaryString(const sensor_msgs::PointCloud2 &pc) const;
+
+#endif
 
   /*! Database connection information. */
   std::string host_, user_, password_, db_;
