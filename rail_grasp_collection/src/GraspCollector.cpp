@@ -101,6 +101,7 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
   rail_pick_and_place_msgs::GraspAndStoreResult result;
   // default to false
   result.success = false;
+  result.id = 0;
 
   // used for action server checks
   bool completed, succeeded, success;
@@ -239,7 +240,15 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     feedback.message = "Storing grasp data...";
     as_.publishFeedback(feedback);
     graspdb::GraspDemonstration gd(goal->object_name, graspdb::Pose(grasp), eef_frame_id_, object.cloud);
-    graspdb_->addGraspDemonstration(gd);
+    if (graspdb_->addGraspDemonstration(gd))
+    {
+      // store the ID
+      result.id = gd.getID();
+    } else
+    {
+      as_.setSucceeded(result, "Could not insert into database.");
+      return;
+    }
   }
 
   // success

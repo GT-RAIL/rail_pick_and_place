@@ -14,7 +14,6 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
-
 Client::Client(const Client &c)
     : host_(c.getHost()), user_(c.getUser()), password_(c.getPassword()), db_(c.getDatabase())
 {
@@ -104,7 +103,7 @@ bool Client::connect()
       connection_->prepare("pg_type.exists", "SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname=$1)");
       connection_->prepare("grasp_demonstrations.insert",
           "INSERT INTO grasp_demonstrations (object_name, grasp_pose, eef_frame_id, point_cloud) " \
-          "VALUES ($1, $2, $3, $4)");
+          "VALUES ($1, $2, $3, $4) RETURNING id, created");
       connection_->prepare("grasp_demonstrations.select",
           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
@@ -166,18 +165,26 @@ void Client::createTables() const
                                  ");";
   w.exec(grasp_collections_sql);
 
-  // create the models table if it doesn't exist
-// TODO string models_sql = "CREATE TABLE IF NOT EXISTS models (" \
-//                        "id SERIAL PRIMARY KEY," \
-//                        "object_name VARCHAR NOT NULL," \
-//                        "grasp_poses pose[] NOT NULL," \
-//                        "grasp_frame_ids VARCHAR[] NOT NULL," \
-//                        "successes INTEGER[] NOT NULL," \
-//                        "attempts INTEGER[] NOT NULL," \
-//                        "point_cloud BYTEA NOT NULL," \
-//                        "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
-//                      ");";
-//  w.exec(grasp_collections_sql);
+  // create the grasp models table if it doesn't exist
+  string grasp_models_sql = "CREATE TABLE IF NOT EXISTS grasp_models (" \
+                              "id SERIAL PRIMARY KEY," \
+                              "object_name VARCHAR NOT NULL," \
+                              "point_cloud BYTEA NOT NULL," \
+                              "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
+                            ");";
+  w.exec(grasp_models_sql);
+
+  // create the grasps table if it doesn't exist
+  string grasps_sql = "CREATE TABLE IF NOT EXISTS grasps (" \
+                        "id SERIAL PRIMARY KEY," \
+                        "grasp_model_id INTEGER NOT NULL REFERENCES grasp_models(id),"
+      "grasp_pose pose NOT NULL," \
+                        "eef_frame_id VARCHAR NOT NULL," \
+                        "successes INTEGER NOT NULL," \
+                        "attempts INTEGER NOT NULL," \
+                        "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
+                      ");";
+  w.exec(grasps_sql);
 
   // commit the changes
   w.commit();
@@ -258,9 +265,10 @@ bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names)
 
 // check API versions
 #if PQXX_VERSION_MAJOR >= 4
+
 /* Only pqxx 4.0.0 or greater support insert with binary strings */
 
-void Client::addGraspDemonstration(const GraspDemonstration &gd)
+bool Client::addGraspDemonstration(GraspDemonstration &gd)
 {
   // build the SQL bits we need
   const string &object_name = gd.getObjectName();
@@ -270,8 +278,20 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
 
   // create and execute the query
   pqxx::work w(*connection_);
-  w.prepared("grasp_demonstrations.insert")(object_name)(grasp_pose)(eef_frame_id)(point_cloud).exec();
+  pqxx::result result = w.prepared("grasp_demonstrations.insert")(object_name)(grasp_pose)(eef_frame_id)(point_cloud)
+      .exec();
   w.commit();
+
+  // check the result
+  if (result.size() > 0)
+  {
+    gd.setID(result[0]["id"].as<uint32_t>());
+    gd.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
+    return true;
+  } else
+  {
+    return false;
+  }
 }
 
 //TODO void Client::addModel(const Model &m)

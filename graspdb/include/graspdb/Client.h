@@ -176,11 +176,13 @@ public:
   /*!
    * \brief Add a grasp demonstration to the database.
    *
-   * Stores the given grasp demonstration data to the database.
+   * Stores the given grasp demonstration data to the database. If the grasp was successfully added, the ID and created
+   * fields of the GraspDemonstration are set accordingly.
    *
    * \param gd The GraspDemonstration with the data to store.
+   * \return True if the grasp was successfully added.
    */
-  void addGraspDemonstration(const GraspDemonstration &gd);
+  bool addGraspDemonstration(GraspDemonstration &gd);
 
   /*!
    * \brief Add a model to the database.

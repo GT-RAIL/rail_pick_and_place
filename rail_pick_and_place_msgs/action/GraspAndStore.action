@@ -4,6 +4,7 @@ bool verify         # If a grasp verification request should be sent after grasp
 string object_name  # The unique name of the object you are picking up
 ---
 # Define the result
+uint32 id           # The ID of the stored grasp entity in the database, or 0 if the store was unsuccessful
 bool success        # If the grasp and store was successful
 ---
 # Define a feedback message
