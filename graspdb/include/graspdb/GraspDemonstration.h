@@ -178,7 +178,7 @@ public:
    *
    * Set the point cloud message to the given values based on the ROS message.
    *
-   * \param point_cloud The ROS PointCloud2 messsage to store.
+   * \param point_cloud The ROS PointCloud2 message to store.
    */
   void setPointCloud(const sensor_msgs::PointCloud2 &point_cloud);
 
@@ -205,7 +205,7 @@ public:
    *
    * \return The ROS GraspDemonstration message with this grasp demonstration data.
    */
-  rail_pick_and_place_msgs::GraspDemonstration toROSPGraspDemonstrationMessage() const;
+  rail_pick_and_place_msgs::GraspDemonstration toROSGraspDemonstrationMessage() const;
 
 private:
   /*! The ID. */
@@ -214,7 +214,7 @@ private:
   std::string object_name_;
   /*! The grasp pose data. */
   Pose grasp_pose_;
-  /*! The serialized point cloud buffer. */
+  /*! The point cloud data. */
   sensor_msgs::PointCloud2 point_cloud_;
   /*! The created timestamp. */
   time_t created_;

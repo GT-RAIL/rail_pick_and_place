@@ -106,7 +106,7 @@ void GraspDemonstration::setCreated(const time_t created)
   created_ = created;
 }
 
-rail_pick_and_place_msgs::GraspDemonstration GraspDemonstration::toROSPGraspDemonstrationMessage() const
+rail_pick_and_place_msgs::GraspDemonstration GraspDemonstration::toROSGraspDemonstrationMessage() const
 {
   rail_pick_and_place_msgs::GraspDemonstration gd;
   gd.id = id_;

@@ -82,7 +82,7 @@ void GraspRetriever::retrieveGrasp(const rail_pick_and_place_msgs::RetrieveGrasp
   } else
   {
     // store inside of the result
-    result.grasp = gd.toROSPGraspDemonstrationMessage();
+    result.grasp = gd.toROSGraspDemonstrationMessage();
 
     // publish the data
     feedback.message = "Publishing to latched topics...";

@@ -13,6 +13,7 @@
 
 #include <graspdb/Client.h>
 #include <graspdb/GraspDemonstration.h>
+#include <graspdb/Model.h>
 #include <graspdb/Orientation.h>
 #include <graspdb/Pose.h>
 #include <graspdb/Position.h>
