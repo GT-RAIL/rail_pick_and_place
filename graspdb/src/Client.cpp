@@ -99,8 +99,10 @@ bool Client::connect()
 
     if (this->connected())
     {
-      // set up the prepared statements
+      // general statements
       connection_->prepare("pg_type.exists", "SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname=$1)");
+
+      // grasp_demonstrations statements
       connection_->prepare("grasp_demonstrations.insert",
           "INSERT INTO grasp_demonstrations (object_name, grasp_pose, eef_frame_id, point_cloud) " \
           "VALUES ($1, $2, $3, $4) RETURNING id, created");
@@ -112,6 +114,10 @@ bool Client::connect()
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created " \
           "FROM grasp_demonstrations WHERE object_name=$1");
       connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
+
+      // grasp_models statements
+      connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
+
       // create the tables in the DB if they do not exist
       this->createTables();
     }
@@ -177,8 +183,8 @@ void Client::createTables() const
   // create the grasps table if it doesn't exist
   string grasps_sql = "CREATE TABLE IF NOT EXISTS grasps (" \
                         "id SERIAL PRIMARY KEY," \
-                        "grasp_model_id INTEGER NOT NULL REFERENCES grasp_models(id),"
-      "grasp_pose pose NOT NULL," \
+                        "grasp_model_id INTEGER NOT NULL REFERENCES grasp_models(id)," \
+                        "grasp_pose pose NOT NULL," \
                         "eef_frame_id VARCHAR NOT NULL," \
                         "successes INTEGER NOT NULL," \
                         "attempts INTEGER NOT NULL," \
@@ -200,7 +206,7 @@ bool Client::doesTypeExist(const string &type) const
   return result[0][0].as<bool>();
 }
 
-bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd)
+bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd) const
 {
   // create and execute the query
   pqxx::work w(*connection_);
@@ -219,7 +225,7 @@ bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd)
   }
 }
 
-bool Client::loadGraspDemonstrationsByObjectName(const string &object_name, vector<GraspDemonstration> &gds)
+bool Client::loadGraspDemonstrationsByObjectName(const string &object_name, vector<GraspDemonstration> &gds) const
 {
   // create and execute the query
   pqxx::work w(*connection_);
@@ -241,26 +247,14 @@ bool Client::loadGraspDemonstrationsByObjectName(const string &object_name, vect
   }
 }
 
-bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names)
+bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names) const
 {
-  // create and execute the query
-  pqxx::work w(*connection_);
-  pqxx::result result = w.prepared("grasp_demonstrations.unique").exec();
-  w.commit();
+  return this->getStringArrayFromPrepared("grasp_demonstrations.unique", "object_name", names);
+}
 
-  // check the result
-  if (result.empty())
-  {
-    return false;
-  } else
-  {
-    // extract each result
-    for (size_t i = 0; i < result.size(); i++)
-    {
-      names.push_back(result[i]["object_name"].as<string>());
-    }
-    return true;
-  }
+bool Client::getUniqueGraspModelObjectNames(vector<string> &names) const
+{
+  return this->getStringArrayFromPrepared("grasp_models.unique", "object_name", names);
 }
 
 // check API versions
@@ -268,7 +262,7 @@ bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names)
 
 /* Only pqxx 4.0.0 or greater support insert with binary strings */
 
-bool Client::addGraspDemonstration(GraspDemonstration &gd)
+bool Client::addGraspDemonstration(GraspDemonstration &gd) const
 {
   // build the SQL bits we need
   const string &object_name = gd.getObjectName();
@@ -283,7 +277,7 @@ bool Client::addGraspDemonstration(GraspDemonstration &gd)
   w.commit();
 
   // check the result
-  if (result.size() > 0)
+  if (!result.empty())
   {
     gd.setID(result[0]["id"].as<uint32_t>());
     gd.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
@@ -398,7 +392,7 @@ time_t Client::extractTimeFromString(const string &str) const
   return mktime(&t);
 }
 
-pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc)
+pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc) const
 {
   // determine the size for the buffer
   uint32_t size = ros::serialization::serializationLength(pc);
@@ -411,6 +405,29 @@ pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc)
   // construct a binary string
   pqxx::binarystring binary(buffer, size);
   return binary;
+}
+
+bool Client::getStringArrayFromPrepared(const string &prepared_name, const string &column_name,
+    vector<string> &strings) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared(prepared_name).exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      strings.push_back(result[i][column_name].as<string>());
+    }
+    return true;
+  }
 }
 
 string Client::toSQL(const Pose &p) const

@@ -145,7 +145,7 @@ public:
    * \param gd The GraspDemonstration object to fill with the loaded data.
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
-  bool loadGraspDemonstration(uint32_t id, GraspDemonstration &gd);
+  bool loadGraspDemonstration(uint32_t id, GraspDemonstration &gd) const;
 
   /*!
    * \brief Load grasp demonstrations from the database from an object name.
@@ -157,7 +157,7 @@ public:
    * \param gds The vector to fill with GraspDemonstration objects with the loaded data.
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
-  bool loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds);
+  bool loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds) const;
 
   /*!
    * \brief Load the unique demonstration object names from the database.
@@ -167,7 +167,17 @@ public:
    * \param names The vector to fill with the unique names.
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
-  bool getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names);
+  bool getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names) const;
+
+  /*!
+   * \brief Load the unique grasp model object names from the database.
+   *
+   * Load a list of the unique object names from the grasp models.
+   *
+   * \param names The vector to fill with the unique names.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool getUniqueGraspModelObjectNames(std::vector<std::string> &names) const;
 
 // check API versions
 #if PQXX_VERSION_MAJOR >= 4
@@ -182,7 +192,7 @@ public:
    * \param gd The GraspDemonstration with the data to store.
    * \return True if the grasp was successfully added.
    */
-  bool addGraspDemonstration(GraspDemonstration &gd);
+  bool addGraspDemonstration(GraspDemonstration &gd) const;
 
   /*!
    * \brief Add a model to the database.
@@ -222,6 +232,21 @@ private:
   bool doesTypeExist(const std::string &type) const;
 
   /*!
+   * \brief Extract a string column from the database.
+   *
+   * Attempt to get an array of strings from a prepared statement based on a given column name in the result. This
+   * will call the named prepared statement and extract the values form the given column and place them in the given
+   * vector.
+   *
+   * \param prepared_name The name of the prepared statement to execute.
+   * \param column_name The column name to extract strings from.
+   * \param strings The vector to fill with the values.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool getStringArrayFromPrepared(const std::string &prepared_name, const std::string &column_name,
+      std::vector<std::string> &strings) const;
+
+  /*!
    * \brief Convert a Pose to a PostgreSQL object string.
    *
    * Converts the given Pose to a PostgreSQL object string for use in SQL queries.
@@ -258,7 +283,7 @@ private:
    *
    * \param pc The ROS PointCloud2 message to convert to a PostgreSQL binary string.
    */
-  pqxx::binarystring toBinaryString(const sensor_msgs::PointCloud2 &pc);
+  pqxx::binarystring toBinaryString(const sensor_msgs::PointCloud2 &pc) const;
 
   /*!
    * \brief Extract PointCloud2 values from a binary string.
