@@ -31,7 +31,7 @@ Client::Client(const Client &c)
   this->checkAPIVersion();
 }
 
-Client::Client(const string host, const uint16_t port, const string user, const string password, const string db) :
+Client::Client(const string &host, const uint16_t port, const string &user, const string &password, const string &db) :
     host_(host), user_(user), password_(password), db_(db)
 {
   port_ = port;
@@ -264,11 +264,13 @@ bool Client::getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &na
 void Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple, GraspDemonstration &gd) const
 {
   // create the Position element
-  vector<double> position_values = this->extractArrayFromString(tuple["position"].as<string>());
+  string position_string = tuple["position"].as<string>();
+  vector<double> position_values = this->extractArrayFromString(position_string);
   Position p(position_values[0], position_values[1], position_values[2]);
 
   // create the Orientation element
-  vector<double> orientation_values = this->extractArrayFromString(tuple["orientation"].as<string>());
+  string orientation_string = tuple["orientation"].as<string>();
+  vector<double> orientation_values = this->extractArrayFromString(orientation_string);
   Orientation o(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
 
   // create the Pose element
@@ -306,7 +308,7 @@ sensor_msgs::PointCloud2 Client::extractPointCloud2FromBinaryString(const pqxx::
   return pc;
 }
 
-void Client::extractArrayFromString(string array, vector<double> &values) const
+void Client::extractArrayFromString(string &array, vector<double> &values) const
 {
   // remove the brackets and spaces
   array.erase(std::remove(array.begin(), array.end(), '{'), array.end());
@@ -326,7 +328,7 @@ void Client::extractArrayFromString(string array, vector<double> &values) const
   }
 }
 
-vector<double> Client::extractArrayFromString(string array) const
+vector<double> Client::extractArrayFromString(string &array) const
 {
   vector<double> values;
   this->extractArrayFromString(array, values);

@@ -55,15 +55,15 @@ public:
    * \param password The password for the user of the database.
    * \param db The database name.
    */
-  Client(const std::string host, const uint16_t port, const std::string user, const std::string password,
-      const std::string db);
+  Client(const std::string &host, const uint16_t port, const std::string &user, const std::string &password,
+      const std::string &db);
 
   /*!
    * \brief Cleans up a Client.
    *
    * Cleans up any connections used by the Client.
    */
-  ~Client();
+  virtual ~Client();
 
   /*!
    * \brief Port value accessor.
@@ -272,7 +272,7 @@ private:
    * \param array The array string representation of the array.
    * \param values The vector to populate with values from the string.
    */
-  void extractArrayFromString(std::string array, std::vector<double> &values) const;
+  void extractArrayFromString(std::string &array, std::vector<double> &values) const;
 
   /*!
    * \brief Extract array values from a string array with vector creation.
@@ -282,7 +282,7 @@ private:
    * \param array The array string representation of the array.
    * \return The vector to populated with values from the string.
    */
-  std::vector<double> extractArrayFromString(std::string array) const;
+  std::vector<double> extractArrayFromString(std::string &array) const;
 
   /*!
    * \brief Extract grasp demonstration information from the SQL result tuple.

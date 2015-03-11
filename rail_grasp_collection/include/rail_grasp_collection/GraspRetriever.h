@@ -45,7 +45,7 @@ public:
    *
    * Cleans up any connections used by the GraspRetriever.
    */
-  ~GraspRetriever();
+  virtual ~GraspRetriever();
 
   /*!
    * \brief A check for a valid GraspRetriever.

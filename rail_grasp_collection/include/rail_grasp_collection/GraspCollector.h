@@ -62,7 +62,7 @@ public:
    *
    * Cleans up any connections used by the GraspCollector.
    */
-  ~GraspCollector();
+  virtual ~GraspCollector();
 
   /*!
    * \brief A check for a valid GraspCollector.
