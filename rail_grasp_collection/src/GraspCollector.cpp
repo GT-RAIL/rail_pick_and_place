@@ -18,7 +18,7 @@ using namespace rail::pick_and_place;
 
 GraspCollector::GraspCollector()
     : private_node_("~"), ac_wait_time_(AC_WAIT_TIME), tf_listener_(tf_buffer_),
-      robot_fixed_frame_("base_footprint"), grasp_frame_("grasp_link"),
+      robot_fixed_frame_id_("base_footprint"), eef_frame_id_("eef_link"),
       as_(private_node_, "grasp_and_store", boost::bind(&GraspCollector::graspAndStore, this, _1), false)
 {
   // set defaults
@@ -35,8 +35,8 @@ GraspCollector::GraspCollector()
 
   // grab any parameters we need
   private_node_.getParam("debug", debug_);
-  private_node_.getParam("robot_fixed_frame", robot_fixed_frame_);
-  private_node_.getParam("grasp_frame", grasp_frame_);
+  private_node_.getParam("robot_fixed_frame_id", robot_fixed_frame_id_);
+  private_node_.getParam("eef_frame_id", eef_frame_id_);
   private_node_.getParam("segmented_objects_topic", segmented_objects_topic);
   private_node_.getParam("gripper_action_server", gripper_action_server);
   private_node_.getParam("lift_action_server", lift_action_server);
@@ -127,7 +127,7 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
   geometry_msgs::TransformStamped grasp;
   try
   {
-    grasp = tf_buffer_.lookupTransform(robot_fixed_frame_, grasp_frame_, ros::Time(0));
+    grasp = tf_buffer_.lookupTransform(robot_fixed_frame_id_, eef_frame_id_, ros::Time(0));
   } catch (tf2::TransformException &ex)
   {
     ROS_WARN("%s", ex.what());
@@ -216,11 +216,11 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     }
     // check if we need to transform the point cloud
     rail_manipulation_msgs::SegmentedObject &object = object_list_.objects[closest];
-    if (object.cloud.header.frame_id != robot_fixed_frame_)
+    if (object.cloud.header.frame_id != robot_fixed_frame_id_)
     {
       try
       {
-        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_);
+        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_id_);
         object.cloud = transformed_cloud;
       } catch (tf2::TransformException &ex)
       {
@@ -238,7 +238,7 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     // store the data
     feedback.message = "Storing grasp data...";
     as_.publishFeedback(feedback);
-    graspdb::GraspDemonstration gd(goal->object_name, robot_fixed_frame_, grasp_frame_, grasp.transform, object.cloud);
+    graspdb::GraspDemonstration gd(goal->object_name, graspdb::Pose(grasp), eef_frame_id_, object.cloud);
     graspdb_->addGraspDemonstration(gd);
   }
 

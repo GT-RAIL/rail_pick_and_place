@@ -12,6 +12,7 @@
 #define RAIL_GRASPDB_ORIENTATION_H_
 
 #include <geometry_msgs/Quaternion.h>
+
 #include <string>
 
 namespace rail

@@ -1,12 +1,13 @@
 /*!
- * \file GraspDemonstration.cpp
- * \brief A grasp demonstration database entry.
+ * \file GraspDemonstration.h
+ * \brief A grasp demonstration database entity.
  *
  * A grasp demonstration contains information about a single grasp demonstration in the grasp database. This
- * contains information about the grasp pose, object name, and serialized segmented point cloud.
+ * contains information about the grasp pose, end effector frame identifier, object name, and serialized segmented
+ * point cloud. A valid database entity has an ID and created timestamp.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date March 3, 2015
+ * \date March 11, 2015
  */
 
 #include <graspdb/GraspDemonstration.h>
@@ -15,55 +16,23 @@ using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
 GraspDemonstration::GraspDemonstration(const uint32_t id, const string &object_name, const Pose &grasp_pose,
-    const sensor_msgs::PointCloud2 &point_cloud, const time_t created)
-    : object_name_(object_name), grasp_pose_(grasp_pose), point_cloud_(point_cloud)
-{
-  id_ = id;
-  created_ = created;
-}
-
-GraspDemonstration::GraspDemonstration(const string &object_name, const Pose &grasp_pose,
-    const sensor_msgs::PointCloud2 &point_cloud)
-    : object_name_(object_name), grasp_pose_(grasp_pose), point_cloud_(point_cloud)
-{
-  // default values
-  id_ = UNSET_ID;
-  created_ = UNSET_TIME;
-}
-
-GraspDemonstration::GraspDemonstration(const string &object_name, const string &grasp_pose_fixed_frame_id,
-    const string &grasp_pose_grasp_frame_id, const geometry_msgs::Pose &grasp_pose,
-    const sensor_msgs::PointCloud2 &point_cloud)
-    : object_name_(object_name), grasp_pose_(grasp_pose_fixed_frame_id, grasp_pose_grasp_frame_id, grasp_pose),
-      point_cloud_(point_cloud)
+    const string &eef_frame_id, const sensor_msgs::PointCloud2 &point_cloud, const time_t created)
+    : Entity(id, created),
+      object_name_(object_name), grasp_pose_(grasp_pose), eef_frame_id_(eef_frame_id), point_cloud_(point_cloud)
 {
 }
 
-GraspDemonstration::GraspDemonstration(const string &object_name, const string &grasp_pose_fixed_frame_id,
-    const string &grasp_pose_grasp_frame_id, const geometry_msgs::Transform &grasp_pose,
+GraspDemonstration::GraspDemonstration(const string &object_name, const Pose &grasp_pose, const string &eef_frame_id,
     const sensor_msgs::PointCloud2 &point_cloud)
-    : object_name_(object_name), grasp_pose_(grasp_pose_fixed_frame_id, grasp_pose_grasp_frame_id, grasp_pose),
-      point_cloud_(point_cloud)
+    : object_name_(object_name), grasp_pose_(grasp_pose), eef_frame_id_(eef_frame_id), point_cloud_(point_cloud)
 {
 }
 
 GraspDemonstration::GraspDemonstration(const rail_pick_and_place_msgs::GraspDemonstration &gd)
-    : object_name_(gd.object_name), point_cloud_(gd.point_cloud),
-      grasp_pose_(gd.grasp_pose_fixed_frame_id, gd.grasp_pose_grasp_frame_id, gd.grasp_pose)
+    : Entity(gd.id, gd.created.sec),
+      object_name_(gd.object_name), grasp_pose_(gd.grasp_pose), eef_frame_id_(gd.eef_frame_id),
+      point_cloud_(gd.point_cloud)
 {
-  // set the ID and timestamp
-  id_ = gd.id;
-  created_ = gd.created.sec;
-}
-
-uint32_t GraspDemonstration::getID() const
-{
-  return id_;
-}
-
-void GraspDemonstration::setID(const uint32_t id)
-{
-  id_ = id;
 }
 
 const string &GraspDemonstration::getObjectName() const
@@ -86,6 +55,16 @@ void GraspDemonstration::setGraspPose(const Pose &grasp_pose)
   grasp_pose_ = grasp_pose;
 }
 
+const string &GraspDemonstration::getEefFrameID() const
+{
+  return eef_frame_id_;
+}
+
+void GraspDemonstration::setEefFrameID(const string &eef_frame_id)
+{
+  eef_frame_id_ = eef_frame_id;
+}
+
 const sensor_msgs::PointCloud2 &GraspDemonstration::getPointCloud() const
 {
   return point_cloud_;
@@ -96,26 +75,15 @@ void GraspDemonstration::setPointCloud(const sensor_msgs::PointCloud2 &point_clo
   point_cloud_ = point_cloud;
 }
 
-time_t GraspDemonstration::getCreated() const
-{
-  return created_;
-}
-
-void GraspDemonstration::setCreated(const time_t created)
-{
-  created_ = created;
-}
-
 rail_pick_and_place_msgs::GraspDemonstration GraspDemonstration::toROSGraspDemonstrationMessage() const
 {
   rail_pick_and_place_msgs::GraspDemonstration gd;
-  gd.id = id_;
+  gd.id = this->getID();
   gd.object_name = object_name_;
-  gd.grasp_pose_fixed_frame_id = grasp_pose_.getFixedFrameID();
-  gd.grasp_pose_grasp_frame_id = grasp_pose_.getGraspFrameID();
-  gd.grasp_pose = grasp_pose_.toROSPoseMessage();
+  gd.grasp_pose = grasp_pose_.toROSPoseStampedMessage();
+  gd.eef_frame_id = eef_frame_id_;
   gd.point_cloud = point_cloud_;
   gd.created.nsec = 0;
-  gd.created.sec = created_;
+  gd.created.sec = this->getCreated();
   return gd;
 }

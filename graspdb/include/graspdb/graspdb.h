@@ -12,6 +12,7 @@
 #define RAIL_GRASPDB_GRASPDB_H_
 
 #include <graspdb/Client.h>
+#include <graspdb/Entity.h>
 #include <graspdb/GraspDemonstration.h>
 #include <graspdb/Model.h>
 #include <graspdb/Orientation.h>

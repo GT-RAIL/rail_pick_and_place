@@ -36,6 +36,7 @@ include_directories(include
 # Source files for the library
 set(GRASPDB_SOURCE
   src/Client.cpp
+  src/Entity.cpp
   src/GraspDemonstration.cpp
   src/Model.cpp
   src/Orientation.cpp

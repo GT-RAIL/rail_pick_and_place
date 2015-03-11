@@ -5,15 +5,18 @@
  * The graspdb client can communicate with a PostgreSQL database.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date March 3, 2015
+ * \date March 11, 2015
  */
 
 #ifndef RAIL_GRASPDB_CLIENT_H_
 #define RAIL_GRASPDB_CLIENT_H_
 
-#include <graspdb/GraspDemonstration.h>
-#include <pqxx/pqxx>
 #include <sensor_msgs/PointCloud2.h>
+
+#include <graspdb/GraspDemonstration.h>
+#include <graspdb/Model.h>
+
+#include <pqxx/pqxx>
 #include <string>
 
 namespace rail
@@ -134,15 +137,6 @@ public:
   void disconnect();
 
   /*!
-   * \brief Add a grasp demonstration to the database.
-   *
-   * Stores the given grasp demonstration data to the database.
-   *
-   * \param gd The GraspDemonstration with the data to store.
-   */
-  void addGraspDemonstration(const GraspDemonstration &gd);
-
-  /*!
    * \brief Load a grasp demonstration from the database.
    *
    * Load the grasp demonstration data from the database with the given ID and store it in the given GraspDemonstration.
@@ -174,6 +168,29 @@ public:
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
   bool getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names);
+
+// check API versions
+#if PQXX_VERSION_MAJOR >= 4
+/* Only pqxx 4.0.0 or greater support insert with binary strings */
+
+  /*!
+   * \brief Add a grasp demonstration to the database.
+   *
+   * Stores the given grasp demonstration data to the database.
+   *
+   * \param gd The GraspDemonstration with the data to store.
+   */
+  void addGraspDemonstration(const GraspDemonstration &gd);
+#endif
+
+  /*!
+   * \brief Add a model to the database.
+   *
+   * Stores the given model data to the database.
+   *
+   * \param gd The Model with the data to store.
+   */
+  //TODO void addModel(const Model &m);
 
 private:
   /*!
@@ -244,17 +261,6 @@ private:
   /*!
    * \brief Extract PointCloud2 values from a binary string.
    *
-   * Extracts PointCloud2 values from the given PostgreSQL binary string and places them in the given ROS PointCloud2
-   * message.
-   *
-   * \param bs The binary string representation of the serialized PointCloud2.
-   * \param pc The PointCloud2 to populate with values from the binary string.
-   */
-  void extractPointCloud2FromBinaryString(const pqxx::binarystring &bs, sensor_msgs::PointCloud2 &pc) const;
-
-  /*!
-   * \brief Extract PointCloud2 values from a binary string.
-   *
    * Extracts PointCloud2 values from the given PostgreSQL binary string and places them in a new ROS PointCloud2
    * message.
    *
@@ -262,17 +268,6 @@ private:
    * \return The PointCloud2 with values from the binary string.
    */
   sensor_msgs::PointCloud2 extractPointCloud2FromBinaryString(const pqxx::binarystring &bs) const;
-
-  /*!
-   * \brief Extract array values from a string array.
-   *
-   * Extracts double values from the given PostgreSQL array string (e.g., "{1,2,3}") and places them in the given
-   * vector.
-   *
-   * \param array The array string representation of the array.
-   * \param values The vector to populate with values from the string.
-   */
-  void extractArrayFromString(std::string &array, std::vector<double> &values) const;
 
   /*!
    * \brief Extract array values from a string array with vector creation.
@@ -283,16 +278,6 @@ private:
    * \return The vector to populated with values from the string.
    */
   std::vector<double> extractArrayFromString(std::string &array) const;
-
-  /*!
-   * \brief Extract grasp demonstration information from the SQL result tuple.
-   *
-   * Extracts values from the given SQL result tuple and places them in the given GraspDemonstration object.
-   *
-   * \param result The SQL result tuple containing the correct values.
-   * \param gd The GraspDemonstration to populate with values from the SQL result tuple.
-   */
-  void extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple, GraspDemonstration &gd) const;
 
   /*!
    * \brief Extract grasp demonstration information from the SQL result tuple.

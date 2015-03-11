@@ -99,7 +99,7 @@ private:
   /*! The debug and okay check flags. */
   bool debug_, okay_;
   /*! Frame IDs to use. */
-  std::string robot_fixed_frame_, grasp_frame_;
+  std::string robot_fixed_frame_id_, eef_frame_id_;
   /* The grasp database connection. */
   graspdb::Client *graspdb_;
 

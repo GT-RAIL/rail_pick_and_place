@@ -2,10 +2,12 @@
  * \file Pose.cpp
  * \brief Position and orientation information with respect to a given coordinate frame.
  *
- * A pose contains position and orientation information as well as a coordinate frame identifier.
+ * A pose contains position and orientation information as well as a coordinate frame identifier. This coordinate
+ * frame should be a fixed frame on the robot. This class is useful for internal data management within the graspdb
+ * library. Convenience functions are added for use with ROS messages.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date March 3, 2015
+ * \date March 11, 2015
  */
 
 #include <graspdb/Pose.h>
@@ -13,58 +15,51 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
-Pose::Pose(const string &fixed_frame_id, const string &grasp_frame_id, const Position &position,
-    const Orientation &orientation)
-    : fixed_frame_id_(fixed_frame_id), grasp_frame_id_(grasp_frame_id), position_(position), orientation_(orientation)
+Pose::Pose(const string &robot_fixed_frame_id, const Position &position, const Orientation &orientation)
+    : robot_fixed_frame_id_(robot_fixed_frame_id), position_(position), orientation_(orientation)
 {
 }
 
-Pose::Pose(const std::string &fixed_frame_id, const string &grasp_frame_id, const geometry_msgs::Point &position,
-    const geometry_msgs::Quaternion &orientation)
-    : fixed_frame_id_(fixed_frame_id), grasp_frame_id_(grasp_frame_id), position_(position), orientation_(orientation)
+Pose::Pose(const string &robot_fixed_frame_id, const geometry_msgs::Pose &pose)
+    : robot_fixed_frame_id_(robot_fixed_frame_id), position_(pose.position), orientation_(pose.orientation)
 {
 }
 
-Pose::Pose(const std::string &fixed_frame_id, const string &grasp_frame_id, const geometry_msgs::Pose &pose)
-    : fixed_frame_id_(fixed_frame_id),
-      grasp_frame_id_(grasp_frame_id),
-      position_(pose.position),
-      orientation_(pose.orientation)
+Pose::Pose(const geometry_msgs::PoseStamped &pose)
+    : robot_fixed_frame_id_(pose.header.frame_id), position_(pose.pose.position), orientation_(pose.pose.orientation)
 {
 }
 
-Pose::Pose(const std::string &fixed_frame_id, const string &grasp_frame_id, const geometry_msgs::Transform &transform)
-    : fixed_frame_id_(fixed_frame_id),
-      grasp_frame_id_(grasp_frame_id),
-      position_(transform.translation),
-      orientation_(transform.rotation)
+Pose::Pose(const string &robot_fixed_frame_id, const geometry_msgs::PoseWithCovariance &pose)
+    : robot_fixed_frame_id_(robot_fixed_frame_id), position_(pose.pose.position), orientation_(pose.pose.orientation)
 {
 }
 
-Pose::Pose(const std::string &fixed_frame_id, const string &grasp_frame_id, const geometry_msgs::Vector3 &position,
-    const geometry_msgs::Quaternion &orientation)
-    : fixed_frame_id_(fixed_frame_id), grasp_frame_id_(grasp_frame_id), position_(position), orientation_(orientation)
+Pose::Pose(const geometry_msgs::PoseWithCovarianceStamped &pose)
+    : robot_fixed_frame_id_(pose.header.frame_id), position_(pose.pose.pose.position),
+      orientation_(pose.pose.pose.orientation)
 {
 }
 
-void Pose::setFixedFrameID(const std::string &fixed_frame_id)
+Pose::Pose(const string &robot_fixed_frame_id, const geometry_msgs::Transform &tf)
+    : robot_fixed_frame_id_(robot_fixed_frame_id), position_(tf.translation), orientation_(tf.rotation)
 {
-  fixed_frame_id_ = fixed_frame_id;
 }
 
-const string &Pose::getFixedFrameID() const
+Pose::Pose(const geometry_msgs::TransformStamped &tf)
+    : robot_fixed_frame_id_(tf.header.frame_id), position_(tf.transform.translation),
+      orientation_(tf.transform.rotation)
 {
-  return fixed_frame_id_;
 }
 
-void Pose::setGraspFrameID(const std::string &grasp_frame_id)
+void Pose::setRobotFixedFrameID(const string &robot_fixed_frame_id)
 {
-  grasp_frame_id_ = grasp_frame_id;
+  robot_fixed_frame_id_ = robot_fixed_frame_id;
 }
 
-const string &Pose::getGraspFrameID() const
+const string &Pose::getRobotFixedFrameID() const
 {
-  return grasp_frame_id_;
+  return robot_fixed_frame_id_;
 }
 
 void Pose::setPosition(const Position &position)
@@ -89,17 +84,25 @@ const Orientation &Pose::getOrientation() const
 
 geometry_msgs::Pose Pose::toROSPoseMessage() const
 {
-  geometry_msgs::Pose p;
-  p.position = position_.toROSPointMessage();
-  p.orientation = orientation_.toROSQuaternionMessage();
-  return p;
+  geometry_msgs::Pose pose;
+  pose.position = position_.toROSPointMessage();
+  pose.orientation = orientation_.toROSQuaternionMessage();
+  return pose;
 }
 
 geometry_msgs::PoseStamped Pose::toROSPoseStampedMessage() const
 {
-  geometry_msgs::PoseStamped p;
-  p.header.frame_id = fixed_frame_id_;
-  p.pose.position = position_.toROSPointMessage();
-  p.pose.orientation = orientation_.toROSQuaternionMessage();
-  return p;
+  geometry_msgs::PoseStamped pose;
+  pose.header.frame_id = robot_fixed_frame_id_;
+  pose.pose.position = position_.toROSPointMessage();
+  pose.pose.orientation = orientation_.toROSQuaternionMessage();
+  return pose;
+}
+
+geometry_msgs::Transform Pose::toROSTransformMessage() const
+{
+  geometry_msgs::Transform tf;
+  tf.translation = position_.toROSVector3Message();
+  tf.rotation = orientation_.toROSQuaternionMessage();
+  return tf;
 }

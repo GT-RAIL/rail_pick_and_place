@@ -48,9 +48,9 @@ Model::Model(const rail_pick_and_place_msgs::Model &m)
   for (size_t i = 0; i < size; i++)
   {
     // create a graspdb Pose object
-    Pose p(m.grasp_frame_ids[i], m.grasp_frame_ids[i], m.grasp_poses[i]);
+   //TODO Pose p(m.grasp_frame_ids[i], m.grasp_frame_ids[i], m.grasp_poses[i]);
     // store the pose
-    this->addGraspPose(p, m.grasp_frame_ids[i], m.successes[i], m.attempts[i]);
+   //TODO this->addGraspPose(p, m.grasp_frame_ids[i], m.successes[i], m.attempts[i]);
   }
 }
 
