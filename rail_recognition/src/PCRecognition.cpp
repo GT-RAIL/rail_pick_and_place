@@ -556,22 +556,6 @@ void PCRecognition::readPointClouds()
   int count = 1;
   while (reading)
   {
-    /*
-    ss.str("");
-    ss << "model_" << count << ".pcd";
-    PointCloud<PointXYZRGB>::Ptr tempCloudPtr(new PointCloud<PointXYZRGB>);
-    if (io::loadPCDFile<PointXYZRGB>(ss.str(), *tempCloudPtr) == -1)
-    {
-      reading = false;
-      count --;
-    }
-    else
-    {
-      models.push_back(tempCloudPtr);
-      count ++;
-    }
-    */
-
     ss.str("");
     ss << "model_" << count << ".txt";
     PointCloud<PointXYZRGB>::Ptr tempCloudPtr(new PointCloud<PointXYZRGB>);

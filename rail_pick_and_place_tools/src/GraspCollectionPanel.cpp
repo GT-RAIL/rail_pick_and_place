@@ -1,3 +1,10 @@
+/*!
+ * \GraspCollectionPanel.cpp
+ * \brief Rviz plugin for collecting grasp data.
+ *
+ * \author David Kent, WPI - davidkent@wpi.edu
+ * \date March 10, 2015
+ */
 
 #include <rail_pick_and_place_tools/GraspCollectionPanel.h>
 
@@ -17,7 +24,6 @@ GraspCollectionPanel::GraspCollectionPanel(QWidget *parent) :
   QLabel *options_label = new QLabel("Options:");
   lift_box_ = new QCheckBox("Lift objects");
   verify_box_ = new QCheckBox("Verify grasps");
-  //first_row_layout->addWidget(options_label);
   first_row_layout->addWidget(lift_box_, 0, Qt::AlignLeft);
   first_row_layout->addWidget(verify_box_, 0, Qt::AlignLeft);
   first_row_layout->addStretch();
@@ -27,7 +33,6 @@ GraspCollectionPanel::GraspCollectionPanel(QWidget *parent) :
   QLabel *name_label = new QLabel("Object name:");
   name_input_ = new QLineEdit;
   grasp_and_store_button_ = new QPushButton("Grasp");
-  //second_row_layout->addWidget(name_label);
   second_row_layout->addWidget(name_input_);
   second_row_layout->addWidget(grasp_and_store_button_);
 
@@ -44,7 +49,6 @@ GraspCollectionPanel::GraspCollectionPanel(QWidget *parent) :
 
   //build final layout
   QVBoxLayout *layout = new QVBoxLayout;
-  //layout->addLayout(first_row_layout);
   layout->addLayout(grid_layout);
   layout->addWidget(grasp_and_store_status_);
 
@@ -56,11 +60,11 @@ GraspCollectionPanel::GraspCollectionPanel(QWidget *parent) :
 
 void GraspCollectionPanel::executeGraspAndStore()
 {
-  rail_pick_and_place_msgs::GraspAndStoreGoal graspAndStoreGoal;
-  graspAndStoreGoal.lift = lift_box_->isChecked();
-  graspAndStoreGoal.verify = verify_box_->isChecked();
-  graspAndStoreGoal.object_name = name_input_->text().toStdString();
-  ac_grasp_and_store_.sendGoal(graspAndStoreGoal, boost::bind(&GraspCollectionPanel::doneCb, this, _1, _2),
+  rail_pick_and_place_msgs::GraspAndStoreGoal grasp_and_store_goal;
+  grasp_and_store_goal.lift = lift_box_->isChecked();
+  grasp_and_store_goal.verify = verify_box_->isChecked();
+  grasp_and_store_goal.object_name = name_input_->text().toStdString();
+  ac_grasp_and_store_.sendGoal(grasp_and_store_goal, boost::bind(&GraspCollectionPanel::doneCb, this, _1, _2),
       actionlib::SimpleActionClient<rail_pick_and_place_msgs::GraspAndStoreAction>::SimpleActiveCallback(),
       boost::bind(&GraspCollectionPanel::feedbackCb, this, _1));
 

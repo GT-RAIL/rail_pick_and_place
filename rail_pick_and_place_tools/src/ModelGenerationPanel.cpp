@@ -1,3 +1,10 @@
+/*!
+ * \ModelGenerationPanel.cpp
+ * \brief Rviz plugin for generating object recognition/grasping models.
+ *
+ * \author David Kent, WPI - davidkent@wpi.edu
+ * \date March 2, 2015
+ */
 
 #include <rail_pick_and_place_tools/ModelGenerationPanel.h>
 
@@ -10,7 +17,7 @@ namespace pick_and_place
 
 ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
     rviz::Panel(parent),
-    acGenerateModels("pc_registration/generate_models", true)
+    ac_generate_models("pc_registration/generate_models", true)
 {
   display_model_client_ = nh_.serviceClient<rail_recognition::DisplayModel>("pc_registration/display_model");
   get_model_numbers_client_ = nh_.serviceClient<rail_recognition::GetModelNumbers>("pc_registration/get_model_numbers");
@@ -87,7 +94,7 @@ void ModelGenerationPanel::deselectAll()
 
 void ModelGenerationPanel::executeRegistration()
 {
-  rail_recognition::GenerateModelsGoal generateModelsGoal;
+  rail_recognition::GenerateModelsGoal generate_models_goal;
   for (unsigned int i = 0; i < models_list_->count(); i++)
   {
     if (models_list_->item(i)->checkState() == Qt::Checked)
@@ -95,13 +102,13 @@ void ModelGenerationPanel::executeRegistration()
       string selected_item = models_list_->item(i)->text().toStdString();
       int id = atoi(selected_item.substr(selected_item.find('_') + 1).c_str()) - 1;
       if (selected_item.at(0) == 'g')
-        generateModelsGoal.individualGraspModelIds.push_back(id);
+        generate_models_goal.individualGraspModelIds.push_back(id);
       else
-        generateModelsGoal.mergedModelIds.push_back(id);
+        generate_models_goal.mergedModelIds.push_back(id);
     }
   }
-  generateModelsGoal.maxModelSize = model_size_spinbox_->value();
-  acGenerateModels.sendGoal(generateModelsGoal, boost::bind(&ModelGenerationPanel::doneCb, this, _1, _2),
+  generate_models_goal.maxModelSize = model_size_spinbox_->value();
+  ac_generate_models.sendGoal(generate_models_goal, boost::bind(&ModelGenerationPanel::doneCb, this, _1, _2),
       actionlib::SimpleActionClient<rail_recognition::GenerateModelsAction>::SimpleActiveCallback(),
       boost::bind(&ModelGenerationPanel::feedbackCb, this, _1));
 
