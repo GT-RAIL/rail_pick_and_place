@@ -13,8 +13,8 @@
 
   <!-- General Grasp Collector Params -->
   <arg name="debug" default="false" />
-  <arg name="robot_fixed_frame" default="base_footprint" />
-  <arg name="grasp_frame" default="grasp_link" />
+  <arg name="robot_fixed_frame_id" default="base_footprint" />
+  <arg name="eef_frame_id" default="grasp_link" />
 
   <!-- Grasp Collector Action Server Client and Topic Params -->
   <arg name="gripper_action_server" default="/manipulation/gripper" />
@@ -31,8 +31,8 @@
     <param name="password" value="$(arg password)" />
     <param name="db" value="$(arg db)" />
     <param name="debug" value="$(arg debug)" />
-    <param name="robot_fixed_frame" value="$(arg robot_fixed_frame)" />
-    <param name="grasp_frame" value="$(arg grasp_frame)" />
+    <param name="robot_fixed_frame_id" value="$(arg robot_fixed_frame_id)" />
+    <param name="eef_frame_id" value="$(arg eef_frame_id)" />
     <param name="gripper_action_server" value="$(arg gripper_action_server)" />
     <param name="lift_action_server" value="$(arg lift_action_server)" />
     <param name="verify_grasp_action_server" value="$(arg verify_grasp_action_server)" />

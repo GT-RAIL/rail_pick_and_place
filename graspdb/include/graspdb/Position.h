@@ -2,7 +2,8 @@
  * \file Position.h
  * \brief 3-point position information.
  *
- * A position simply contains x, y, and z value.
+ * A position simply contains x, y, and z value. This class is useful for internal data management within the graspdb
+ * library. Convenience functions are added for use with ROS messages.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 3, 2015
@@ -13,6 +14,7 @@
 
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Vector3.h>
+
 #include <string>
 
 namespace rail

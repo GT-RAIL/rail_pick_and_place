@@ -1,6 +1,6 @@
 /*!
  * \file graspdb.h
- * \brief All-inclusive inclide file for the graspdb library.
+ * \brief All-inclusive include file for the graspdb library.
  *
  * The graspdb library is a standalone C++ library for communicating with the PostgreSQL grasp database.
  *
@@ -12,6 +12,8 @@
 #define RAIL_GRASPDB_GRASPDB_H_
 
 #include <graspdb/Client.h>
+#include <graspdb/Entity.h>
+#include <graspdb/Grasp.h>
 #include <graspdb/GraspDemonstration.h>
 #include <graspdb/Orientation.h>
 #include <graspdb/Pose.h>

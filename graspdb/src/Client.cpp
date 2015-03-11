@@ -5,7 +5,7 @@
  * The graspdb client can communicate with a PostgreSQL database.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date March 3, 2015
+ * \date March 11, 2015
  */
 
 #include <graspdb/Client.h>
@@ -13,7 +13,6 @@
 
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
-
 
 Client::Client(const Client &c)
     : host_(c.getHost()), user_(c.getUser()), password_(c.getPassword()), db_(c.getDatabase())
@@ -31,7 +30,7 @@ Client::Client(const Client &c)
   this->checkAPIVersion();
 }
 
-Client::Client(const string host, const uint16_t port, const string user, const string password, const string db) :
+Client::Client(const string &host, const uint16_t port, const string &user, const string &password, const string &db) :
     host_(host), user_(user), password_(password), db_(db)
 {
   port_ = port;
@@ -100,19 +99,25 @@ bool Client::connect()
 
     if (this->connected())
     {
-      // set up the prepared statements
-      connection_->prepare("pg_type.exists",
-          "SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname=$1)");
+      // general statements
+      connection_->prepare("pg_type.exists", "SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname=$1)");
+
+      // grasp_demonstrations statements
       connection_->prepare("grasp_demonstrations.insert",
-          "INSERT INTO grasp_demonstrations (object_name, grasp_pose, point_cloud) VALUES ($1, $2, $3)");
+          "INSERT INTO grasp_demonstrations (object_name, grasp_pose, eef_frame_id, point_cloud) " \
+          "VALUES ($1, $2, $3, $4) RETURNING id, created");
       connection_->prepare("grasp_demonstrations.select",
-          "SELECT id, object_name, (grasp_pose).fixed_frame_id, (grasp_pose).grasp_frame_id, (grasp_pose).position, " \
-          "(grasp_pose).orientation, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
+          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
       connection_->prepare("grasp_demonstrations.select_object_name",
-          "SELECT id, object_name, (grasp_pose).fixed_frame_id, (grasp_pose).grasp_frame_id, (grasp_pose).position, " \
-          "(grasp_pose).orientation, point_cloud, created FROM grasp_demonstrations WHERE object_name=$1");
-      connection_->prepare("grasp_demonstrations.unique",
-          "SELECT DISTINCT object_name FROM grasp_demonstrations");
+          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, point_cloud, created " \
+          "FROM grasp_demonstrations WHERE object_name=$1");
+      connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
+
+      // grasp_models statements
+      connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
+
       // create the tables in the DB if they do not exist
       this->createTables();
     }
@@ -145,8 +150,7 @@ void Client::createTables() const
   {
     pqxx::work w(*connection_);
     string sql = "CREATE TYPE pose AS (" \
-                   "fixed_frame_id VARCHAR," \
-                   "grasp_frame_id VARCHAR," \
+                   "robot_fixed_frame_id VARCHAR," \
                    "position NUMERIC[3]," \
                    "orientation NUMERIC[4]" \
                  ");";
@@ -161,10 +165,32 @@ void Client::createTables() const
                                    "id SERIAL PRIMARY KEY," \
                                    "object_name VARCHAR NOT NULL," \
                                    "grasp_pose pose NOT NULL," \
+                                   "eef_frame_id VARCHAR NOT NULL," \
                                    "point_cloud BYTEA NOT NULL," \
                                    "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
                                  ");";
   w.exec(grasp_collections_sql);
+
+  // create the grasp models table if it doesn't exist
+  string grasp_models_sql = "CREATE TABLE IF NOT EXISTS grasp_models (" \
+                              "id SERIAL PRIMARY KEY," \
+                              "object_name VARCHAR NOT NULL," \
+                              "point_cloud BYTEA NOT NULL," \
+                              "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
+                            ");";
+  w.exec(grasp_models_sql);
+
+  // create the grasps table if it doesn't exist
+  string grasps_sql = "CREATE TABLE IF NOT EXISTS grasps (" \
+                        "id SERIAL PRIMARY KEY," \
+                        "grasp_model_id INTEGER NOT NULL REFERENCES grasp_models(id)," \
+                        "grasp_pose pose NOT NULL," \
+                        "eef_frame_id VARCHAR NOT NULL," \
+                        "successes INTEGER NOT NULL," \
+                        "attempts INTEGER NOT NULL," \
+                        "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
+                      ");";
+  w.exec(grasps_sql);
 
   // commit the changes
   w.commit();
@@ -180,25 +206,7 @@ bool Client::doesTypeExist(const string &type) const
   return result[0][0].as<bool>();
 }
 
-void Client::addGraspDemonstration(const GraspDemonstration &gd)
-{
-  // check API versions
-#if PQXX_VERSION_MAJOR < 4
-  ROS_ERROR("libpqxx-%s does not support binarystring insertion. Cannot add grasp to database.", PQXX_VERSION);
-#else
-  // build the SQL bits we need
-  const string &objectName = gd.getObjectName();
-  string graspPose = this->toSQL(gd.getGraspPose());
-  pqxx::binarystring pointCloud(gd.getPointCloud(), gd.getPointCloudSize());
-
-  // create and execute the query
-  pqxx::work w(*connection_);
-  w.prepared("grasp_demonstrations.insert")(objectName)(graspPose)(pointCloud).exec();
-  w.commit();
-#endif
-}
-
-bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd)
+bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd) const
 {
   // create and execute the query
   pqxx::work w(*connection_);
@@ -212,12 +220,12 @@ bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd)
   } else
   {
     // extract the information
-    this->extractGraspDemonstrationFromTuple(result[0], gd);
+    gd = this->extractGraspDemonstrationFromTuple(result[0]);
     return true;
   }
 }
 
-bool Client::loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds)
+bool Client::loadGraspDemonstrationsByObjectName(const string &object_name, vector<GraspDemonstration> &gds) const
 {
   // create and execute the query
   pqxx::work w(*connection_);
@@ -239,83 +247,130 @@ bool Client::loadGraspDemonstrationsByObjectName(const std::string &object_name,
   }
 }
 
-bool Client::getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names)
+bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names) const
 {
+  return this->getStringArrayFromPrepared("grasp_demonstrations.unique", "object_name", names);
+}
+
+bool Client::getUniqueGraspModelObjectNames(vector<string> &names) const
+{
+  return this->getStringArrayFromPrepared("grasp_models.unique", "object_name", names);
+}
+
+// check API versions
+#if PQXX_VERSION_MAJOR >= 4
+
+/* Only pqxx 4.0.0 or greater support insert with binary strings */
+
+bool Client::addGraspDemonstration(GraspDemonstration &gd) const
+{
+  // build the SQL bits we need
+  const string &object_name = gd.getObjectName();
+  string grasp_pose = this->toSQL(gd.getGraspPose());
+  const string &eef_frame_id = gd.getEefFrameID();
+  pqxx::binarystring point_cloud = this->toBinaryString(gd.getPointCloud());
+
   // create and execute the query
   pqxx::work w(*connection_);
-  pqxx::result result = w.prepared("grasp_demonstrations.unique").exec();
+  pqxx::result result = w.prepared("grasp_demonstrations.insert")(object_name)(grasp_pose)(eef_frame_id)(point_cloud)
+      .exec();
   w.commit();
 
   // check the result
-  if (result.empty())
+  if (!result.empty())
   {
-    return false;
+    gd.setID(result[0]["id"].as<uint32_t>());
+    gd.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
+    return true;
   } else
   {
-    // extract each result
-    for (size_t i = 0; i < result.size(); i++)
-    {
-      names.push_back(result[i]["object_name"].as<string>());
-    }
-    return true;
+    return false;
   }
 }
 
-void Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple, GraspDemonstration &gd) const
+//TODO void Client::addModel(const Model &m)
+//{
+//  // check API versions
+//#if PQXX_VERSION_MAJOR < 4
+//  ROS_ERROR("libpqxx-%s does not support binarystring insertion. Cannot add model to database.", PQXX_VERSION);
+//#else
+//  // build the SQL bits we need
+//  const string &objectName = m.getObjectName();
+//  string graspPose = this->toSQL(gd.getGraspPose());
+//  pqxx::binarystring pointCloud = this->toBinaryString(gd.getPointCloud());
+//
+//  // create and execute the query
+//  pqxx::work w(*connection_);
+//  w.prepared("grasp_demonstrations.insert")(objectName)(graspPose)(pointCloud).exec();
+//  w.commit();
+//#endif
+//}
+
+#endif
+
+GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const
 {
+  // to return
+  GraspDemonstration gd;
+
   // create the Position element
-  vector<double> position_values = this->extractArrayFromString(tuple["position"].as<string>());
-  Position p(position_values[0], position_values[1], position_values[2]);
+  string position_string = tuple["position"].as<string>();
+  vector<double> position_values = this->extractArrayFromString(position_string);
+  Position pos(position_values[0], position_values[1], position_values[2]);
 
   // create the Orientation element
-  vector<double> orientation_values = this->extractArrayFromString(tuple["orientation"].as<string>());
-  Orientation o(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
+  string orientation_string = tuple["orientation"].as<string>();
+  vector<double> orientation_values = this->extractArrayFromString(orientation_string);
+  Orientation ori(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
 
   // create the Pose element
-  Pose pose(tuple["fixed_frame_id"].as<string>(), tuple["grasp_frame_id"].as<string>(), p, o);
+  Pose pose(tuple["robot_fixed_frame_id"].as<string>(), pos, ori);
 
-  // set our easy fields
+  // set our fields
   gd.setID(tuple["id"].as<uint32_t>());
   gd.setObjectName(tuple["object_name"].as<string>());
   gd.setGraspPose(pose);
+  gd.setEefFrameID(tuple["eef_frame_id"].as<string>());
   gd.setCreated(this->extractTimeFromString(tuple["created"].as<string>()));
 
   // extract the point cloud
   pqxx::binarystring blob(tuple["point_cloud"]);
-  gd.setPointCloud(blob.data(), blob.size());
-}
+  gd.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
 
-GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const
-{
-  GraspDemonstration gd;
-  this->extractGraspDemonstrationFromTuple(tuple, gd);
   return gd;
 }
 
-void Client::extractArrayFromString(string array, vector<double> &values) const
+sensor_msgs::PointCloud2 Client::extractPointCloud2FromBinaryString(const pqxx::binarystring &bs) const
 {
+  sensor_msgs::PointCloud2 pc;
+  // deserialize from memory
+  ros::serialization::IStream stream((uint8_t *) bs.data(), bs.size());
+  ros::serialization::Serializer<sensor_msgs::PointCloud2>::read(stream, pc);
+  return pc;
+}
+
+vector<double> Client::extractArrayFromString(string &array) const
+{
+  // to return
+  vector<double> values;
+
   // remove the brackets and spaces
-  array.erase(std::remove(array.begin(), array.end(), '{'), array.end());
-  array.erase(std::remove(array.begin(), array.end(), '}'), array.end());
-  array.erase(std::remove(array.begin(), array.end(), ' '), array.end());
+  array.erase(remove(array.begin(), array.end(), '{'), array.end());
+  array.erase(remove(array.begin(), array.end(), '}'), array.end());
+  array.erase(remove(array.begin(), array.end(), ' '), array.end());
 
   // split on the ','
   stringstream ss(array);
   string str;
   double dbl;
-  while (std::getline(ss, str, ','))
+  while (getline(ss, str, ','))
   {
     // store as the double value
     istringstream i(str);
     i >> dbl;
     values.push_back(dbl);
   }
-}
 
-vector<double> Client::extractArrayFromString(string array) const
-{
-  vector<double> values;
-  this->extractArrayFromString(array, values);
   return values;
 }
 
@@ -337,16 +392,38 @@ time_t Client::extractTimeFromString(const string &str) const
   return mktime(&t);
 }
 
+bool Client::getStringArrayFromPrepared(const string &prepared_name, const string &column_name,
+    vector<string> &strings) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared(prepared_name).exec();
+  w.commit();
 
-std::string Client::toSQL(const Pose &p) const
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      strings.push_back(result[i][column_name].as<string>());
+    }
+    return true;
+  }
+}
+
+string Client::toSQL(const Pose &p) const
 {
   // build the SQL
-  string sql = "(\"" + p.getFixedFrameID() + "\",\"" + p.getGraspFrameID() + "\",\"" + this->toSQL(p.getPosition())
-      + "\",\"" + this->toSQL(p.getOrientation()) + "\")";
+  string sql = "(\"" + p.getRobotFixedFrameID() + "\",\"" + this->toSQL(p.getPosition()) + "\",\""
+      + this->toSQL(p.getOrientation()) + "\")";
   return sql;
 }
 
-std::string Client::toSQL(const Position &p) const
+string Client::toSQL(const Position &p) const
 {
   // build the SQL
   stringstream ss;
@@ -354,10 +431,32 @@ std::string Client::toSQL(const Position &p) const
   return ss.str();
 }
 
-std::string Client::toSQL(const Orientation &o) const
+string Client::toSQL(const Orientation &o) const
 {
   // build the SQL
   stringstream ss;
   ss << "{" << o.getX() << "," << o.getY() << ", " << o.getZ() << "," << o.getW() << "}";
   return ss.str();
 }
+
+// check API versions
+#if PQXX_VERSION_MAJOR >= 4
+
+/* Only pqxx 4.0.0 or greater support insert with binary strings */
+
+pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc) const
+{
+  // determine the size for the buffer
+  uint32_t size = ros::serialization::serializationLength(pc);
+  uint8_t buffer[size];
+
+  // serilize the message
+  ros::serialization::OStream stream(buffer, size);
+  ros::serialization::serialize(stream, pc);
+
+  // construct a binary string
+  pqxx::binarystring binary(buffer, size);
+  return binary;
+}
+
+#endif

@@ -2,7 +2,8 @@
  * \file Orientation.cpp
  * \brief Quaternion orientation information.
  *
- * An orientation simply contains x, y, z, and w values.
+ * An orientation simply contains x, y, z, and w values. This class is useful for internal data management within the
+ * graspdb  library. Convenience functions are added for use with ROS messages.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 3, 2015

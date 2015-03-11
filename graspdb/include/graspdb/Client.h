@@ -5,15 +5,19 @@
  * The graspdb client can communicate with a PostgreSQL database.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date March 3, 2015
+ * \date March 11, 2015
  */
 
 #ifndef RAIL_GRASPDB_CLIENT_H_
 #define RAIL_GRASPDB_CLIENT_H_
 
-#include <string>
-#include <pqxx/pqxx>
+#include <sensor_msgs/PointCloud2.h>
+
 #include <graspdb/GraspDemonstration.h>
+#include <graspdb/Model.h>
+
+#include <pqxx/pqxx>
+#include <string>
 
 namespace rail
 {
@@ -54,15 +58,15 @@ public:
    * \param password The password for the user of the database.
    * \param db The database name.
    */
-  Client(const std::string host, const uint16_t port, const std::string user, const std::string password,
-      const std::string db);
+  Client(const std::string &host, const uint16_t port, const std::string &user, const std::string &password,
+      const std::string &db);
 
   /*!
    * \brief Cleans up a Client.
    *
    * Cleans up any connections used by the Client.
    */
-  ~Client();
+  virtual ~Client();
 
   /*!
    * \brief Port value accessor.
@@ -133,15 +137,6 @@ public:
   void disconnect();
 
   /*!
-   * \brief Add a grasp demonstration to the database.
-   *
-   * Stores the given grasp demonstration data to the database.
-   *
-   * \param gd The GraspDemonstration with the data to store.
-   */
-  void addGraspDemonstration(const GraspDemonstration &gd);
-
-  /*!
    * \brief Load a grasp demonstration from the database.
    *
    * Load the grasp demonstration data from the database with the given ID and store it in the given GraspDemonstration.
@@ -150,7 +145,7 @@ public:
    * \param gd The GraspDemonstration object to fill with the loaded data.
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
-  bool loadGraspDemonstration(uint32_t id, GraspDemonstration &gd);
+  bool loadGraspDemonstration(uint32_t id, GraspDemonstration &gd) const;
 
   /*!
    * \brief Load grasp demonstrations from the database from an object name.
@@ -162,7 +157,7 @@ public:
    * \param gds The vector to fill with GraspDemonstration objects with the loaded data.
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
-  bool loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds);
+  bool loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds) const;
 
   /*!
    * \brief Load the unique demonstration object names from the database.
@@ -172,7 +167,42 @@ public:
    * \param names The vector to fill with the unique names.
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
-  bool getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names);
+  bool getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names) const;
+
+  /*!
+   * \brief Load the unique grasp model object names from the database.
+   *
+   * Load a list of the unique object names from the grasp models.
+   *
+   * \param names The vector to fill with the unique names.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool getUniqueGraspModelObjectNames(std::vector<std::string> &names) const;
+
+// check API versions
+#if PQXX_VERSION_MAJOR >= 4
+/* Only pqxx 4.0.0 or greater support insert with binary strings */
+
+  /*!
+   * \brief Add a grasp demonstration to the database.
+   *
+   * Stores the given grasp demonstration data to the database. If the grasp was successfully added, the ID and created
+   * fields of the GraspDemonstration are set accordingly.
+   *
+   * \param gd The GraspDemonstration with the data to store.
+   * \return True if the grasp was successfully added.
+   */
+  bool addGraspDemonstration(GraspDemonstration &gd) const;
+
+  /*!
+   * \brief Add a model to the database.
+   *
+   * Stores the given model data to the database.
+   *
+   * \param gd The Model with the data to store.
+   */
+  //TODO void addModel(const Model &m);
+#endif
 
 private:
   /*!
@@ -200,6 +230,21 @@ private:
    * \return True if the type composite exists in the database.
    */
   bool doesTypeExist(const std::string &type) const;
+
+  /*!
+   * \brief Extract a string column from the database.
+   *
+   * Attempt to get an array of strings from a prepared statement based on a given column name in the result. This
+   * will call the named prepared statement and extract the values form the given column and place them in the given
+   * vector.
+   *
+   * \param prepared_name The name of the prepared statement to execute.
+   * \param column_name The column name to extract strings from.
+   * \param strings The vector to fill with the values.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool getStringArrayFromPrepared(const std::string &prepared_name, const std::string &column_name,
+      std::vector<std::string> &strings) const;
 
   /*!
    * \brief Convert a Pose to a PostgreSQL object string.
@@ -232,15 +277,15 @@ private:
   std::string toSQL(const Orientation &o) const;
 
   /*!
-   * \brief Extract array values from a string array.
+   * \brief Extract PointCloud2 values from a binary string.
    *
-   * Extracts double values from the given PostgreSQL array string (e.g., "{1,2,3}") and places them in the given
-   * vector.
+   * Extracts PointCloud2 values from the given PostgreSQL binary string and places them in a new ROS PointCloud2
+   * message.
    *
-   * \param array The array string representation of the array.
-   * \param values The vector to populate with values from the string.
+   * \param bs The binary string representation of the serialized PointCloud2.
+   * \return The PointCloud2 with values from the binary string.
    */
-  void extractArrayFromString(std::string array, std::vector<double> &values) const;
+  sensor_msgs::PointCloud2 extractPointCloud2FromBinaryString(const pqxx::binarystring &bs) const;
 
   /*!
    * \brief Extract array values from a string array with vector creation.
@@ -250,17 +295,7 @@ private:
    * \param array The array string representation of the array.
    * \return The vector to populated with values from the string.
    */
-  std::vector<double> extractArrayFromString(std::string array) const;
-
-  /*!
-   * \brief Extract grasp demonstration information from the SQL result tuple.
-   *
-   * Extracts values from the given SQL result tuple and places them in the given GraspDemonstration object.
-   *
-   * \param result The SQL result tuple containing the correct values.
-   * \param gd The GraspDemonstration to populate with values from the SQL result tuple.
-   */
-  void extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple, GraspDemonstration &gd) const;
+  std::vector<double> extractArrayFromString(std::string &array) const;
 
   /*!
    * \brief Extract grasp demonstration information from the SQL result tuple.
@@ -281,6 +316,21 @@ private:
    * \return The time value from the string.
    */
   time_t extractTimeFromString(const std::string &str) const;
+
+// check API versions
+#if PQXX_VERSION_MAJOR >= 4
+/* Only pqxx 4.0.0 or greater support insert with binary strings */
+
+  /*!
+   * \brief Convert a ROS PointCloud2 to a PostgreSQL binary string.
+   *
+   * Converts the given ROS PointCloud2 message to a PostgreSQL binary string for use in SQL queries.
+   *
+   * \param pc The ROS PointCloud2 message to convert to a PostgreSQL binary string.
+   */
+  pqxx::binarystring toBinaryString(const sensor_msgs::PointCloud2 &pc) const;
+
+#endif
 
   /*! Database connection information. */
   std::string host_, user_, password_, db_;
