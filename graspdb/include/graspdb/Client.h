@@ -11,9 +11,10 @@
 #ifndef RAIL_GRASPDB_CLIENT_H_
 #define RAIL_GRASPDB_CLIENT_H_
 
-#include <string>
-#include <pqxx/pqxx>
 #include <graspdb/GraspDemonstration.h>
+#include <pqxx/pqxx>
+#include <sensor_msgs/PointCloud2.h>
+#include <string>
 
 namespace rail
 {
@@ -230,6 +231,37 @@ private:
    * \return The converted PostgreSQL object string.
    */
   std::string toSQL(const Orientation &o) const;
+
+  /*!
+   * \brief Convert a ROS PointCloud2 to a PostgreSQL binary string.
+   *
+   * Converts the given ROS PointCloud2 message to a PostgreSQL binary string for use in SQL queries.
+   *
+   * \param pc The ROS PointCloud2 message to convert to a PostgreSQL binary string.
+   */
+  pqxx::binarystring toBinaryString(const sensor_msgs::PointCloud2 &pc);
+
+  /*!
+   * \brief Extract PointCloud2 values from a binary string.
+   *
+   * Extracts PointCloud2 values from the given PostgreSQL binary string and places them in the given ROS PointCloud2
+   * message.
+   *
+   * \param bs The binary string representation of the serialized PointCloud2.
+   * \param pc The PointCloud2 to populate with values from the binary string.
+   */
+  void extractPointCloud2FromBinaryString(const pqxx::binarystring &bs, sensor_msgs::PointCloud2 &pc) const;
+
+  /*!
+   * \brief Extract PointCloud2 values from a binary string.
+   *
+   * Extracts PointCloud2 values from the given PostgreSQL binary string and places them in a new ROS PointCloud2
+   * message.
+   *
+   * \param bs The binary string representation of the serialized PointCloud2.
+   * \return The PointCloud2 with values from the binary string.
+   */
+  sensor_msgs::PointCloud2 extractPointCloud2FromBinaryString(const pqxx::binarystring &bs) const;
 
   /*!
    * \brief Extract array values from a string array.

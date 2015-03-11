@@ -189,7 +189,7 @@ void Client::addGraspDemonstration(const GraspDemonstration &gd)
   // build the SQL bits we need
   const string &objectName = gd.getObjectName();
   string graspPose = this->toSQL(gd.getGraspPose());
-  pqxx::binarystring pointCloud(gd.getPointCloud(), gd.getPointCloudSize());
+  pqxx::binarystring pointCloud = this->toBinaryString(gd.getPointCloud());
 
   // create and execute the query
   pqxx::work w(*connection_);
@@ -282,7 +282,7 @@ void Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple
 
   // extract the point cloud
   pqxx::binarystring blob(tuple["point_cloud"]);
-  gd.setPointCloud(blob.data(), blob.size());
+  gd.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
 }
 
 GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const
@@ -290,6 +290,20 @@ GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result
   GraspDemonstration gd;
   this->extractGraspDemonstrationFromTuple(tuple, gd);
   return gd;
+}
+
+void Client::extractPointCloud2FromBinaryString(const pqxx::binarystring &bs, sensor_msgs::PointCloud2 &pc) const
+{
+  // deserialize from memory
+  ros::serialization::IStream stream((uint8_t *) bs.data(), bs.size());
+  ros::serialization::Serializer<sensor_msgs::PointCloud2>::read(stream, pc);
+}
+
+sensor_msgs::PointCloud2 Client::extractPointCloud2FromBinaryString(const pqxx::binarystring &bs) const
+{
+  sensor_msgs::PointCloud2 pc;
+  this->extractPointCloud2FromBinaryString(bs, pc);
+  return pc;
 }
 
 void Client::extractArrayFromString(string array, vector<double> &values) const
@@ -337,6 +351,20 @@ time_t Client::extractTimeFromString(const string &str) const
   return mktime(&t);
 }
 
+pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc)
+{
+  // determine the size for the buffer
+  uint32_t size = ros::serialization::serializationLength(pc);
+  uint8_t buffer[size];
+
+  // serilize the message
+  ros::serialization::OStream stream(buffer, size);
+  ros::serialization::serialize(stream, pc);
+
+  // construct a binary string
+  pqxx::binarystring binary(buffer, size);
+  return binary;
+}
 
 std::string Client::toSQL(const Pose &p) const
 {
