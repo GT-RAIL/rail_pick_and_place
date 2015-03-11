@@ -166,6 +166,19 @@ void Client::createTables() const
                                  ");";
   w.exec(grasp_collections_sql);
 
+  // create the models table if it doesn't exist
+  string models_sql = "CREATE TABLE IF NOT EXISTS models (" \
+                        "id SERIAL PRIMARY KEY," \
+                        "object_name VARCHAR NOT NULL," \
+                        "grasp_poses pose[] NOT NULL," \
+                        "grasp_frame_ids VARCHAR[] NOT NULL," \
+                        "successes INTEGER[] NOT NULL," \
+                        "attempts INTEGER[] NOT NULL," \
+                        "point_cloud BYTEA NOT NULL," \
+                        "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
+                      ");";
+  w.exec(grasp_collections_sql);
+
   // commit the changes
   w.commit();
 }
@@ -217,7 +230,7 @@ bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd)
   }
 }
 
-bool Client::loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds)
+bool Client::loadGraspDemonstrationsByObjectName(const string &object_name, vector<GraspDemonstration> &gds)
 {
   // create and execute the query
   pqxx::work w(*connection_);
@@ -239,7 +252,7 @@ bool Client::loadGraspDemonstrationsByObjectName(const std::string &object_name,
   }
 }
 
-bool Client::getUniqueGraspDemonstrationObjectNames(std::vector<std::string> &names)
+bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names)
 {
   // create and execute the query
   pqxx::work w(*connection_);
@@ -311,15 +324,15 @@ sensor_msgs::PointCloud2 Client::extractPointCloud2FromBinaryString(const pqxx::
 void Client::extractArrayFromString(string &array, vector<double> &values) const
 {
   // remove the brackets and spaces
-  array.erase(std::remove(array.begin(), array.end(), '{'), array.end());
-  array.erase(std::remove(array.begin(), array.end(), '}'), array.end());
-  array.erase(std::remove(array.begin(), array.end(), ' '), array.end());
+  array.erase(remove(array.begin(), array.end(), '{'), array.end());
+  array.erase(remove(array.begin(), array.end(), '}'), array.end());
+  array.erase(remove(array.begin(), array.end(), ' '), array.end());
 
   // split on the ','
   stringstream ss(array);
   string str;
   double dbl;
-  while (std::getline(ss, str, ','))
+  while (getline(ss, str, ','))
   {
     // store as the double value
     istringstream i(str);
@@ -368,7 +381,7 @@ pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc)
   return binary;
 }
 
-std::string Client::toSQL(const Pose &p) const
+string Client::toSQL(const Pose &p) const
 {
   // build the SQL
   string sql = "(\"" + p.getFixedFrameID() + "\",\"" + p.getGraspFrameID() + "\",\"" + this->toSQL(p.getPosition())
@@ -376,7 +389,7 @@ std::string Client::toSQL(const Pose &p) const
   return sql;
 }
 
-std::string Client::toSQL(const Position &p) const
+string Client::toSQL(const Position &p) const
 {
   // build the SQL
   stringstream ss;
@@ -384,7 +397,7 @@ std::string Client::toSQL(const Position &p) const
   return ss.str();
 }
 
-std::string Client::toSQL(const Orientation &o) const
+string Client::toSQL(const Orientation &o) const
 {
   // build the SQL
   stringstream ss;
