@@ -14,16 +14,16 @@
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
-GraspDemonstration::GraspDemonstration(const uint32_t id, const string object_name, const Pose grasp_pose,
-    const sensor_msgs::PointCloud2 point_cloud, const time_t created)
+GraspDemonstration::GraspDemonstration(const uint32_t id, const string &object_name, const Pose &grasp_pose,
+    const sensor_msgs::PointCloud2 &point_cloud, const time_t created)
     : object_name_(object_name), grasp_pose_(grasp_pose), point_cloud_(point_cloud)
 {
   id_ = id;
   created_ = created;
 }
 
-GraspDemonstration::GraspDemonstration(const string object_name, const Pose grasp_pose,
-    const sensor_msgs::PointCloud2 point_cloud)
+GraspDemonstration::GraspDemonstration(const string &object_name, const Pose &grasp_pose,
+    const sensor_msgs::PointCloud2 &point_cloud)
     : object_name_(object_name), grasp_pose_(grasp_pose), point_cloud_(point_cloud)
 {
   // default values
@@ -31,16 +31,16 @@ GraspDemonstration::GraspDemonstration(const string object_name, const Pose gras
   created_ = UNSET_TIME;
 }
 
-GraspDemonstration::GraspDemonstration(const string object_name, const string grasp_pose_fixed_frame_id,
-    const string grasp_pose_grasp_frame_id, const geometry_msgs::Pose &grasp_pose,
+GraspDemonstration::GraspDemonstration(const string &object_name, const string &grasp_pose_fixed_frame_id,
+    const string &grasp_pose_grasp_frame_id, const geometry_msgs::Pose &grasp_pose,
     const sensor_msgs::PointCloud2 &point_cloud)
     : object_name_(object_name), grasp_pose_(grasp_pose_fixed_frame_id, grasp_pose_grasp_frame_id, grasp_pose),
       point_cloud_(point_cloud)
 {
 }
 
-GraspDemonstration::GraspDemonstration(const string object_name, const string grasp_pose_fixed_frame_id,
-    const string grasp_pose_grasp_frame_id, const geometry_msgs::Transform &grasp_pose,
+GraspDemonstration::GraspDemonstration(const string &object_name, const string &grasp_pose_fixed_frame_id,
+    const string &grasp_pose_grasp_frame_id, const geometry_msgs::Transform &grasp_pose,
     const sensor_msgs::PointCloud2 &point_cloud)
     : object_name_(object_name), grasp_pose_(grasp_pose_fixed_frame_id, grasp_pose_grasp_frame_id, grasp_pose),
       point_cloud_(point_cloud)
@@ -71,7 +71,7 @@ const string &GraspDemonstration::getObjectName() const
   return object_name_;
 }
 
-void GraspDemonstration::setObjectName(const string object_name)
+void GraspDemonstration::setObjectName(const string &object_name)
 {
   object_name_ = object_name;
 }
@@ -81,7 +81,7 @@ const Pose &GraspDemonstration::getGraspPose() const
   return grasp_pose_;
 }
 
-void GraspDemonstration::setGraspPose(const Pose grasp_pose)
+void GraspDemonstration::setGraspPose(const Pose &grasp_pose)
 {
   grasp_pose_ = grasp_pose;
 }
@@ -91,7 +91,7 @@ const sensor_msgs::PointCloud2 &GraspDemonstration::getPointCloud() const
   return point_cloud_;
 }
 
-void GraspDemonstration::setPointCloud(const sensor_msgs::PointCloud2 point_cloud)
+void GraspDemonstration::setPointCloud(const sensor_msgs::PointCloud2 &point_cloud)
 {
   point_cloud_ = point_cloud;
 }

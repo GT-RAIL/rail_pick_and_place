@@ -44,8 +44,8 @@ public:
    * \param position The position values (defaults are 0).
    * \param orientation The orientation values (defaults are 0).
    */
-  Pose(const std::string fixed_frame_id = "", const std::string grasp_frame_id = "",
-      const Position position = Position(), const Orientation orientation = Orientation());
+  Pose(const std::string &fixed_frame_id = "", const std::string &grasp_frame_id = "",
+      const Position &position = Position(), const Orientation &orientation = Orientation());
 
   /*!
    * \brief Create a new Pose.
@@ -57,7 +57,7 @@ public:
    * \param position The ROS Point message to extract position data from.
    * \param orientation The ROS Quaternion message to extract orientation data from.
    */
-  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Point &position,
+  Pose(const std::string &fixed_frame_id, const std::string &grasp_frame_id, const geometry_msgs::Point &position,
       const geometry_msgs::Quaternion &orientation);
 
   /*!
@@ -69,7 +69,7 @@ public:
    * \param grasp_frame_id The grasp frame identifier.
    * \param position The ROS Pose message to extract position and orientation data from.
    */
-  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Pose &pose);
+  Pose(const std::string &fixed_frame_id, const std::string &grasp_frame_id, const geometry_msgs::Pose &pose);
 
   /*!
    * \brief Create a new Pose.
@@ -80,7 +80,7 @@ public:
    * \param grasp_frame_id The grasp frame identifier.
    * \param position The ROS Transform message to extract position and orientation data from.
    */
-  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Transform &transform);
+  Pose(const std::string &fixed_frame_id, const std::string &grasp_frame_id, const geometry_msgs::Transform &transform);
 
   /*!
    * \brief Create a new Pose.
@@ -92,7 +92,7 @@ public:
    * \param position The ROS Vector3 message to extract position data from.
    * \param orientation The ROS Quaternion message to extract orientation data from.
    */
-  Pose(const std::string fixed_frame_id, const std::string grasp_frame_id, const geometry_msgs::Vector3 &position,
+  Pose(const std::string &fixed_frame_id, const std::string &grasp_frame_id, const geometry_msgs::Vector3 &position,
       const geometry_msgs::Quaternion &orientation);
 
   /*!
@@ -102,7 +102,7 @@ public:
    *
    * \param fixed_frame_id The new frame ID value.
    */
-  void setFixedFrameID(const std::string fixed_frame_id);
+  void setFixedFrameID(const std::string &fixed_frame_id);
 
   /*!
    * \brief Fixed frame ID value accessor.
@@ -120,7 +120,7 @@ public:
    *
    * \param grasp_frame_id The new frame ID value.
    */
-  void setGraspFrameID(const std::string grasp_frame_id);
+  void setGraspFrameID(const std::string &grasp_frame_id);
 
   /*!
    * \brief Grasp frame ID value accessor.
@@ -138,7 +138,7 @@ public:
    *
    * \param position The new position value.
    */
-  void setPosition(const Position position);
+  void setPosition(const Position &position);
 
   /*!
    * \brief Position value accessor.
@@ -156,7 +156,7 @@ public:
    *
    * \param orientation The new orientation value.
    */
-  void setOrientation(const Orientation orientation);
+  void setOrientation(const Orientation &orientation);
 
   /*!
    * \brief Orientation value accessor.
