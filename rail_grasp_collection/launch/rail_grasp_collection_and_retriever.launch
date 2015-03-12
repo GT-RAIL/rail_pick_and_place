@@ -14,7 +14,7 @@
   <!-- General Grasp Collector Params -->
   <arg name="debug" default="false" />
   <arg name="robot_fixed_frame_id" default="base_footprint" />
-  <arg name="eef_frame_id" default="grasp_link" />
+  <arg name="eef_frame_id" default="eef_link" />
 
   <!-- Grasp Collector Action Server Client and Topic Params -->
   <arg name="gripper_action_server" default="/manipulation/gripper" />
