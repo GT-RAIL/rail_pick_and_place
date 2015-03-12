@@ -14,7 +14,6 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <graspdb/GraspDemonstration.h>
-#include <graspdb/Model.h>
 
 #include <pqxx/pqxx>
 #include <string>

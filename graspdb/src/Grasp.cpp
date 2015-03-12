@@ -4,7 +4,8 @@
  *
  * A grasp contains information about a single grasp in the grasp database. This contains information about the grasp
  * pose, end effector frame identifier, number of recorded successful grasps, number of recorded attempted grasps,
- * and associated model ID.  A valid database  entity has an ID and created timestamp.
+ * and associated model ID.  A valid database  entity has an ID and created timestamp. This class is useful for
+ * internal data management within the graspdb library. Convenience functions are added for use with ROS messages.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 11, 2015
@@ -35,7 +36,8 @@ Grasp::Grasp(const Pose &grasp_pose, const uint32_t grasp_model_id, const string
 }
 
 Grasp::Grasp(const rail_pick_and_place_msgs::GraspWithSuccessRate &g, const uint32_t grasp_model_id)
-    : grasp_pose_(g.grasp_pose), eef_frame_id_(g.eef_frame_id)
+    : Entity(g.id, g.created.sec),
+      grasp_pose_(g.grasp_pose), eef_frame_id_(g.eef_frame_id)
 {
   grasp_model_id_ = grasp_model_id;
   successes_ = 0;
@@ -102,9 +104,12 @@ double Grasp::getSuccessRate() const
 rail_pick_and_place_msgs::GraspWithSuccessRate Grasp::toROSGraspWithSuccessRateMessage() const
 {
   rail_pick_and_place_msgs::GraspWithSuccessRate g;
+  g.id = this->getID();
   g.grasp_pose = grasp_pose_.toROSPoseStampedMessage();
   g.eef_frame_id = eef_frame_id_;
   g.successes = successes_;
   g.attempts = attempts_;
+  g.created.nsec = 0;
+  g.created.sec = this->getCreated();
   return g;
 }

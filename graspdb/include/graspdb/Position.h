@@ -28,7 +28,8 @@ namespace graspdb
  * \class Position
  * \brief 3-point position information.
  *
- * A position simply contains an x, y, and z value.
+ * A position simply contains x, y, and z value. This class is useful for internal data management within the graspdb
+ * library. Convenience functions are added for use with ROS messages.
  */
 class Position
 {

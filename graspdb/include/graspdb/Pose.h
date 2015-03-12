@@ -36,7 +36,9 @@ namespace graspdb
  * \class Pose
  * \brief Position and orientation information with respect to a given coordinate frame.
  *
- * A pose contains position and orientation information as well as a coordinate frame identifier.
+ * A pose contains position and orientation information as well as a coordinate frame identifier. This coordinate
+ * frame should be a fixed frame on the robot. This class is useful for internal data management within the graspdb
+ * library. Convenience functions are added for use with ROS messages.
  */
 class Pose
 {

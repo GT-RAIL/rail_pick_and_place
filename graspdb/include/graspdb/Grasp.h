@@ -4,7 +4,8 @@
  *
  * A grasp contains information about a single grasp in the grasp database. This contains information about the grasp
  * pose, end effector frame identifier, number of recorded successful grasps, number of recorded attempted grasps,
- * and associated model ID.  A valid database  entity has an ID and created timestamp.
+ * and associated model ID.  A valid database  entity has an ID and created timestamp. This class is useful for
+ * internal data management within the graspdb library. Convenience functions are added for use with ROS messages.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 11, 2015
@@ -33,7 +34,8 @@ namespace graspdb
  *
  * A grasp contains information about a single grasp in the grasp database. This contains information about the grasp
  * pose, end effector frame identifier, number of recorded successful grasps, number of recorded attempted grasps,
- * and associated model ID.  A valid database  entity has an ID and created timestamp.
+ * and associated model ID.  A valid database  entity has an ID and created timestamp. This class is useful for
+ * internal data management within the graspdb library. Convenience functions are added for use with ROS messages.
  */
 class Grasp : public Entity
 {

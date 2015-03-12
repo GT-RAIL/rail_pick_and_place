@@ -15,6 +15,7 @@
 #include <graspdb/Entity.h>
 #include <graspdb/Grasp.h>
 #include <graspdb/GraspDemonstration.h>
+#include <graspdb/GraspModel.h>
 #include <graspdb/Orientation.h>
 #include <graspdb/Pose.h>
 #include <graspdb/Position.h>

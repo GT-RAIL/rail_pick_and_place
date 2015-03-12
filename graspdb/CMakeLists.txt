@@ -39,6 +39,7 @@ set(GRASPDB_SOURCE
   src/Entity.cpp
   src/Grasp.cpp
   src/GraspDemonstration.cpp
+  src/GraspModel.cpp
   src/Orientation.cpp
   src/Pose.cpp
   src/Position.cpp

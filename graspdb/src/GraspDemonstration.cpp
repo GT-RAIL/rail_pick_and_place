@@ -4,7 +4,8 @@
  *
  * A grasp demonstration contains information about a single grasp demonstration in the grasp database. This
  * contains information about the grasp pose, end effector frame identifier, object name, and serialized segmented
- * point cloud. A valid database entity has an ID and created timestamp.
+ * point cloud. A valid database entity has an ID and created timestamp. This class is useful for internal data
+ * management within the graspdb library. Convenience functions are added for use with ROS messages.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date March 11, 2015
