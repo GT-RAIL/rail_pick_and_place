@@ -189,10 +189,6 @@ public:
    */
   bool addGrasp(Grasp &g) const;
 
-// check API versions
-#if PQXX_VERSION_MAJOR >= 4
-/* Only pqxx 4.0.0 or greater support insert with binary strings */
-
   /*!
    * \brief Add a grasp demonstration to the database.
    *
@@ -213,8 +209,6 @@ public:
    * \param gm The GraspModel with the data to store.
    */
   bool addGraspModel(GraspModel &gm) const;
-
-#endif
 
 private:
   /*!

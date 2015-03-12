@@ -374,6 +374,18 @@ bool Client::addGraspModel(GraspModel &gm) const
   }
 }
 
+#else
+
+bool Client::addGraspModel(GraspModel &gm) const
+{
+  ROS_WARN("libpqxx-%s does not support binary string insertion. Add grasp model ignored.", PQXX_VERSION);
+}
+
+bool Client::addGraspDemonstration(GraspDemonstration &gd) const
+{
+  ROS_WARN("libpqxx-%s does not support binary string insertion. Add grasp demonstration ignored.", PQXX_VERSION);
+}
+
 #endif
 
 GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const
