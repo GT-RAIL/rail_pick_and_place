@@ -103,6 +103,7 @@ bool Client::connect()
       connection_->prepare("pg_type.exists", "SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname=$1)");
 
       // grasp_demonstrations statements
+      connection_->prepare("grasp_demonstrations.delete", "DELETE FROM grasp_demonstrations WHERE id=$1");
       connection_->prepare("grasp_demonstrations.insert",
           "INSERT INTO grasp_demonstrations (object_name, grasp_pose, eef_frame_id, point_cloud) " \
           "VALUES ($1, $2, $3, $4) RETURNING id, created");
@@ -116,6 +117,7 @@ bool Client::connect()
       connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
 
       // grasp_models statements
+      connection_->prepare("grasp_models.delete", "DELETE FROM grasp_models WHERE id=$1");
       connection_->prepare("grasp_models.insert",
           "INSERT INTO grasp_models (object_name, point_cloud) VALUES ($1, $2) RETURNING id, created");
       connection_->prepare("grasp_models.select",
@@ -125,6 +127,7 @@ bool Client::connect()
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
 
       // grasps statements
+      connection_->prepare("grasps.delete", "DELETE FROM grasps WHERE id=$1");
       connection_->prepare("grasps.insert",
           "INSERT INTO grasps (grasp_model_id, grasp_pose, eef_frame_id, successes, attempts) " \
           "VALUES ($1, $2, $3, $4, $5) RETURNING id, created");
@@ -200,7 +203,7 @@ void Client::createTables() const
   // create the grasps table if it doesn't exist
   string grasps_sql = "CREATE TABLE IF NOT EXISTS grasps (" \
                         "id SERIAL PRIMARY KEY," \
-                        "grasp_model_id INTEGER NOT NULL REFERENCES grasp_models(id)," \
+                        "grasp_model_id INTEGER NOT NULL REFERENCES grasp_models(id) ON DELETE CASCADE," \
                         "grasp_pose pose NOT NULL," \
                         "eef_frame_id VARCHAR NOT NULL," \
                         "successes INTEGER NOT NULL," \
@@ -374,14 +377,14 @@ bool Client::getUniqueGraspModelObjectNames(vector<string> &names) const
   return this->getStringArrayFromPrepared("grasp_models.unique", "object_name", names);
 }
 
-bool Client::addGrasp(Grasp &g) const
+bool Client::addGrasp(Grasp &grasp) const
 {
   // build the SQL bits we need
-  uint32_t grasp_model_id = g.getGraspModelID();
-  const string &grasp_pose = this->toSQL(g.getGraspPose());
-  const string &eef_frame_id = g.getEefFrameID();
-  uint32_t succeses = g.getSuccesses();
-  uint32_t attempts = g.getAttempts();
+  uint32_t grasp_model_id = grasp.getGraspModelID();
+  const string &grasp_pose = this->toSQL(grasp.getGraspPose());
+  const string &eef_frame_id = grasp.getEefFrameID();
+  uint32_t succeses = grasp.getSuccesses();
+  uint32_t attempts = grasp.getAttempts();
 
   // create and execute the query
   pqxx::work w(*connection_);
@@ -392,8 +395,8 @@ bool Client::addGrasp(Grasp &g) const
   // check the result
   if (!result.empty())
   {
-    g.setID(result[0]["id"].as<uint32_t>());
-    g.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
+    grasp.setID(result[0]["id"].as<uint32_t>());
+    grasp.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
     return true;
   } else
   {
@@ -499,6 +502,30 @@ bool Client::addGraspDemonstration(GraspDemonstration &gd) const
 }
 
 #endif
+
+void Client::deleteGrasp(uint32_t id) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasps.delete")(id).exec();
+  w.commit();
+}
+
+void Client::deleteGraspDemonstration(uint32_t id) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_demonstrations.delete")(id).exec();
+  w.commit();
+}
+
+void Client::deleteGraspModel(uint32_t id) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_models.delete")(id).exec();
+  w.commit();
+}
 
 GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const
 {

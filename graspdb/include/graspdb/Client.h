@@ -231,8 +231,9 @@ public:
     * the Grasp are set accordingly.
    *
    * \param g The Grasp with the data to store.
+   * \return Returns true if the entity was added to the database.
    */
-  bool addGrasp(Grasp &g) const;
+  bool addGrasp(Grasp &graps) const;
 
   /*!
    * \brief Add a grasp demonstration to the database.
@@ -252,8 +253,36 @@ public:
    * added, the ID and created fields of the GraspModel are set accordingly.
    *
    * \param gm The GraspModel with the data to store.
+   * \return Returns true if the entity was added to the database.
    */
   bool addGraspModel(GraspModel &gm) const;
+
+  /*!
+   * \brief Delete a grasp from the database.
+   *
+   * Deletes the grasp from the database with the given ID.
+   *
+   * \param id The ID of the grasp to delete.
+   */
+  void deleteGrasp(uint32_t id) const;
+
+  /*!
+   * \brief Delete a grasp demonstration from the database.
+   *
+   * Deletes the grasp demonstration from the database with the given ID.
+   *
+   * \param id The ID of the grasp demonstration to delete.
+   */
+  void deleteGraspDemonstration(uint32_t id) const;
+
+  /*!
+   * \brief Delete a grasp model from the database.
+   *
+   * Deletes the grasp model from the database with the given ID. All associated grasps are also deleted.
+   *
+   * \param id The ID of the grasp model to delete.
+   */
+  void deleteGraspModel(uint32_t id) const;
 
 private:
   /*!
