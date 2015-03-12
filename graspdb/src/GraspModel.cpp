@@ -32,7 +32,7 @@ GraspModel::GraspModel(const string &object_name, const vector<Grasp> &grasps,
 
 GraspModel::GraspModel(const rail_pick_and_place_msgs::GraspModel &gm)
     : Entity(gm.id, gm.created.sec),
-      object_name_(gm.object_name), grasps_(gm.grasps.size()), point_cloud_(gm.point_cloud)
+      object_name_(gm.object_name), point_cloud_(gm.point_cloud)
 {
   // copy over the grasp values
   for (size_t i = 0; i < gm.grasps.size(); i++)

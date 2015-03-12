@@ -116,7 +116,14 @@ bool Client::connect()
       connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
 
       // grasp_models statements
+      connection_->prepare("grasp_models.insert",
+          "INSERT INTO grasp_models (object_name, point_cloud) VALUES ($1, $2) RETURNING id, created");
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
+
+      // grasps statements
+      connection_->prepare("grasps.insert",
+          "INSERT INTO grasps (grasp_model_id, grasp_pose, eef_frame_id, successes, attempts) " \
+          "VALUES ($1, $2, $3, $4, $5) RETURNING id, created");
 
       // create the tables in the DB if they do not exist
       this->createTables();
@@ -257,6 +264,33 @@ bool Client::getUniqueGraspModelObjectNames(vector<string> &names) const
   return this->getStringArrayFromPrepared("grasp_models.unique", "object_name", names);
 }
 
+bool Client::addGrasp(Grasp &g) const
+{
+  // build the SQL bits we need
+  uint32_t grasp_model_id = g.getGraspModelID();
+  const string &grasp_pose = this->toSQL(g.getGraspPose());
+  const string &eef_frame_id = g.getEefFrameID();
+  uint32_t succeses = g.getSuccesses();
+  uint32_t attempts = g.getAttempts();
+
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasps.insert")(grasp_model_id)(grasp_pose)(eef_frame_id)(succeses)(attempts)
+      .exec();
+  w.commit();
+
+  // check the result
+  if (!result.empty())
+  {
+    g.setID(result[0]["id"].as<uint32_t>());
+    g.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
+    return true;
+  } else
+  {
+    return false;
+  }
+}
+
 // check API versions
 #if PQXX_VERSION_MAJOR >= 4
 
@@ -288,23 +322,57 @@ bool Client::addGraspDemonstration(GraspDemonstration &gd) const
   }
 }
 
-//TODO void Client::addModel(const Model &m)
-//{
-//  // check API versions
-//#if PQXX_VERSION_MAJOR < 4
-//  ROS_ERROR("libpqxx-%s does not support binarystring insertion. Cannot add model to database.", PQXX_VERSION);
-//#else
-//  // build the SQL bits we need
-//  const string &objectName = m.getObjectName();
-//  string graspPose = this->toSQL(gd.getGraspPose());
-//  pqxx::binarystring pointCloud = this->toBinaryString(gd.getPointCloud());
-//
-//  // create and execute the query
-//  pqxx::work w(*connection_);
-//  w.prepared("grasp_demonstrations.insert")(objectName)(graspPose)(pointCloud).exec();
-//  w.commit();
-//#endif
-//}
+bool Client::addGraspModel(GraspModel &gm) const
+{
+  // build the SQL bits we need
+  const string &object_name = gm.getObjectName();
+  pqxx::binarystring point_cloud = this->toBinaryString(gm.getPointCloud());
+
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_models.insert")(object_name)(point_cloud).exec();
+  w.commit();
+
+  // check the result
+  if (!result.empty())
+  {
+    gm.setID(result[0]["id"].as<uint32_t>());
+    gm.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
+
+    // used to add back the grasps with the correct ID and created fields
+    vector<Grasp> addedGrasps;
+
+    // now add each grasp to the database
+
+    for (size_t i = 0; i < gm.getNumGrasps(); i++)
+    {
+      // set the model ID and attempt to add it
+      Grasp grasp = gm.getGrasp(i);
+      grasp.setGraspModelID(gm.getID());
+      if (this->addGrasp(grasp))
+      {
+        addedGrasps.push_back(grasp);
+      }
+    }
+
+    // clear out the old grasp values
+    while (gm.getNumGrasps() > 0)
+    {
+      gm.removeGrasp(0);
+    }
+
+    // add each new grasp
+    for (size_t i = 0; i < addedGrasps.size(); i++)
+    {
+      gm.addGrasp(addedGrasps[i]);
+    }
+
+    return true;
+  } else
+  {
+    return false;
+  }
+}
 
 #endif
 

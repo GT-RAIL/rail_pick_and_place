@@ -14,6 +14,7 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <graspdb/GraspDemonstration.h>
+#include <graspdb/GraspModel.h>
 
 #include <pqxx/pqxx>
 #include <string>
@@ -178,6 +179,16 @@ public:
    */
   bool getUniqueGraspModelObjectNames(std::vector<std::string> &names) const;
 
+  /*!
+   * \brief Add a grasp to the database.
+   *
+   * Stores the given grasp data to the database. If the entity was successfully  added, the ID and created fields of
+    * the Grasp are set accordingly.
+   *
+   * \param g The Grasp with the data to store.
+   */
+  bool addGrasp(Grasp &g) const;
+
 // check API versions
 #if PQXX_VERSION_MAJOR >= 4
 /* Only pqxx 4.0.0 or greater support insert with binary strings */
@@ -194,13 +205,15 @@ public:
   bool addGraspDemonstration(GraspDemonstration &gd) const;
 
   /*!
-   * \brief Add a model to the database.
+   * \brief Add a grasp model and its associated grasps to the database.
    *
-   * Stores the given model data to the database.
+   * Stores the given grasp model data and its associated grasps to the database. If the entity was successfully
+   * added, the ID and created fields of the GraspModel are set accordingly.
    *
-   * \param gd The Model with the data to store.
+   * \param gm The GraspModel with the data to store.
    */
-  //TODO void addModel(const Model &m);
+  bool addGraspModel(GraspModel &gm) const;
+
 #endif
 
 private:
