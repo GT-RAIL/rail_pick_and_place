@@ -46,24 +46,6 @@ GraspRetriever::GraspRetriever()
 
   if (okay_)
   {
-    graspdb::Grasp grasp1(graspdb::Pose(), 0, "eef one", 1, 2);
-    graspdb::Grasp grasp2(graspdb::Pose(), 0, "eef two", 3, 4);
-
-    graspdb::GraspModel gm;
-    gm.setObjectName("test123");
-    gm.addGrasp(grasp1);
-    gm.addGrasp(grasp2);
-    graspdb_->addGraspModel(gm);
-    cout << gm.getCreated() << endl;
-
-
-    vector<string> tmp;
-    graspdb_->getUniqueGraspModelObjectNames(tmp);
-    for (size_t i = 0; i < tmp.size(); i++)
-    {
-      cout << tmp[i] << endl;
-    }
-
     ROS_INFO("Grasp Retriever Successfully Initialized");
   }
 }

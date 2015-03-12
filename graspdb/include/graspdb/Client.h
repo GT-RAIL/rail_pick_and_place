@@ -160,6 +160,51 @@ public:
   bool loadGraspDemonstrationsByObjectName(const std::string &object_name, std::vector<GraspDemonstration> &gds) const;
 
   /*!
+   * \brief Load a grasp from the database.
+   *
+   * Load the grasp data from the database with the given ID and store it in the given Grasp.
+   *
+   * \param id The ID of the grasp to load.
+   * \param grasp The Grasp object to fill with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGrasp(uint32_t id, Grasp &grasp) const;
+
+  /*!
+   * \brief Load grasps from the database from an associated model ID.
+   *
+   * Load the grasp data from the database with the given grasp model ID and store them in the given vector.
+   *
+   * \param grasp_model_id The object name of the grasp demonstrations to load.
+   * \param grasps The vector to fill with Grasp objects with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGraspByGraspModelID(const uint32_t grasp_model_id, std::vector<Grasp> &grasps) const;
+
+  /*!
+   * \brief Load a grasp model from the database.
+   *
+   * Load the grasp model data from the database with the given ID and store it in the given GraspModel. Associated
+   * grasps are also loaded.
+   *
+   * \param id The ID of the grasp model to load.
+   * \param gm The Grasp model object to fill with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGraspModel(uint32_t id, GraspModel &gm) const;
+
+  /*!
+   * \brief Load grasp models from the database from an object name.
+   *
+   * Load the grasp models data from the database with the given object names and store them in the given vector.
+   *
+   * \param object_name The object name of the grasp model to load.
+   * \param gms The vector to fill with GraspModel objects with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGraspModelsByObjectName(const std::string &object_name, std::vector<GraspModel> &gms) const;
+
+  /*!
    * \brief Load the unique demonstration object names from the database.
    *
    * Load a list of the unique object names from the grasp demonstrations.
@@ -314,9 +359,29 @@ private:
   GraspDemonstration extractGraspDemonstrationFromTuple(const pqxx::result::tuple &tuple) const;
 
   /*!
+   * \brief Extract grasp information from the SQL result tuple.
+   *
+   * Extracts values from the given SQL result tuple and places them in a new Grasp object.
+   *
+   * \param result The SQL result tuple containing the correct values.
+   * \return The Grasp populated with values from the SQL result tuple.
+   */
+  Grasp extractGraspFromTuple(const pqxx::result::tuple &tuple) const;
+
+  /*!
+   * \brief Extract grasp model information from the SQL result tuple.
+   *
+   * Extracts values from the given SQL result tuple and places them in a new GraspModel object.
+   *
+   * \param result The SQL result tuple containing the correct values.
+   * \return The GraspModel populated with values from the SQL result tuple.
+   */
+  GraspModel extractGraspModelFromTuple(const pqxx::result::tuple &tuple) const;
+
+  /*!
    * \brief Extract a time from a timestamp.
    *
-   * Extracts a time value from the given PostgreSQL
+   * Extracts a time value from the given PostgreSQL.
    *
    * \param str The timestamp to parse.
    * \return The time value from the string.

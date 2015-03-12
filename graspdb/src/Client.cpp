@@ -118,12 +118,22 @@ bool Client::connect()
       // grasp_models statements
       connection_->prepare("grasp_models.insert",
           "INSERT INTO grasp_models (object_name, point_cloud) VALUES ($1, $2) RETURNING id, created");
+      connection_->prepare("grasp_models.select",
+          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
+      connection_->prepare("grasp_models.select_object_name",
+          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE object_name=$1");
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
 
       // grasps statements
       connection_->prepare("grasps.insert",
           "INSERT INTO grasps (grasp_model_id, grasp_pose, eef_frame_id, successes, attempts) " \
           "VALUES ($1, $2, $3, $4, $5) RETURNING id, created");
+      connection_->prepare("grasps.select",
+          "SELECT id, grasp_model_id, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, successes, attempts, created FROM grasps WHERE id=$1");
+      connection_->prepare("grasps.select_grasp_model_id",
+          "SELECT id, grasp_model_id, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, successes, attempts, created FROM grasps  WHERE grasp_model_id=$1");
 
       // create the tables in the DB if they do not exist
       this->createTables();
@@ -254,6 +264,106 @@ bool Client::loadGraspDemonstrationsByObjectName(const string &object_name, vect
   }
 }
 
+bool Client::loadGrasp(uint32_t id, Grasp &grasp) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasps.select")(id).exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract the information
+    grasp = this->extractGraspFromTuple(result[0]);
+    return true;
+  }
+}
+
+bool Client::loadGraspByGraspModelID(const uint32_t grasp_model_id, vector<Grasp> &grasps) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasps.select_grasp_model_id")(grasp_model_id).exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      grasps.push_back(this->extractGraspFromTuple(result[i]));
+    }
+    return true;
+  }
+}
+
+bool Client::loadGraspModel(uint32_t id, GraspModel &gm) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_models.select")(id).exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract the information
+    gm = this->extractGraspModelFromTuple(result[0]);
+    // now load the grasps
+    vector<Grasp> grasps;
+    this->loadGraspByGraspModelID(id, grasps);
+    // add each grasp
+    for (size_t i = 0; i < grasps.size(); i++)
+    {
+      gm.addGrasp(grasps[i]);
+    }
+    return true;
+  }
+}
+
+bool Client::loadGraspModelsByObjectName(const string &object_name, vector<GraspModel> &gms) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_models.select_object_name")(object_name).exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      GraspModel gm = this->extractGraspModelFromTuple(result[i]);
+      // now load the grasps
+      vector<Grasp> grasps;
+      this->loadGraspByGraspModelID(gm.getID(), grasps);
+      // add each grasp
+      for (size_t i = 0; i < grasps.size(); i++)
+      {
+        gm.addGrasp(grasps[i]);
+      }
+      gms.push_back(gm);
+    }
+    return true;
+  }
+
+}
+
 bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names) const
 {
   return this->getStringArrayFromPrepared("grasp_demonstrations.unique", "object_name", names);
@@ -379,11 +489,13 @@ bool Client::addGraspModel(GraspModel &gm) const
 bool Client::addGraspModel(GraspModel &gm) const
 {
   ROS_WARN("libpqxx-%s does not support binary string insertion. Add grasp model ignored.", PQXX_VERSION);
+  return false;
 }
 
 bool Client::addGraspDemonstration(GraspDemonstration &gd) const
 {
   ROS_WARN("libpqxx-%s does not support binary string insertion. Add grasp demonstration ignored.", PQXX_VERSION);
+  return false;
 }
 
 #endif
@@ -418,6 +530,53 @@ GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result
   gd.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
 
   return gd;
+}
+
+Grasp Client::extractGraspFromTuple(const pqxx::result::tuple &tuple) const
+{
+  // to return
+  Grasp grasp;
+
+  // create the Position element
+  string position_string = tuple["position"].as<string>();
+  vector<double> position_values = this->extractArrayFromString(position_string);
+  Position pos(position_values[0], position_values[1], position_values[2]);
+
+  // create the Orientation element
+  string orientation_string = tuple["orientation"].as<string>();
+  vector<double> orientation_values = this->extractArrayFromString(orientation_string);
+  Orientation ori(orientation_values[0], orientation_values[1], orientation_values[2], orientation_values[3]);
+
+  // create the Pose element
+  Pose pose(tuple["robot_fixed_frame_id"].as<string>(), pos, ori);
+
+  // set our fields
+  grasp.setID(tuple["id"].as<uint32_t>());
+  grasp.setGraspModelID(tuple["grasp_model_id"].as<uint32_t>());
+  grasp.setGraspPose(pose);
+  grasp.setEefFrameID(tuple["eef_frame_id"].as<string>());
+  grasp.setSuccesses(tuple["successes"].as<uint32_t>());
+  grasp.setAttempts(tuple["attempts"].as<uint32_t>());
+  grasp.setCreated(this->extractTimeFromString(tuple["created"].as<string>()));
+
+  return grasp;
+}
+
+GraspModel Client::extractGraspModelFromTuple(const pqxx::result::tuple &tuple) const
+{
+  // to return
+  GraspModel gm;
+
+  // set our fields
+  gm.setID(tuple["id"].as<uint32_t>());
+  gm.setObjectName(tuple["object_name"].as<string>());
+  gm.setCreated(this->extractTimeFromString(tuple["created"].as<string>()));
+
+  // extract the point cloud
+  pqxx::binarystring blob(tuple["point_cloud"]);
+  gm.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
+
+  return gm;
 }
 
 sensor_msgs::PointCloud2 Client::extractPointCloud2FromBinaryString(const pqxx::binarystring &bs) const
