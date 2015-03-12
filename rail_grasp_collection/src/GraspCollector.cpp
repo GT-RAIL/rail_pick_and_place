@@ -41,11 +41,11 @@ GraspCollector::GraspCollector()
   private_node_.getParam("gripper_action_server", gripper_action_server);
   private_node_.getParam("lift_action_server", lift_action_server);
   private_node_.getParam("verify_grasp_action_server", verify_grasp_action_server);
-  private_node_.getParam("host", host);
-  private_node_.getParam("port", port);
-  private_node_.getParam("user", user);
-  private_node_.getParam("password", password);
-  private_node_.getParam("db", db);
+  node_.getParam("/graspdb/host", host);
+  node_.getParam("/graspdb/port", port);
+  node_.getParam("/graspdb/user", user);
+  node_.getParam("/graspdb/password", password);
+  node_.getParam("/graspdb/db", db);
 
   // set up a connection to the grasp database
   graspdb_ = new graspdb::Client(host, port, user, password, db);

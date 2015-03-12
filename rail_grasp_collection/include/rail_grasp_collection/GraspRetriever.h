@@ -71,8 +71,8 @@ private:
   /* The grasp database connection. */
   graspdb::Client *graspdb_;
 
-  /*! The private ROS node handle. */
-  ros::NodeHandle private_node_;
+  /*! The public and private ROS node handles. */
+  ros::NodeHandle node_, private_node_;
   /*! The main action server. */
   actionlib::SimpleActionServer<rail_pick_and_place_msgs::RetrieveGraspDemonstrationAction> as_;
   /*! The latched publishers for retrieved data. */

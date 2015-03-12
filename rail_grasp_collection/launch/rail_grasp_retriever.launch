@@ -11,13 +11,14 @@
   <arg name="password" default="" />
   <arg name="db" default="graspdb" />
 
+  <!-- Set Global Params -->
+  <param name="/graspdb/host" type="str" value="$(arg host)" />
+  <param name="/graspdb/port" type="int" value="$(arg port)" />
+  <param name="/graspdb/user" type="str" value="$(arg user)" />
+  <param name="/graspdb/password" type="str" value="$(arg password)" />
+  <param name="/graspdb/db" type="str" value="$(arg db)" />
+
   <!-- Main Node -->
   <node name="rail_grasp_retriever" pkg="rail_grasp_collection" type="rail_grasp_retriever" respawn="false"
-        output="screen" >
-    <param name="host" value="$(arg host)" />
-    <param name="port" value="$(arg port)" />
-    <param name="user" value="$(arg user)" />
-    <param name="password" value="$(arg password)" />
-    <param name="db" value="$(arg db)" />
-  </node>
+        output="screen" />
 </launch>

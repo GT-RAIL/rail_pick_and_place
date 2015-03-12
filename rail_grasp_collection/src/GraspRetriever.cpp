@@ -27,11 +27,11 @@ GraspRetriever::GraspRetriever()
   string db("graspdb");
 
   // grab any parameters we need
-  private_node_.getParam("host", host);
-  private_node_.getParam("port", port);
-  private_node_.getParam("user", user);
-  private_node_.getParam("password", password);
-  private_node_.getParam("db", db);
+  node_.getParam("/graspdb/host", host);
+  node_.getParam("/graspdb/port", port);
+  node_.getParam("/graspdb/user", user);
+  node_.getParam("/graspdb/password", password);
+  node_.getParam("/graspdb/db", db);
 
   // set up a connection to the grasp database
   graspdb_ = new graspdb::Client(host, port, user, password, db);

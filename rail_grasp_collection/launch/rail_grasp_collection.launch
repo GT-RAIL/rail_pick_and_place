@@ -22,14 +22,16 @@
   <arg name="verify_grasp_action_server" default="/manipulation/verify_grasp" />
   <arg name="segmented_objects_topic" default="/segmentation/segmented_objects" />
 
+  <!-- Set Global Params -->
+  <param name="/graspdb/host" type="str" value="$(arg host)" />
+  <param name="/graspdb/port" type="int" value="$(arg port)" />
+  <param name="/graspdb/user" type="str" value="$(arg user)" />
+  <param name="/graspdb/password" type="str" value="$(arg password)" />
+  <param name="/graspdb/db" type="str" value="$(arg db)" />
+
   <!-- Main Node -->
   <node name="rail_grasp_collection" pkg="rail_grasp_collection" type="rail_grasp_collection" respawn="false"
         output="screen">
-    <param name="host" value="$(arg host)" />
-    <param name="port" value="$(arg port)" />
-    <param name="user" value="$(arg user)" />
-    <param name="password" value="$(arg password)" />
-    <param name="db" value="$(arg db)" />
     <param name="debug" value="$(arg debug)" />
     <param name="robot_fixed_frame_id" value="$(arg robot_fixed_frame_id)" />
     <param name="eef_frame_id" value="$(arg eef_frame_id)" />
