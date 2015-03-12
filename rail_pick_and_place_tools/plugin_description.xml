@@ -1,16 +1,23 @@
 <library path="lib/librail_pick_and_place_tools">
-  <class name="rail_pick_and_place_tools/GraspCollection"
+  <class name="rail_pick_and_place_tools/Grasp Collection"
          type="rail::pick_and_place::GraspCollectionPanel"
          base_class_type="rviz::Panel">
     <description>
       A panel widget allowing for the collection of grasp demonstrations.
     </description>
   </class>
-  <class name="rail_pick_and_place_tools/ModelGeneration"
+  <class name="rail_pick_and_place_tools/Object Model Generation"
          type="rail::pick_and_place::ModelGenerationPanel"
          base_class_type="rviz::Panel">
     <description>
       A panel widget allowing interactive recognition and grasping model generation.
+    </description>
+  </class>
+  <class name="rail_pick_and_place_tools/Vision"
+         type="rail::pick_and_place::VisionPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget for point cloud segmentation and recognition.
     </description>
   </class>
 </library>

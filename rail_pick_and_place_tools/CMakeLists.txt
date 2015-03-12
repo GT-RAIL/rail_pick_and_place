@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rail_pick_and_place_tools)
 
-find_package(catkin REQUIRED COMPONENTS roscpp actionlib rail_pick_and_place_msgs rail_recognition rviz)
+find_package(catkin REQUIRED COMPONENTS roscpp actionlib rail_pick_and_place_msgs rail_recognition rail_segmentation rviz std_srvs)
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -33,6 +33,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 qt4_wrap_cpp(MOC_FILES
   include/rail_pick_and_place_tools/GraspCollectionPanel.h
   include/rail_pick_and_place_tools/ModelGenerationPanel.h
+  include/rail_pick_and_place_tools/VisionPanel.h
 )
 
 ## Here we specify the list of source files, including the output of
@@ -40,6 +41,7 @@ qt4_wrap_cpp(MOC_FILES
 set(SOURCE_FILES
   src/GraspCollectionPanel.cpp
   src/ModelGenerationPanel.cpp
+  src/VisionPanel.cpp
   ${MOC_FILES}
 )
 

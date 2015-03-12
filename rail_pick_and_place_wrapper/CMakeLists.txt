@@ -33,7 +33,7 @@ target_link_libraries(pick_and_place
 )
 
 add_dependencies(pick_and_place rail_segmentation_generate_messages_cpp)
-add_dependencies(pick_and_place rail_pick_and_place_messages_generate_messages_cpp)
+add_dependencies(pick_and_place rail_pick_and_place_msgs_generate_messages_cpp)
 
 #############
 ## Install ##
