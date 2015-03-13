@@ -14,9 +14,10 @@
 #define RAIL_PICK_AND_PLACE_GRASP_RETRIEVER_H_
 
 #include <actionlib/server/simple_action_server.h>
-#include <graspdb/graspdb.h>
 #include <rail_pick_and_place_msgs/RetrieveGraspDemonstrationAction.h>
 #include <ros/ros.h>
+
+#include <graspdb/graspdb.h>
 
 namespace rail
 {
