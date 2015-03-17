@@ -15,7 +15,9 @@
 
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/server/simple_action_server.h>
+#include <boost/thread/mutex.hpp>
 #include <geometry_msgs/Point32.h>
+#include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/GripperAction.h>
 #include <rail_manipulation_msgs/LiftAction.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
@@ -23,11 +25,7 @@
 #include <rail_pick_and_place_msgs/GraspAndStoreAction.h>
 #include <ros/ros.h>
 #include <sensor_msgs/point_cloud_conversion.h>
-#include <tf2_ros/transform_listener.h>s
-
-#include <graspdb/graspdb.h>
-
-#include <boost/thread/mutex.hpp>
+#include <tf2_ros/transform_listener.h>
 
 namespace rail
 {
@@ -46,8 +44,6 @@ class GraspCollector
 public:
   /*! If a topic should be created to display debug information such as point clouds. */
   static const bool DEFAULT_DEBUG = false;
-  /*! The default cache time for the TF buffer in seconds. */
-  static const int TF_CACHE_TIME = 5;
   /*! The default wait time for action servers in seconds. */
   static const int AC_WAIT_TIME = 10;
 

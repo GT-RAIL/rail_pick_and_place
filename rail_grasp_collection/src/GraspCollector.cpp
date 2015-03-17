@@ -199,7 +199,7 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
       {
         //convert PointCloud2 to PointCloud to access the data easily
         sensor_msgs::PointCloud cloud;
-        sensor_msgs::convertPointCloud2ToPointCloud(object_list_.objects[i].cloud, cloud);
+        sensor_msgs::convertPointCloud2ToPointCloud(object_list_.objects[i].point_cloud, cloud);
         // check each point in the cloud
         for (size_t j = 0; j < cloud.points.size(); j++)
         {
@@ -217,12 +217,12 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     }
     // check if we need to transform the point cloud
     rail_manipulation_msgs::SegmentedObject &object = object_list_.objects[closest];
-    if (object.cloud.header.frame_id != robot_fixed_frame_id_)
+    if (object.point_cloud.header.frame_id != robot_fixed_frame_id_)
     {
       try
       {
-        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.cloud, robot_fixed_frame_id_);
-        object.cloud = transformed_cloud;
+        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_);
+        object.point_cloud = transformed_cloud;
       } catch (tf2::TransformException &ex)
       {
         ROS_WARN("%s", ex.what());
@@ -233,13 +233,13 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     // check if we are going to publish some debug info
     if (debug_)
     {
-      debug_pub_.publish(object.cloud);
+      debug_pub_.publish(object.point_cloud);
     }
 
     // store the data
     feedback.message = "Storing grasp data...";
     as_.publishFeedback(feedback);
-    graspdb::GraspDemonstration gd(goal->object_name, graspdb::Pose(grasp), eef_frame_id_, object.cloud);
+    graspdb::GraspDemonstration gd(goal->object_name, graspdb::Pose(grasp), eef_frame_id_, object.point_cloud);
     if (graspdb_->addGraspDemonstration(gd))
     {
       // store the ID

@@ -160,7 +160,7 @@ bool pickAndPlace::pickupSegmented(rail_pick_and_place_msgs::PickupSegmentedObje
     rail_pick_and_place_msgs::RecognizeAndGrasp::Response pickupRes;
     
     pickupReq.objectIndices.clear();
-    sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[req.objectIndex].cloud, pickupReq.cloud);
+    sensor_msgs::convertPointCloud2ToPointCloud(objectList.objects[req.objectIndex].point_cloud, pickupReq.cloud);
     pickupReq.numAttempts = 6;
     
     recognizeAndGraspClient.call(pickupReq, pickupRes);
