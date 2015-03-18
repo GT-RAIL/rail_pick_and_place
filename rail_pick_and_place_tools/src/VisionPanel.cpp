@@ -18,7 +18,7 @@ VisionPanel::VisionPanel(QWidget *parent) :
     rviz::Panel(parent),
     ac_recognize_all_("rail_segmentation/recognize_all", true)
 {
-  segmentClient = nh_.serviceClient<std_srvs::Empty>("rail_segmentation/segment_auto");
+  segmentClient = nh_.serviceClient<std_srvs::Empty>("rail_segmentation/segment");
 
   //buttons and such
   QGridLayout *grid_layout = new QGridLayout;

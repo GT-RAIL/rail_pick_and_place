@@ -42,8 +42,8 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
   else
     ROS_INFO("Could not connect to grasp database.");
 
-  display_cloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("model_cloud", 1);
-  display_grasps_pub = nh_.advertise<geometry_msgs::PoseArray>("model_grasps", 1);
+  display_cloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("pc_registration/model_cloud", 1);
+  display_grasps_pub = nh_.advertise<geometry_msgs::PoseArray>("pc_registration/model_grasps", 1);
 
   models_list_ = new QListWidget;
   object_list_ = new QComboBox;
@@ -112,7 +112,6 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
   QObject::connect(display_button, SIGNAL(clicked()), this, SLOT(displayModel()));
   QObject::connect(remove_button_, SIGNAL(clicked()), this, SLOT(removeModel()));
 
-
   setLayout(layout);
 }
 
@@ -172,9 +171,7 @@ void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState &state,
     ss << "Added " << new_models << " new models.";
   }
   model_generation_status_->setText(ss.str().c_str());
-  ROS_INFO("Updating model info");
   updateModelInfo();
-  ROS_INFO("Done model info update");
 
   generate_button_->setEnabled(true);
 }
@@ -191,28 +188,30 @@ void ModelGenerationPanel::displayModel()
     ROS_INFO("No item selected.");
     return;
   }
-  int i = models_list_->currentIndex().row() - 1; //-1 is the adjustment for the demonstrations label
+  int i = models_list_->currentIndex().row() - 1; //the 1 is the adjustment for the demonstrations label
   string selected_item = models_list_->currentItem()->text().toStdString();
+  if (selected_item.at(0) == '-')
+  {
+    ROS_INFO("No item selected.");
+    return;
+  }
 
   sensor_msgs::PointCloud2 cloud;
   geometry_msgs::PoseArray poses;
   if (selected_item.at(0) == 'g')
   {
     cloud = current_demonstrations_[i].getPointCloud();
-    cloud.header.frame_id = "model";
-    poses.header.frame_id = "model";
+    cloud.header.frame_id = "base_footprint";
+    poses.header.frame_id = "base_footprint";
     //poses.header = current_demonstrations_[i].getGraspPose().toROSPoseStampedMessage().header;
     poses.poses.push_back(current_demonstrations_[i].getGraspPose().toROSPoseMessage());
   }
   else
   {
-    //TODO: Is this correct?
-    if (!current_demonstrations_.empty())
-      i --; //adjustment for models label
-    cout << "i: " << i << endl;
+    i -= current_demonstrations_.size() + 1; //the 1 is an adjustment for the models label
     cloud = current_models_[i].getPointCloud();
-    cloud.header.frame_id = "model";
-    poses.header.frame_id = "model";
+    cloud.header.frame_id = "base_footprint";
+    poses.header.frame_id = "base_footprint";
     for (unsigned int j = 0; j < current_models_[i].getNumGrasps(); j ++)
     {
       poses.poses.push_back(current_models_[i].getGrasp(j).getGraspPose().toROSPoseMessage());
@@ -232,8 +231,13 @@ void ModelGenerationPanel::removeModel()
   }
 
   string selected_item = models_list_->currentItem()->text().toStdString();
+  if (selected_item.at(0) == '-')
+  {
+    ROS_INFO("No item selected.");
+    return;
+  }
+
   int id = atoi(selected_item.substr(5).c_str());
-  //TODO: Check indices on erase from list (display a model below what's being removed, remove model, try to display the first model again)
   if (selected_item.at(0) == 'g')
   {
     graspdb_->deleteGraspDemonstration(id);
@@ -242,12 +246,9 @@ void ModelGenerationPanel::removeModel()
   else
   {
     graspdb_->deleteGraspModel(id);
-    int index = models_list_->currentIndex().row() - current_demonstrations_.size() - 1;
-    if (!current_demonstrations_.empty())
-      index --;
-    current_models_.erase(current_models_.begin() + index);
+    current_models_.erase(current_models_.begin() + models_list_->currentIndex().row() - current_demonstrations_.size() - 2);
   }
-  models_list_->removeItemWidget(models_list_->currentItem());
+  delete models_list_->currentItem();
 }
 
 void ModelGenerationPanel::updateObjectNames()
@@ -277,11 +278,8 @@ void ModelGenerationPanel::populateModelsList(const QString &text)
   graspdb_->loadGraspDemonstrationsByObjectName(text.toStdString(), current_demonstrations_);
   graspdb_->loadGraspModelsByObjectName(text.toStdString(), current_models_);
 
-  if (!current_demonstrations_.empty())
-  {
-    QListWidgetItem *item = new QListWidgetItem("--Grasp Demonstrations--", models_list_);
-    item->setFlags(Qt::ItemIsEnabled);
-  }
+  QListWidgetItem *grasps_label = new QListWidgetItem("--Grasp Demonstrations--", models_list_);
+  grasps_label->setFlags(Qt::ItemIsEnabled);
   for (unsigned int i = 0; i < current_demonstrations_.size(); i ++)
   {
     stringstream ss;
@@ -291,11 +289,8 @@ void ModelGenerationPanel::populateModelsList(const QString &text)
     item->setCheckState(Qt::Unchecked);
   }
 
-  if (!current_models_.empty())
-  {
-    QListWidgetItem *item = new QListWidgetItem("--Object Models--", models_list_);
-    item->setFlags(Qt::ItemIsEnabled);
-  }
+  QListWidgetItem *models_label = new QListWidgetItem("--Object Models--", models_list_);
+  models_label->setFlags(Qt::ItemIsEnabled);
   for (unsigned int i = 0; i < current_models_.size(); i ++)
   {
     stringstream ss;
@@ -308,31 +303,33 @@ void ModelGenerationPanel::populateModelsList(const QString &text)
 
 void ModelGenerationPanel::updateModelInfo()
 {
-  ROS_INFO("1");
   vector<graspdb::GraspModel> models;
   int max_id = 0;
+  int insert_id = 0;
   if (!current_models_.empty())
+  {
     max_id = current_models_[current_models_.size() - 1].getID();
-  ROS_INFO("2");
+    insert_id = current_models_.size();
+  }
   int row = models_list_->count();
   graspdb_->loadGraspModelsByObjectName(object_list_->currentText().toStdString(), models);
-  ROS_INFO("3");
   for (int i = models.size() - 1; i >= 0; i --)
   {
-    ROS_INFO("3-1");
     if (models[i].getID() <= max_id)
+    {
       break;
-    ROS_INFO("3-2");
+    }
     stringstream ss;
-    ss << "grasp" << models[i].getID();
+    ss << "model" << models[i].getID();
     QListWidgetItem *item = new QListWidgetItem(ss.str().c_str());
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(Qt::Unchecked);
-    ROS_INFO("3-3");
     models_list_->insertItem(row, item);
-    ROS_INFO("3-4");
+    if (i == models.size() - 1)
+      current_models_.push_back(models[i]);
+    else
+      current_models_.insert(current_models_.begin() + insert_id, models[i]);
   }
-  ROS_INFO("4");
 }
 
 // Save all configuration data from this panel to the given

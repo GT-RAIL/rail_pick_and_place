@@ -59,22 +59,14 @@ void PCRegistration::executeGenerateModels(const rail_recognition::GenerateModel
   for (unsigned int i = 0; i < goal->individualGraspModelIds.size(); i ++)
   {
     graspdb::GraspDemonstration demonstration;
-    cout << "Loading model " << goal->individualGraspModelIds[i] << "..." << endl;
     graspdb->loadGraspDemonstration(goal->individualGraspModelIds[i], demonstration);
-    cout << "Model has point cloud of size: " << demonstration.getPointCloud().data.size() << endl;
     models[i].copyFromGraspDemonstrationMsg(demonstration.toROSGraspDemonstrationMessage());
-    cout << "Copied model has point cloud of size: " << models[i].pointCloud->size() << endl;
   }
   for (unsigned int i = 0; i < goal->mergedModelIds.size(); i ++)
   {
     graspdb::GraspModel model;
     graspdb->loadGraspModel(goal->mergedModelIds[i], model);
     models[goal->individualGraspModelIds.size() + i].copyFromGraspModelMsg(model.toROSGraspModelMessage());
-  }
-
-  for (unsigned int i = 0; i < models.size(); i ++)
-  {
-    cout << "Model: " << i << ", size: " << models[i].pointCloud->size() << endl;
   }
 
   feedback.message = "Registering models, please wait...";
@@ -95,11 +87,6 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
   vector<rail_pick_and_place_msgs::GraspWithSuccessRate> baseGraspList;
   vector<rail_pick_and_place_msgs::GraspWithSuccessRate> targetGraspList;
   vector<rail_pick_and_place_msgs::GraspWithSuccessRate> resultGraspList;
-
-  for (unsigned int i = 0; i < models.size(); i ++)
-  {
-    cout << "Model: " << i << ", size: " << models[i].pointCloud->size() << endl;
-  }
 
   //Filter point clouds to remove noise, translate them to the origin for easier visualization
   for (unsigned int i = 0; i < models.size(); i++)
@@ -151,6 +138,7 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
               Model mergedModel;
               mergedModel.pointCloud = resultPtr;
               mergedModel.graspList = resultGraspList;
+              mergedModel.objectName = models[i].objectName;
 
               models.erase(models.begin() + i);
               models.erase(models.begin() + j);
@@ -488,27 +476,11 @@ void PCRegistration::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr
 
 void PCRegistration::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr, vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *grasps)
 {
-  float x = 0;
-  float y = 0;
-  float z = 0;
-
-  //TODO: make sure the calculate centroid is equivalent
   Eigen::Vector4f centroid;
   compute3DCentroid(*cloudPtr, centroid);
-
-  for (unsigned int i = 0; i < cloudPtr->size(); i++)
-  {
-    x += cloudPtr->at(i).x;
-    y += cloudPtr->at(i).y;
-    z += cloudPtr->at(i).z;
-  }
-  x /= cloudPtr->size();
-  y /= cloudPtr->size();
-  z /= cloudPtr->size();
-
-  ROS_INFO("x: (%f, %f)", x, centroid[0]);
-  ROS_INFO("y: (%f, %f)", y, centroid[1]);
-  ROS_INFO("z: (%f, %f)", z, centroid[2]);
+  float x = centroid[0];
+  float y = centroid[1];
+  float z = centroid[2];
 
   //transform point cloud
   Eigen::Matrix4f transform;
