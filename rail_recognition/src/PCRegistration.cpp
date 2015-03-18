@@ -2,11 +2,35 @@
 
 using namespace std;
 using namespace pcl;
-using namespace rail_recognition;
+using namespace rail::pick_and_place;
 
 PCRegistration::PCRegistration() :
     asGenerateModels(n, "pc_registration/generate_models", boost::bind(&PCRegistration::executeGenerateModels, this, _1), false)
 {
+  //setup connection to grasp database
+  // set defaults
+  int port = graspdb::Client::DEFAULT_PORT;
+  string host("127.0.0.1");
+  string user("ros");
+  string password("");
+  string db("graspdb");
+
+  // grab any parameters we need
+  n.getParam("/graspdb/host", host);
+  n.getParam("/graspdb/port", port);
+  n.getParam("/graspdb/user", user);
+  n.getParam("/graspdb/password", password);
+  n.getParam("/graspdb/db", db);
+
+  // connect to the grasp database
+  graspdb = new graspdb::Client(host, port, user, password, db);
+  bool okay = graspdb->connect();
+
+  if (okay)
+    ROS_INFO("Successfully connected to grasp database.");
+  else
+    ROS_INFO("Could not connect to grasp database.");
+
   // private node handle
   ros::NodeHandle private_nh("~");
 
@@ -20,131 +44,46 @@ PCRegistration::PCRegistration() :
   modelCloudPublisher = n.advertise<sensor_msgs::PointCloud2>("pc_registration/model_cloud", 1);
   modelGraspsPublisher = n.advertise<geometry_msgs::PoseArray>("pc_registration/model_grasps", 1);
 
-  readGraspClient = n.serviceClient<rail_recognition::ReadGrasp>("grasp_reader/read_grasps");
-  getModelNumbers = n.advertiseService("pc_registration/get_model_numbers", &PCRegistration::getModelNumbersService, this);
-  displayModel = n.advertiseService("pc_registration/display_model", &PCRegistration::displayModelService, this);
-
   asGenerateModels.start();
-
-  readGraspsAndModels();
-}
-
-void PCRegistration::readGraspsAndModels()
-{
-  ROS_INFO("Reading grasp demonstrations...");
-  bool reading = true;
-  stringstream ss;
-  int count = 1;
-  while (reading)
-  {
-    ss.str("");
-    ss << "grasp_" << count << ".txt";
-    Model readModel;
-    reading = getModel(ss.str(), &readModel);
-    if (reading)
-    {
-      individualGraspModels.push_back(readModel);
-      count++;
-    }
-    else
-      count--;
-  }
-  ROS_INFO("Read %d grasp demonstrations", count);
-
-  ROS_INFO("Reading object models...");
-  reading = true;
-  count = 1;
-  while (reading)
-  {
-    ss.str("");
-    ss << "model_" << count << ".txt";
-    Model readModel;
-    reading = getModel(ss.str(), &readModel);
-    if (reading)
-    {
-      mergedModels.push_back(readModel);
-      count++;
-    }
-    else
-      count--;
-  }
-  ROS_INFO("Read %d models", count);
-}
-
-bool PCRegistration::getModel(string filename, Model *model)
-{
-  rail_recognition::ReadGrasp srv;
-  srv.request.grasp_entry = filename;
-  srv.request.visualize_grasps = false;
-
-  readGraspClient.call(srv);
-
-  if (srv.response.success)
-  {
-    sensor_msgs::convertPointCloudToPointCloud2(srv.response.grasp.pointCloud, baseCloud);
-    PCLPointCloud2 tempCloud;
-    pcl_conversions::toPCL(baseCloud, tempCloud);
-    fromPCLPointCloud2(tempCloud, *model->pointCloud);
-    baseCloudPublisher.publish(baseCloud);
-
-    model->graspList = srv.response.grasp.gripperPoses;
-    model->successesList = srv.response.grasp.successes;
-    model->totalAttemptsList = srv.response.grasp.totalAttempts;
-  }
-
-  return srv.response.success;
 }
 
 void PCRegistration::executeGenerateModels(const rail_recognition::GenerateModelsGoalConstPtr &goal)
 {
   rail_recognition::GenerateModelsResult result;
   rail_recognition::GenerateModelsFeedback feedback;
+
   feedback.message = "Populating model generation graph...";
   asGenerateModels.publishFeedback(feedback);
   vector<Model> models;
   models.resize(goal->individualGraspModelIds.size() + goal->mergedModelIds.size());
   for (unsigned int i = 0; i < goal->individualGraspModelIds.size(); i ++)
   {
-    models[i].copy(individualGraspModels[goal->individualGraspModelIds[i]]);
+    graspdb::GraspDemonstration demonstration;
+    cout << "Loading model " << goal->individualGraspModelIds[i] << "..." << endl;
+    graspdb->loadGraspDemonstration(goal->individualGraspModelIds[i], demonstration);
+    cout << "Model has point cloud of size: " << demonstration.getPointCloud().data.size() << endl;
+    models[i].copyFromGraspDemonstrationMsg(demonstration.toROSGraspDemonstrationMessage());
+    cout << "Copied model has point cloud of size: " << models[i].pointCloud->size() << endl;
   }
   for (unsigned int i = 0; i < goal->mergedModelIds.size(); i ++)
   {
-    models[goal->individualGraspModelIds.size() + i].copy(mergedModels[goal->mergedModelIds[i]]);
+    graspdb::GraspModel model;
+    graspdb->loadGraspModel(goal->mergedModelIds[i], model);
+    models[goal->individualGraspModelIds.size() + i].copyFromGraspModelMsg(model.toROSGraspModelMessage());
   }
+
+  for (unsigned int i = 0; i < models.size(); i ++)
+  {
+    cout << "Model: " << i << ", size: " << models[i].pointCloud->size() << endl;
+  }
+
   feedback.message = "Registering models, please wait...";
   asGenerateModels.publishFeedback(feedback);
   result.newModelsTotal = registerPointCloudsGraph(models, goal->maxModelSize, result.unusedModelIds);
+
   feedback.message = "Model generation complete.";
   asGenerateModels.publishFeedback(feedback);
   asGenerateModels.setSucceeded(result);
-}
-
-bool PCRegistration::getModelNumbersService(rail_recognition::GetModelNumbers::Request &req, rail_recognition::GetModelNumbers::Response &res)
-{
-  res.total_individual_grasps = individualGraspModels.size();
-  res.total_merged_models = mergedModels.size();
-  return true;
-}
-
-bool PCRegistration::displayModelService(rail_recognition::DisplayModel::Request &req, rail_recognition::DisplayModel::Response &res)
-{
-  sensor_msgs::PointCloud2 displayCloud;
-  PCLPointCloud2 tempCloud;
-  if (req.isMergedModel)
-    toPCLPointCloud2(*mergedModels[req.modelId].pointCloud, tempCloud);
-  else
-    toPCLPointCloud2(*individualGraspModels[req.modelId].pointCloud, tempCloud);
-  pcl_conversions::fromPCL(tempCloud, displayCloud);
-  displayCloud.header.frame_id = req.frame;
-  modelCloudPublisher.publish(displayCloud);
-
-  geometry_msgs::PoseArray displayGrasps;
-  displayGrasps.header = displayCloud.header;
-  if (req.isMergedModel)
-    displayGrasps.poses = mergedModels[req.modelId].graspList;
-  else
-    displayGrasps.poses = individualGraspModels[req.modelId].graspList;
-  modelGraspsPublisher.publish(displayGrasps);
 }
 
 int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelSize, vector<int> unusedModelIds)
@@ -153,9 +92,14 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
   PointCloud<PointXYZRGB>::Ptr targetCloudPtr(new PointCloud<PointXYZRGB>);
   PointCloud<PointXYZRGB>::Ptr resultPtr(new PointCloud<PointXYZRGB>);
 
-  vector<geometry_msgs::Pose> baseGraspList;
-  vector<geometry_msgs::Pose> targetGraspList;
-  vector<geometry_msgs::Pose> resultGraspList;
+  vector<rail_pick_and_place_msgs::GraspWithSuccessRate> baseGraspList;
+  vector<rail_pick_and_place_msgs::GraspWithSuccessRate> targetGraspList;
+  vector<rail_pick_and_place_msgs::GraspWithSuccessRate> resultGraspList;
+
+  for (unsigned int i = 0; i < models.size(); i ++)
+  {
+    cout << "Model: " << i << ", size: " << models[i].pointCloud->size() << endl;
+  }
 
   //Filter point clouds to remove noise, translate them to the origin for easier visualization
   for (unsigned int i = 0; i < models.size(); i++)
@@ -183,12 +127,12 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
           {
             if (models[i].graspList.size() + models[j].graspList.size() > maxModelSize)
             {
-              ROS_INFO("Skipping pair %d-%d as a merge would exceed the maximum model size.", i + 1, j + 1);
+              ROS_INFO("Skipping pair %d-%d as a merge would exceed the maximum model size.", i, j);
               continue;
             }
             else
             {
-              ROS_INFO("Checking pair %d-%d", i + 1, j + 1);
+              ROS_INFO("Checking pair %d-%d", i, j);
             }
 
             baseCloudPtr = models[i].pointCloud;
@@ -207,16 +151,6 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
               Model mergedModel;
               mergedModel.pointCloud = resultPtr;
               mergedModel.graspList = resultGraspList;
-
-              vector<int> combinedSuccesses = models[i].successesList;
-              vector<int> combinedTotalAttempts = models[i].totalAttemptsList;
-              for (unsigned int k = 0; k < models[j].successesList.size(); k++)
-              {
-                combinedSuccesses.push_back(models[j].successesList[k]);
-                combinedTotalAttempts.push_back(models[j].totalAttemptsList[k]);
-              }
-              mergedModel.successesList = combinedSuccesses;
-              mergedModel.totalAttemptsList = combinedTotalAttempts;
 
               models.erase(models.begin() + i);
               models.erase(models.begin() + j);
@@ -245,83 +179,35 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
 
   for (unsigned int i = 0; i < models.size(); i++)
   {
-    //save model
-
-    sensor_msgs::PointCloud saveCloud;
-    sensor_msgs::PointCloud2 tempSaveCloud;
-    PCLPointCloud2 tempConvCloud;
-    toPCLPointCloud2(*models[i].pointCloud, tempConvCloud);
-    pcl_conversions::fromPCL(tempConvCloud, tempSaveCloud);
-    sensor_msgs::convertPointCloud2ToPointCloud(tempSaveCloud, saveCloud);
-
-    stringstream ss;
-    ss << outputDirectory << "/model_" << mergedModels.size() + i + 1 << ".txt";
-
-    ofstream myfile;
-    myfile.open(ss.str().c_str());
-
-    myfile << "reference_frame_id: base_footprint" << "\npointCloud:\n\theader:\n\t\tframe_id: base_footprint" << "\n\tpoints: [";
-    for (unsigned int j = 0; j < saveCloud.points.size(); j++)
+    //add new models to database
+    vector<graspdb::Grasp> grasps;
+    grasps.resize(models[i].graspList.size());
+    for (unsigned int j = 0; j < grasps.size(); j++)
     {
-      myfile << "[" << saveCloud.points[j].x << "," << saveCloud.points[j].y << "," << saveCloud.points[j].z << "]";
-      if (j < saveCloud.points.size() - 1)
-        myfile << ",";
+      grasps[j] = graspdb::Grasp(graspdb::Pose(models[i].graspList[j].grasp_pose), graspdb::Entity::UNSET_ID, models[i].graspList[j].eef_frame_id, models[i].graspList[j].successes, models[i].graspList[j].attempts);
     }
-    myfile << "]\n\tchannels:";
-    for (unsigned int j = 0; j < saveCloud.channels.size(); j++)
+    PCLPointCloud2 tempCloud;
+    sensor_msgs::PointCloud2 outCloud;
+    toPCLPointCloud2(*models[i].pointCloud, tempCloud);
+    pcl_conversions::fromPCL(tempCloud, outCloud);
+    graspdb::GraspModel model(models[i].objectName, grasps, outCloud);
+    if (graspdb->addGraspModel(model))
     {
-      myfile << "\n\t\tname: " << saveCloud.channels[j].name << "\n\t\tvalues: [";
-      for (unsigned int k = 0; k < saveCloud.channels[j].values.size(); k++)
-      {
-        uint32_t value = *(uint32_t *) (&saveCloud.channels[j].values[k]);
-        myfile << value;
-        if (k < saveCloud.channels[j].values.size() - 1)
-          myfile << ",";
-      }
-      myfile << "]";
+      ROS_INFO("Added new model (number %d) to the database with id %d", i, model.getID());
     }
-
-    for (unsigned int j = 0; j < models[i].graspList.size(); j++)
+    else
     {
-      ROS_INFO("Writing grasp %d", j);
-      myfile << "\ngripperPose: " << "\n\tposition: [" << models[i].graspList[j].position.x << "," << models[i].graspList[j].position.y << "," << models[i].graspList[j].position.z << "]\n\torientation: [" << models[i].graspList[j].orientation.x << "," << models[i].graspList[j].orientation.y << "," << models[i].graspList[j].orientation.z << "," << models[i].graspList[j].orientation.w << "]";
+      ROS_INFO("Could not insert new model (number %d) into the database.", i);
     }
-
-    myfile << "\nsuccesses: [";
-    for (unsigned int j = 0; j < models[i].successesList.size(); j++)
-    {
-      myfile << models[i].successesList[j];
-      if (j < models[i].successesList.size() - 1)
-        myfile << ",";
-    }
-    myfile << "]";
-
-    myfile << "\ntotalAttempts: [";
-    for (unsigned int j = 0; j < models[i].totalAttemptsList.size(); j++)
-    {
-      myfile << models[i].totalAttemptsList[j];
-      if (j < models[i].totalAttemptsList.size() - 1)
-        myfile << ",";
-    }
-    myfile << "]";
-
-    myfile.close();
-
-    ROS_INFO("Finished writing file model_%d", i);
   }
-
-  for (unsigned int i = 0; i < models.size(); i ++)
-  {
-    mergedModels.push_back(models[i]);
-  }
-
-  ROS_INFO("---------------------------");
-  ROS_INFO("Models saved to %s, move them to the models directory of the rail_pick_and_place_tools package to use them for recognition.", outputDirectory.c_str());
 
   return models.size();
 }
 
-PointCloud<PointXYZRGB>::Ptr PCRegistration::icpRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, vector<geometry_msgs::Pose> baseGrasps, vector<geometry_msgs::Pose> targetGrasps, vector<geometry_msgs::Pose> *resultGrasps)
+PointCloud<PointXYZRGB>::Ptr PCRegistration::icpRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr,
+    vector<rail_pick_and_place_msgs::GraspWithSuccessRate> baseGrasps,
+    vector<rail_pick_and_place_msgs::GraspWithSuccessRate> targetGrasps,
+    vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *resultGrasps)
 {
   IterativeClosestPoint<PointXYZRGB, PointXYZRGB> icp;
   icp.setInputSource(targetCloudPtr);
@@ -354,6 +240,7 @@ PointCloud<PointXYZRGB>::Ptr PCRegistration::icpRegistration(PointCloud<PointXYZ
   tfTransform.setOrigin(tf::Vector3(transform(0, 3), transform(1, 3), transform(2, 3)));
   tfTransform.setRotation(quat);
 
+  //TODO: do this without frames?
   ros::Time now = ros::Time::now();
   tfBroadcaster.sendTransform(tf::StampedTransform(tfTransform, now, "base_cloud_frame", "target_cloud_frame"));
   tfListener.waitForTransform("base_cloud_frame", "target_cloud_frame", now, ros::Duration(5.0));
@@ -361,12 +248,12 @@ PointCloud<PointXYZRGB>::Ptr PCRegistration::icpRegistration(PointCloud<PointXYZ
   {
     geometry_msgs::PoseStamped poseOut;
     geometry_msgs::PoseStamped tempPoseStamped;
-    tempPoseStamped.pose = targetGrasps[i];
+    tempPoseStamped.pose = targetGrasps[i].grasp_pose.pose;
     tempPoseStamped.header.stamp = now;
     tempPoseStamped.header.frame_id = "target_cloud_frame";
 
     tfListener.transformPose("base_cloud_frame", tempPoseStamped, poseOut);
-    targetGrasps[i] = poseOut.pose;
+    targetGrasps[i].grasp_pose.pose = poseOut.pose;
   }
 
   //merge point clouds
@@ -599,11 +486,15 @@ void PCRegistration::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr
   }
 }
 
-void PCRegistration::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr, vector<geometry_msgs::Pose> *grasps)
+void PCRegistration::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr, vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *grasps)
 {
   float x = 0;
   float y = 0;
   float z = 0;
+
+  //TODO: make sure the calculate centroid is equivalent
+  Eigen::Vector4f centroid;
+  compute3DCentroid(*cloudPtr, centroid);
 
   for (unsigned int i = 0; i < cloudPtr->size(); i++)
   {
@@ -614,6 +505,10 @@ void PCRegistration::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cl
   x /= cloudPtr->size();
   y /= cloudPtr->size();
   z /= cloudPtr->size();
+
+  ROS_INFO("x: (%f, %f)", x, centroid[0]);
+  ROS_INFO("y: (%f, %f)", y, centroid[1]);
+  ROS_INFO("z: (%f, %f)", z, centroid[2]);
 
   //transform point cloud
   Eigen::Matrix4f transform;
@@ -626,9 +521,9 @@ void PCRegistration::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cl
   //transform grasps
   for (unsigned int i = 0; i < grasps->size(); i++)
   {
-    (*grasps)[i].position.x -= x;
-    (*grasps)[i].position.y -= y;
-    (*grasps)[i].position.z -= z;
+    grasps->at(i).grasp_pose.pose.position.x -= x;
+    grasps->at(i).grasp_pose.pose.position.y -= y;
+    grasps->at(i).grasp_pose.pose.position.z -= z;
   }
 }
 

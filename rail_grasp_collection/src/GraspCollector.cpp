@@ -193,10 +193,12 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     {
       // find the closest point
       float min = numeric_limits<float>::infinity();
-      geometry_msgs::Vector3 &v = grasp.transform.translation;
+      //geometry_msgs::Vector3 &v = grasp.transform.translation;
       // check each segmented object
       for (size_t i = 0; i < object_list_.objects.size(); i++)
       {
+        geometry_msgs::TransformStamped eef_transform = tf_buffer_.lookupTransform(object_list_.objects[i].point_cloud.header.frame_id, eef_frame_id_, ros::Time(0));
+        geometry_msgs::Vector3 &v = eef_transform.transform.translation;
         //convert PointCloud2 to PointCloud to access the data easily
         sensor_msgs::PointCloud cloud;
         sensor_msgs::convertPointCloud2ToPointCloud(object_list_.objects[i].point_cloud, cloud);
@@ -223,6 +225,7 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
       {
         sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_);
         object.point_cloud = transformed_cloud;
+        object.point_cloud.header.frame_id = robot_fixed_frame_id_;
       } catch (tf2::TransformException &ex)
       {
         ROS_WARN("%s", ex.what());

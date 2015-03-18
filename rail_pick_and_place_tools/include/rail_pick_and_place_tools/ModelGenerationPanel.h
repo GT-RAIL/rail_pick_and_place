@@ -11,11 +11,13 @@
 
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
-#include <rail_recognition/DisplayModel.h>
+#include <graspdb/graspdb.h>
+#include <geometry_msgs/PoseArray.h>
 #include <rail_recognition/GenerateModelsAction.h>
-#include <rail_recognition/GetModelNumbers.h>
 #include <rviz/panel.h>
+#include <sensor_msgs/PointCloud2.h>
 
+#include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
 #include <QListWidget>
@@ -43,6 +45,11 @@ public:
   ModelGenerationPanel(QWidget *parent = 0);
 
   /**
+  * \brief destructor
+  */
+  ~ModelGenerationPanel();
+
+  /**
   * \brief rviz load function, will load option check box states
   * @param config rviz configuration
   */
@@ -56,10 +63,11 @@ public:
 
 protected:
   QLabel *model_generation_status_;
-  QLabel *busy_feedback_;
+  QComboBox *object_list_;
   QListWidget *models_list_;
   QSpinBox *model_size_spinbox_;
   QPushButton *generate_button_;
+  QPushButton *remove_button_;
 
 protected
   Q_SLOTS:
@@ -77,21 +85,40 @@ protected
   void displayModel();
 
   /**
+  * \brief Remove the currently selected individual grasp or object model
+  */
+  void removeModel();
+
+  /**
   * \brief Uncheck any checked items in the models list
   */
   void deselectAll();
 
+  /**
+  * \brief Read all grasps and models for the currently selected object and populate the models_list_
+  * @text the text of the new item displayed in the box
+  */
+  void populateModelsList(const QString &text);
+
 private:
   actionlib::SimpleActionClient <rail_recognition::GenerateModelsAction> ac_generate_models;
 
-  ros::ServiceClient display_model_client_;
-  ros::ServiceClient get_model_numbers_client_;
+  ros::Publisher display_cloud_pub;
+  ros::Publisher display_grasps_pub;
 
   // The ROS node handle.
   ros::NodeHandle nh_;
 
+  graspdb::Client *graspdb_;
+  std::vector<graspdb::GraspDemonstration> current_demonstrations_;
+  std::vector<graspdb::GraspModel> current_models_;
+
+  bool okay_;
+
+  void updateObjectNames();
+
   /**
-  * \brief Read individual grasps and merged models/add new models to the list
+  * \brief Read merged models and add new models to the list
   */
   void updateModelInfo();
 

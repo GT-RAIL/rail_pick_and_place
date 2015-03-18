@@ -17,7 +17,7 @@ namespace pick_and_place
 
 GraspCollectionPanel::GraspCollectionPanel(QWidget *parent) :
     rviz::Panel(parent),
-    ac_grasp_and_store_("grasp_and_store", true)
+    ac_grasp_and_store_("rail_grasp_collection/grasp_and_store", true)
 {
   //grasp collection options
   QHBoxLayout *first_row_layout = new QHBoxLayout;
@@ -75,11 +75,11 @@ void GraspCollectionPanel::doneCb(const actionlib::SimpleClientGoalState &state,
 {
   if (result->success)
   {
-    grasp_and_store_status_->setText("Grasp failed.");
+    grasp_and_store_status_->setText("Grasp data successfully collected.");
   }
   else
   {
-    grasp_and_store_status_->setText("Grasp data successfully collected.");
+    grasp_and_store_status_->setText("Grasp failed.");
   }
 
   grasp_and_store_button_->setEnabled(true);

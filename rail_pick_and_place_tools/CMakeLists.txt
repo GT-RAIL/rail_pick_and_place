@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rail_pick_and_place_tools)
 
-find_package(catkin REQUIRED COMPONENTS roscpp actionlib rail_pick_and_place_msgs rail_recognition rail_segmentation rviz std_srvs)
+find_package(catkin REQUIRED COMPONENTS roscpp actionlib graspdb rail_pick_and_place_msgs rail_recognition rail_segmentation rviz sensor_msgs std_srvs)
 
 ###################################################
 ## Declare things to be passed to other projects ##
