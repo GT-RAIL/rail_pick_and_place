@@ -223,7 +223,8 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     {
       try
       {
-        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_);
+        //sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_);
+        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_, ros::Time(0), object.point_cloud.header.frame_id);
         object.point_cloud = transformed_cloud;
         object.point_cloud.header.frame_id = robot_fixed_frame_id_;
       } catch (tf2::TransformException &ex)
