@@ -48,16 +48,13 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a cpp executable
-add_executable(grasp_reader src/GraspReader.cpp)
 add_executable(pc_registration src/PCRegistration.cpp)
 add_executable(pc_recognition src/PCRecognition.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pc_registration ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
 target_link_libraries(pc_recognition ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
-target_link_libraries(grasp_reader ${catkin_LIBRARIES})
 
-add_dependencies(grasp_reader ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pc_registration ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pc_recognition ${PROJECT_NAME}_generate_messages_cpp)
 
@@ -65,7 +62,7 @@ add_dependencies(pc_recognition ${PROJECT_NAME}_generate_messages_cpp)
 ## Install ##
 #############
 ## Mark executables and/or libraries for installation
-install(TARGETS grasp_reader pc_registration pc_recognition
+install(TARGETS pc_registration pc_recognition
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

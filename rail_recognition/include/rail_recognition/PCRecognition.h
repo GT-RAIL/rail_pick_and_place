@@ -57,31 +57,15 @@ private:
   //ROS publishers, subscribers, and action servers
   ros::NodeHandle n;
 
-  ros::Publisher releasePosePublisher;
-
-  ros::Subscriber objectSubscriber;
-
   actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeObjectAction> asRecognizeObject;
   actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeObjectByNameAction> asRecognizeObjectByName;
   actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeObjectsAction> asRecognizeObjects;
 
   graspdb::Client *graspdb;
 
-  //Point clouds
-  sensor_msgs::PointCloud2 baseCloud;
-  sensor_msgs::PointCloud2 targetCloud;
-  std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> models;
-
-  //Point clouds in
-  rail_manipulation_msgs::SegmentedObjectList objectList;
-
-  //Grasp info
-  std::vector<std::vector<geometry_msgs::Pose> > graspLists;
   float xTrans;
   float yTrans;
   float zTrans;
-  std::vector<std::vector<int> > successesList;
-  std::vector<std::vector<int> > totalAttemptsList;
 
   //tf
   tf::TransformListener tfListener;

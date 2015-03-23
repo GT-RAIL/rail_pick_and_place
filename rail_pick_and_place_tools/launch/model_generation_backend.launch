@@ -38,9 +38,6 @@
     <arg name="segmented_objects_topic" value="$(arg segmented_objects_topic)"/>
   </include>
 
-  <node pkg="rail_recognition" name="grasp_reader" type="grasp_reader" output="screen">
-    <param name="model_dir" type="string" value="$(arg model_dir)" />
-  </node>
   <node pkg="rail_recognition" name="pc_registration" type="pc_registration" output="screen">
     <param name="output_dir" type="string" value="$(arg output_dir)" />
   </node>
