@@ -100,6 +100,8 @@ protected
   */
   void populateModelsList(const QString &text);
 
+  void updateObjectNames();
+
 private:
   actionlib::SimpleActionClient <rail_recognition::GenerateModelsAction> ac_generate_models;
 
@@ -114,8 +116,6 @@ private:
   std::vector<graspdb::GraspModel> current_models_;
 
   bool okay_;
-
-  void updateObjectNames();
 
   /**
   * \brief Read merged models and add new models to the list

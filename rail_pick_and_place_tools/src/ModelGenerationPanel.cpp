@@ -58,9 +58,13 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
   QLabel *object_name_label = new QLabel("Object:");
   object_name_layout->addWidget(object_name_label);
   object_name_layout->addWidget(object_list_);
+  QHBoxLayout *models_layout_header = new QHBoxLayout;
   QLabel *list_label = new QLabel("Model List:");
+  QPushButton *refresh_button = new QPushButton("Refresh");
+  models_layout_header->addWidget(list_label);
+  models_layout_header->addWidget(refresh_button);
   QPushButton *deselect_all_button = new QPushButton("Deselect All");
-  models_layout->addWidget(list_label);
+  models_layout->addLayout(models_layout_header);
   models_layout->addLayout(object_name_layout);
   models_layout->addWidget(models_list_);
   models_layout->addWidget(deselect_all_button);
@@ -107,6 +111,7 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
   layout->addWidget(model_generation_status_);
 
   //connect things
+  QObject::connect(refresh_button, SIGNAL(clicked()), this, SLOT(updateObjectNames()));
   QObject::connect(deselect_all_button, SIGNAL(clicked()), this, SLOT(deselectAll()));
   QObject::connect(generate_button_, SIGNAL(clicked()), this, SLOT(executeRegistration()));
   QObject::connect(display_button, SIGNAL(clicked()), this, SLOT(displayModel()));
