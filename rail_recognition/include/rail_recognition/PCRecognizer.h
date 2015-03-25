@@ -1,21 +1,11 @@
+#ifndef PC_RECOGNIZER_H_
+#define PC_RECOGNIZER_H_
+
 //ROS
-#include <ros/ros.h>
-#include <actionlib/server/simple_action_server.h>
 #include <graspdb/graspdb.h>
 #include <rail_recognition/Model.h>
-#include <rail_manipulation_msgs/RecognizeObjectAction.h>
-#include <rail_manipulation_msgs/RecognizeObjectByNameAction.h>
-#include <rail_manipulation_msgs/RecognizeObjectsAction.h>
-#include <rail_manipulation_msgs/SegmentedObjectList.h>
-#include <rail_recognition/ReadGrasp.h>
-#include <rail_pick_and_place_msgs/RecognizeAndGrasp.h>
-#include <rail_pick_and_place_msgs/GraspRecognized.h>
-#include <rail_recognition/Release.h>
-#include <rail_segmentation/Recognize.h>
-#include <rail_grasping/RequestGrasp.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <sensor_msgs/PointCloud.h>
-#include <std_srvs/Empty.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
@@ -44,25 +34,18 @@ namespace rail
 namespace pick_and_place
 {
 
-class PCRecognition
+class PCRecognizer
 {
 public:
 
 /**
   * Constructor
   */
-  PCRecognition();
+  PCRecognizer();
+
+  bool recognizeObject(rail_manipulation_msgs::SegmentedObject *object, std::vector<graspdb::GraspModel> candidates);
 
 private:
-  //ROS publishers, subscribers, and action servers
-  ros::NodeHandle n;
-
-  actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeObjectAction> asRecognizeObject;
-  actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeObjectByNameAction> asRecognizeObjectByName;
-  actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeObjectsAction> asRecognizeObjects;
-
-  graspdb::Client *graspdb;
-
   float xTrans;
   float yTrans;
   float zTrans;
@@ -70,14 +53,6 @@ private:
   //tf
   tf::TransformListener tfListener;
   tf::TransformBroadcaster tfBroadcaster;
-
-  void executeRecognizeObject(const rail_manipulation_msgs::RecognizeObjectGoalConstPtr &goal);
-
-  void executeRecognizeObjectByName(const rail_manipulation_msgs::RecognizeObjectByNameGoalConstPtr &goal);
-
-  void executeRecognizeObjects(const rail_manipulation_msgs::RecognizeObjectsGoalConstPtr &goal);
-
-  bool recognizeObject(rail_manipulation_msgs::SegmentedObject *object, std::vector<graspdb::GraspModel> candidates);
 
   /**
   * Determine a score for the registration of two point clouds
@@ -159,3 +134,5 @@ private:
 
 } //end namespace pick_and_place
 } //end namespace rail
+
+#endif

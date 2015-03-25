@@ -1,3 +1,6 @@
+#ifndef MODEL_H_
+#define MODEL_H_
+
 #include <geometry_msgs/PoseStamped.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -91,3 +94,5 @@ public:
 
 } //end namespace pick_and_place
 } //end namespace rail
+
+#endif

@@ -1,6 +1,25 @@
 <launch>
   <!-- This launch file starts everything necessary for object recognition. -->
 
-  <node pkg="rail_recognition" name="pc_recognition" type="pc_recognition" output="screen" />
+  <!-- Grasp Database Connection Params -->
+  <arg name="host" default="127.0.0.1" />
+  <arg name="port" default="5432" />
+  <arg name="user" default="ros" />
+  <arg name="password" default="" />
+  <arg name="db" default="graspdb" />
+
+  <!-- Recognition Listener Params -->
+  <arg name="object_topic" default="/rail_segmentation/segmented_objects" />
+
+  <!-- Set Global Params -->
+  <param name="/graspdb/host" type="str" value="$(arg host)" />
+  <param name="/graspdb/port" type="int" value="$(arg port)" />
+  <param name="/graspdb/user" type="str" value="$(arg user)" />
+  <param name="/graspdb/password" type="str" value="$(arg password)" />
+  <param name="/graspdb/db" type="str" value="$(arg db)" />
+
+  <node pkg="rail_recognition" name="object_recognition_listener" type="object_recognition_listener" output="screen">
+    <param name="object_topic" value="$(arg object_topic)" />
+  </node>
 
 </launch>

@@ -1,9 +1,6 @@
 <launch>
   <!-- This launch file starts everything necessary to generate object models from demonstration grasps. -->
 
-  <arg name="model_dir" default="$(find rail_recognition)/models" />
-  <arg name="output_dir" default="$(env HOME)" />
-
   <!-- Grasp Database Connection Params -->
   <arg name="host" default="127.0.0.1" />
   <arg name="port" default="5432" />
@@ -38,8 +35,6 @@
     <arg name="segmented_objects_topic" value="$(arg segmented_objects_topic)"/>
   </include>
 
-  <node pkg="rail_recognition" name="pc_registration" type="pc_registration" output="screen">
-    <param name="output_dir" type="string" value="$(arg output_dir)" />
-  </node>
+  <node pkg="rail_recognition" name="model_generator" type="model_generator" output="screen" />
 
 </launch>

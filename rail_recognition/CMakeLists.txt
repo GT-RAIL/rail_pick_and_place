@@ -48,21 +48,24 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a cpp executable
-add_executable(pc_registration src/PCRegistration.cpp)
-add_executable(pc_recognition src/PCRecognition.cpp)
+add_executable(model_generator src/ModelGenerator.cpp)
+add_executable(object_recognizer src/ObjectRecognizer.cpp src/PCRecognizer.cpp)
+add_executable(object_recognition_listener src/ObjectRecognitionListener.cpp src/PCRecognizer.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(pc_registration ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
-target_link_libraries(pc_recognition ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
+target_link_libraries(model_generator ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
+target_link_libraries(object_recognizer ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
+target_link_libraries(object_recognition_listener ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
 
-add_dependencies(pc_registration ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(pc_recognition ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(model_generator rail_manipulation_msgs_generate_messages_cpp)
+add_dependencies(object_recognizer rail_manipulation_msgs_generate_messages_cpp)
+add_dependencies(object_recognition_listener rail_manipulation_msgs_generate_messages_cpp)
 
 #############
 ## Install ##
 #############
 ## Mark executables and/or libraries for installation
-install(TARGETS pc_registration pc_recognition
+install(TARGETS model_generator object_recognizer
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

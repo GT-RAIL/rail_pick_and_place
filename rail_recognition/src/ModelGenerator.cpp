@@ -1,11 +1,11 @@
-#include <rail_recognition/PCRegistration.h>
+#include <rail_recognition/ModelGenerator.h>
 
 using namespace std;
 using namespace pcl;
 using namespace rail::pick_and_place;
 
-PCRegistration::PCRegistration() :
-    asGenerateModels(n, "pc_registration/generate_models", boost::bind(&PCRegistration::executeGenerateModels, this, _1), false)
+ModelGenerator::ModelGenerator() :
+    asGenerateModels(n, "pc_registration/generate_models", boost::bind(&ModelGenerator::executeGenerateModels, this, _1), false)
 {
   //setup connection to grasp database
   // set defaults
@@ -47,7 +47,7 @@ PCRegistration::PCRegistration() :
   asGenerateModels.start();
 }
 
-void PCRegistration::executeGenerateModels(const rail_recognition::GenerateModelsGoalConstPtr &goal)
+void ModelGenerator::executeGenerateModels(const rail_recognition::GenerateModelsGoalConstPtr &goal)
 {
   rail_recognition::GenerateModelsResult result;
   rail_recognition::GenerateModelsFeedback feedback;
@@ -78,7 +78,7 @@ void PCRegistration::executeGenerateModels(const rail_recognition::GenerateModel
   asGenerateModels.setSucceeded(result);
 }
 
-int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelSize, vector<int> unusedModelIds)
+int ModelGenerator::registerPointCloudsGraph(vector<Model> models, int maxModelSize, vector<int> unusedModelIds)
 {
   PointCloud<PointXYZRGB>::Ptr baseCloudPtr(new PointCloud<PointXYZRGB>);
   PointCloud<PointXYZRGB>::Ptr targetCloudPtr(new PointCloud<PointXYZRGB>);
@@ -192,7 +192,7 @@ int PCRegistration::registerPointCloudsGraph(vector<Model> models, int maxModelS
   return models.size();
 }
 
-PointCloud<PointXYZRGB>::Ptr PCRegistration::icpRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr,
+PointCloud<PointXYZRGB>::Ptr ModelGenerator::icpRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr,
     vector<rail_pick_and_place_msgs::GraspWithSuccessRate> baseGrasps,
     vector<rail_pick_and_place_msgs::GraspWithSuccessRate> targetGrasps,
     vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *resultGrasps)
@@ -265,7 +265,7 @@ PointCloud<PointXYZRGB>::Ptr PCRegistration::icpRegistration(PointCloud<PointXYZ
   return resultPtr;
 }
 
-bool PCRegistration::checkRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+bool ModelGenerator::checkRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   IterativeClosestPoint<PointXYZRGB, PointXYZRGB> icp;
   icp.setInputSource(targetCloudPtr);
@@ -291,7 +291,7 @@ bool PCRegistration::checkRegistration(PointCloud<PointXYZRGB>::Ptr baseCloudPtr
   return result;
 }
 
-float PCRegistration::calculateRegistrationMetricDstError(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+float ModelGenerator::calculateRegistrationMetricDstError(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   float score = 0;
   KdTreeFLANN<PointXYZRGB> searchTree(new KdTreeFLANN<PointXYZRGB>);
@@ -309,7 +309,7 @@ float PCRegistration::calculateRegistrationMetricDstError(PointCloud<PointXYZRGB
   return score;
 }
 
-float PCRegistration::calculateRegistrationMetricOverlap(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, float dstThreshold)
+float ModelGenerator::calculateRegistrationMetricOverlap(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr, float dstThreshold)
 {
   float score = 0;
   float colorError = 0;
@@ -348,7 +348,7 @@ float PCRegistration::calculateRegistrationMetricOverlap(PointCloud<PointXYZRGB>
   return score;
 }
 
-float PCRegistration::calculateRegistrationMetricColorRange(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+float ModelGenerator::calculateRegistrationMetricColorRange(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   float avgr = 0, avgg = 0, avgb = 0;
 
@@ -391,7 +391,7 @@ float PCRegistration::calculateRegistrationMetricColorRange(PointCloud<PointXYZR
   return fabs(avg1 - avg2);
 }
 
-float PCRegistration::calculateRegistrationMetricDistance(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
+float ModelGenerator::calculateRegistrationMetricDistance(PointCloud<PointXYZRGB>::Ptr baseCloudPtr, PointCloud<PointXYZRGB>::Ptr targetCloudPtr)
 {
   float maxDst = 0;
 
@@ -432,7 +432,7 @@ float PCRegistration::calculateRegistrationMetricDistance(PointCloud<PointXYZRGB
   return fabs(maxDst - maxDst2);
 }
 
-void PCRegistration::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, double radius, int numNeighborThreshold)
+void ModelGenerator::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, double radius, int numNeighborThreshold)
 {
   KdTreeFLANN<PointXYZRGB> searchTree(new KdTreeFLANN<PointXYZRGB>);
   searchTree.setInputCloud(cloudPtr);
@@ -458,7 +458,7 @@ void PCRegistration::filterCloudOutliers(PointCloud<PointXYZRGB>::Ptr cloudPtr, 
   }
 }
 
-void PCRegistration::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr, double dstThreshold)
+void ModelGenerator::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr, double dstThreshold)
 {
   KdTreeFLANN<PointXYZRGB> searchTree(new KdTreeFLANN<PointXYZRGB>);
   searchTree.setInputCloud(cloudPtr);
@@ -474,7 +474,7 @@ void PCRegistration::filterRedundentPoints(PointCloud<PointXYZRGB>::Ptr cloudPtr
   }
 }
 
-void PCRegistration::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr, vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *grasps)
+void ModelGenerator::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr, vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *grasps)
 {
   Eigen::Vector4f centroid;
   compute3DCentroid(*cloudPtr, centroid);
@@ -499,13 +499,13 @@ void PCRegistration::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cl
   }
 }
 
-void PCRegistration::publishTest()
+void ModelGenerator::publishTest()
 {
   baseCloudPublisher.publish(baseCloud);
   targetCloudPublisher.publish(targetCloud);
 }
 
-bool PCRegistration::classifyMerge(float overlap, float maxDstDiff, float dstError, float avgColorDiff)
+bool ModelGenerator::classifyMerge(float overlap, float maxDstDiff, float dstError, float avgColorDiff)
 {
   if (overlap <= .795576)
   {
@@ -537,7 +537,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "pc_registration");
 
-  PCRegistration pcr;
+  ModelGenerator pcr;
 
   ros::Rate loop_rate(1);
   while (ros::ok())

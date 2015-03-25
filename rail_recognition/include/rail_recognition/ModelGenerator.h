@@ -36,13 +36,13 @@ namespace rail
 namespace pick_and_place
 {
 
-class PCRegistration
+class ModelGenerator
 {
 public:
   /**
    * Constructor
    */
-  PCRegistration();
+  ModelGenerator();
 
   /**
   * Register all possible point cloud pairs
