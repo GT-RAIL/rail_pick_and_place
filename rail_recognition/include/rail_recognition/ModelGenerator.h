@@ -4,11 +4,8 @@
 #include <geometry_msgs/PoseArray.h>
 #include <graspdb/graspdb.h>
 #include <rail_pick_and_place_msgs/GraspWithSuccessRate.h>
-#include <rail_recognition/DisplayModel.h>
 #include <rail_recognition/GenerateModelsAction.h>
-#include <rail_recognition/GetModelNumbers.h>
 #include <rail_recognition/Model.h>
-#include <rail_recognition/ReadGrasp.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <tf/transform_broadcaster.h>
