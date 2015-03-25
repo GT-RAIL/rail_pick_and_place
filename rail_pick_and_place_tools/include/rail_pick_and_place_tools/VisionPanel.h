@@ -11,7 +11,7 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <std_srvs/Empty.h>
-#include <rail_segmentation/RecognizeAllAction.h>
+#include <rail_manipulation_msgs/RecognizeAllAction.h>
 #include <rviz/panel.h>
 
 #include <QGridLayout>
@@ -71,7 +71,7 @@ protected
 private:
   ros::ServiceClient segmentClient;
 
-  actionlib::SimpleActionClient <rail_segmentation::RecognizeAllAction> ac_recognize_all_;
+  actionlib::SimpleActionClient <rail_manipulation_msgs::RecognizeAllAction> ac_recognize_all_;
 
   // The ROS node handle.
   ros::NodeHandle nh_;
@@ -81,13 +81,13 @@ private:
   * @param state goal state
   * @param result recognize all result
   */
-  void doneCb(const actionlib::SimpleClientGoalState& state, const rail_segmentation::RecognizeAllResultConstPtr& result);
+  void doneCb(const actionlib::SimpleClientGoalState& state, const rail_manipulation_msgs::RecognizeAllResultConstPtr& result);
 
   /**
   * \brief Callback for feedback from the recognition action server
   * @param feedback recognize all feedback
   */
-  void feedbackCb(const rail_segmentation::RecognizeAllFeedbackConstPtr& feedback);
+  void feedbackCb(const rail_manipulation_msgs::RecognizeAllFeedbackConstPtr& feedback);
 
 };
 

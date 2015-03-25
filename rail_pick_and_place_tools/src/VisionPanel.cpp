@@ -16,7 +16,7 @@ namespace pick_and_place
 
 VisionPanel::VisionPanel(QWidget *parent) :
     rviz::Panel(parent),
-    ac_recognize_all_("rail_segmentation/recognize_all", true)
+    ac_recognize_all_("rail_recognition/recognize_all", true)
 {
   segmentClient = nh_.serviceClient<std_srvs::Empty>("rail_segmentation/segment");
 
@@ -66,26 +66,32 @@ void VisionPanel::executeSegment()
 
 void VisionPanel::executeRecognizeAll()
 {
-  rail_segmentation::RecognizeAllGoal recognize_all_goal;
+  rail_manipulation_msgs::RecognizeAllGoal recognize_all_goal;
   ac_recognize_all_.sendGoal(recognize_all_goal, boost::bind(&VisionPanel::doneCb, this, _1, _2),
-      actionlib::SimpleActionClient<rail_segmentation::RecognizeAllAction>::SimpleActiveCallback(),
+      actionlib::SimpleActionClient<rail_manipulation_msgs::RecognizeAllAction>::SimpleActiveCallback(),
       boost::bind(&VisionPanel::feedbackCb, this, _1));
 
   segment_button_->setEnabled(false);
   recognize_all_button_->setEnabled(false);
 }
 
-void VisionPanel::doneCb(const actionlib::SimpleClientGoalState& state, const rail_segmentation::RecognizeAllResultConstPtr& result)
+void VisionPanel::doneCb(const actionlib::SimpleClientGoalState& state, const rail_manipulation_msgs::RecognizeAllResultConstPtr& result)
 {
+  int total_recognized = 0;
+  for (unsigned int i = 0; i < result->successes.size(); i ++)
+  {
+    if (result->successes[i])
+      total_recognized ++;
+  }
   stringstream ss;
-  ss << "Recognized " << result->totalRecognized << " objects.";
+  ss << "Recognized " << total_recognized << " objects.";
   action_status_->setText(ss.str().c_str());
 
   segment_button_->setEnabled(true);
   recognize_all_button_->setEnabled(true);
 }
 
-void VisionPanel::feedbackCb(const rail_segmentation::RecognizeAllFeedbackConstPtr& feedback)
+void VisionPanel::feedbackCb(const rail_manipulation_msgs::RecognizeAllFeedbackConstPtr& feedback)
 {
   action_status_->setText(feedback->message.c_str());
 }
