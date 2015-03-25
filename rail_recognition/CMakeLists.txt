@@ -57,7 +57,7 @@ target_link_libraries(model_generator ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvt
 target_link_libraries(object_recognizer ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
 target_link_libraries(object_recognition_listener ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)
 
-add_dependencies(model_generator rail_manipulation_msgs_generate_messages_cpp)
+add_dependencies(model_generator ${PROJECT_NAME}_generate_messages_cpp rail_manipulation_msgs_generate_messages_cpp)
 add_dependencies(object_recognizer rail_manipulation_msgs_generate_messages_cpp)
 add_dependencies(object_recognition_listener rail_manipulation_msgs_generate_messages_cpp)
 
