@@ -197,7 +197,9 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
       // check each segmented object
       for (size_t i = 0; i < object_list_.objects.size(); i++)
       {
-        geometry_msgs::TransformStamped eef_transform = tf_buffer_.lookupTransform(object_list_.objects[i].point_cloud.header.frame_id, eef_frame_id_, ros::Time(0));
+        geometry_msgs::TransformStamped eef_transform = tf_buffer_.lookupTransform(
+            object_list_.objects[i].point_cloud.header.frame_id, eef_frame_id_, ros::Time(0)
+        );
         geometry_msgs::Vector3 &v = eef_transform.transform.translation;
         //convert PointCloud2 to PointCloud to access the data easily
         sensor_msgs::PointCloud cloud;
@@ -223,8 +225,8 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     {
       try
       {
-        //sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_);
-        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_, ros::Time(0), object.point_cloud.header.frame_id);
+        sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_,
+            ros::Time(0), object.point_cloud.header.frame_id);
         object.point_cloud = transformed_cloud;
         object.point_cloud.header.frame_id = robot_fixed_frame_id_;
       } catch (tf2::TransformException &ex)
