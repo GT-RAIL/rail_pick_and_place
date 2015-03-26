@@ -10,9 +10,10 @@
  * \date March 11, 2015
  */
 
-#ifndef RAIL_GRASPDB_POSE_H_
-#define RAIL_GRASPDB_POSE_H_
+#ifndef RAIL_PICK_AND_PLACE_GRASPDB_POSE_H_
+#define RAIL_PICK_AND_PLACE_GRASPDB_POSE_H_
 
+// ROS
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovariance.h>
@@ -20,10 +21,12 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/TransformStamped.h>
 
-#include <graspdb/Orientation.h>
-#include <graspdb/Position.h>
-
+// C++ Standard Library
 #include <string>
+
+// graspdb
+#include "Orientation.h"
+#include "Position.h"
 
 namespace rail
 {

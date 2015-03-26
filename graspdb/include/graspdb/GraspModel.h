@@ -11,16 +11,19 @@
  * \date March 12, 2015
  */
 
-#ifndef RAIL_GRASPDB_GRASP_MODEL_H_
-#define RAIL_GRASPDB_GRASP_MODEL_H_
+#ifndef RAIL_PICK_AND_PLACE_GRASPDB_GRASP_MODEL_H_
+#define RAIL_PICK_AND_PLACE_GRASPDB_GRASP_MODEL_H_
 
+// ROS
 #include <rail_pick_and_place_msgs/GraspModel.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include <graspdb/Grasp.h>
-
+// C++ Standard Library
 #include <string>
 #include <vector>
+
+// graspdb
+#include "Grasp.h"
 
 namespace rail
 {

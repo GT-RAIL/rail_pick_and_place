@@ -8,16 +8,22 @@
  * \date March 11, 2015
  */
 
-#ifndef RAIL_GRASPDB_CLIENT_H_
-#define RAIL_GRASPDB_CLIENT_H_
+#ifndef RAIL_PICK_AND_PLACE_GRASPDB_CLIENT_H_
+#define RAIL_PICK_AND_PLACE_GRASPDB_CLIENT_H_
 
+// ROS
 #include <sensor_msgs/PointCloud2.h>
 
-#include <graspdb/GraspDemonstration.h>
-#include <graspdb/GraspModel.h>
-
+// PostgreSQL
 #include <pqxx/pqxx>
+
+// C++ Standard Library
 #include <string>
+
+// graspdb
+#include "GraspDemonstration.h"
+#include "GraspModel.h"
+
 
 namespace rail
 {

@@ -8,16 +8,16 @@
  * \date March 3, 2015
  */
 
-#ifndef RAIL_GRASPDB_GRASPDB_H_
-#define RAIL_GRASPDB_GRASPDB_H_
+#ifndef RAIL_PICK_AND_PLACE_GRASPDB_GRASPDB_H_
+#define RAIL_PICK_AND_PLACE_GRASPDB_GRASPDB_H_
 
-#include <graspdb/Client.h>
-#include <graspdb/Entity.h>
-#include <graspdb/Grasp.h>
-#include <graspdb/GraspDemonstration.h>
-#include <graspdb/GraspModel.h>
-#include <graspdb/Orientation.h>
-#include <graspdb/Pose.h>
-#include <graspdb/Position.h>
+#include "Client.h"
+#include "Entity.h"
+#include "Grasp.h"
+#include "GraspDemonstration.h"
+#include "GraspModel.h"
+#include "Orientation.h"
+#include "Pose.h"
+#include "Position.h"
 
 #endif

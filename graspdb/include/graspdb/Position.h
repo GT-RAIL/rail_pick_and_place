@@ -9,12 +9,14 @@
  * \date March 3, 2015
  */
 
-#ifndef RAIL_GRASPDB_POSITION_H_
-#define RAIL_GRASPDB_POSITION_H_
+#ifndef RAIL_PICK_AND_PLACE_GRASPDB_POSITION_H_
+#define RAIL_PICK_AND_PLACE_GRASPDB_POSITION_H_
 
+// ROS
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Vector3.h>
 
+// C++ Standard Library
 #include <string>
 
 namespace rail

@@ -1,11 +1,12 @@
 <package>
   <name>rail_pick_and_place</name>
   <version>0.0.2</version>
-  <description>Pick and Place Functionality for CARL in the RAIL Lab</description>
+  <description>Grasp Training and Pick and Place Methods Developed by the RAIL Lab</description>
 
+  <author email="rctoris@wpi.edu">Russell Toris</author>
   <author email="davidkent@wpi.edu">David Kent</author>
-  <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
   <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
+  <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
 
   <license>BSD</license>
 
@@ -15,11 +16,10 @@
  
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>graspdb</run_depend>
   <run_depend>rail_grasp_collection</run_depend>
-  <run_depend>rail_grasping</run_depend>
   <run_depend>rail_pick_and_place_msgs</run_depend>
   <run_depend>rail_pick_and_place_tools</run_depend>
-  <run_depend>rail_pick_and_place_wrapper</run_depend>
   <run_depend>rail_recognition</run_depend>
 
   <export>

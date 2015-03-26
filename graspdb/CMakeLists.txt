@@ -21,7 +21,9 @@ find_package(catkin REQUIRED
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME} pqxx roscpp roscpp_serialization
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS roscpp roscpp_serialization
+  DEPENDS pqxx
 )
 
 ###########
@@ -63,12 +65,11 @@ target_link_libraries(${PROJECT_NAME}
 
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 ## Copy header files
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/rms
-  FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
+  FILES_MATCHING PATTERN "*.h"
 )

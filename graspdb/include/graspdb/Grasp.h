@@ -11,15 +11,18 @@
  * \date March 11, 2015
  */
 
-#ifndef RAIL_GRASPDB_GRASP_H_
-#define RAIL_GRASPDB_GRASP_H_
+#ifndef RAIL_PICK_AND_PLACE_GRASPDB_GRASP_H_
+#define RAIL_PICK_AND_PLACE_GRASPDB_GRASP_H_
 
+// ROS
 #include <rail_pick_and_place_msgs/GraspWithSuccessRate.h>
 
-#include <graspdb/Entity.h>
-#include <graspdb/Pose.h>
-
+// C++ Standard Library
 #include <string>
+
+// graspdb
+#include "Entity.h"
+#include "Pose.h"
 
 namespace rail
 {

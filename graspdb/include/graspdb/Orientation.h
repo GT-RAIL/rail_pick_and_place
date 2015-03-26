@@ -9,11 +9,13 @@
  * \date March 3, 2015
  */
 
-#ifndef RAIL_GRASPDB_ORIENTATION_H_
-#define RAIL_GRASPDB_ORIENTATION_H_
+#ifndef RAIL_PICK_AND_PLACE_GRASPDB_ORIENTATION_H_
+#define RAIL_PICK_AND_PLACE_GRASPDB_ORIENTATION_H_
 
+// ROS
 #include <geometry_msgs/Quaternion.h>
 
+// C++ Standard Library
 #include <string>
 
 namespace rail

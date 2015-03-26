@@ -12,7 +12,6 @@
 
 using namespace rail::pick_and_place::graspdb;
 
-
 Entity::Entity(const uint32_t id, const time_t created)
 {
   id_ = id;
