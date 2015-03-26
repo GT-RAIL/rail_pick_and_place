@@ -13,7 +13,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <graspdb/graspdb.h>
 #include <geometry_msgs/PoseArray.h>
-#include <rail_recognition/GenerateModelsAction.h>
+#include <rail_pick_and_place_msgs/GenerateModelsAction.h>
 #include <rviz/panel.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -103,7 +103,7 @@ protected
   void updateObjectNames();
 
 private:
-  actionlib::SimpleActionClient <rail_recognition::GenerateModelsAction> ac_generate_models;
+  actionlib::SimpleActionClient <rail_pick_and_place_msgs::GenerateModelsAction> ac_generate_models;
 
   ros::Publisher display_cloud_pub;
   ros::Publisher display_grasps_pub;
@@ -127,13 +127,13 @@ private:
   * @param state goal state
   * @param result registration result
   */
-  void doneCb(const actionlib::SimpleClientGoalState &state, const rail_recognition::GenerateModelsResultConstPtr &result);
+  void doneCb(const actionlib::SimpleClientGoalState &state, const rail_pick_and_place_msgs::GenerateModelsResultConstPtr &result);
 
   /**
   * \brief Callback for feedback from the registration action server
   * @param feedback registration feedback
   */
-  void feedbackCb(const rail_recognition::GenerateModelsFeedbackConstPtr &feedback);
+  void feedbackCb(const rail_pick_and_place_msgs::GenerateModelsFeedbackConstPtr &feedback);
 
 };
 

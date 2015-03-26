@@ -84,7 +84,7 @@ private:
   std::vector<Model> individualGraspModels;
   std::vector<Model> mergedModels;
 
-  void executeGenerateModels(const rail_recognition::GenerateModelsGoalConstPtr &goal);
+  void executeGenerateModels(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal);
 
   /**
    * Run pcl's icp on a base and target point cloud

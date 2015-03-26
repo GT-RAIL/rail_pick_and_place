@@ -138,7 +138,7 @@ void ModelGenerationPanel::deselectAll()
 
 void ModelGenerationPanel::executeRegistration()
 {
-  rail_recognition::GenerateModelsGoal generate_models_goal;
+  rail_pick_and_place_msgs::GenerateModelsGoal generate_models_goal;
   for (unsigned int i = 0; i < models_list_->count(); i++)
   {
     if (models_list_->item(i)->checkState() == Qt::Checked)
@@ -153,13 +153,13 @@ void ModelGenerationPanel::executeRegistration()
   }
   generate_models_goal.maxModelSize = model_size_spinbox_->value();
   ac_generate_models.sendGoal(generate_models_goal, boost::bind(&ModelGenerationPanel::doneCb, this, _1, _2),
-      actionlib::SimpleActionClient<rail_recognition::GenerateModelsAction>::SimpleActiveCallback(),
+      actionlib::SimpleActionClient<rail_pick_and_place_msgs::GenerateModelsAction>::SimpleActiveCallback(),
       boost::bind(&ModelGenerationPanel::feedbackCb, this, _1));
 
   generate_button_->setEnabled(false);
 }
 
-void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState &state, const rail_recognition::GenerateModelsResultConstPtr &result)
+void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState &state, const rail_pick_and_place_msgs::GenerateModelsResultConstPtr &result)
 {
   int new_models = result->newModelsTotal;
   stringstream ss;
@@ -181,7 +181,7 @@ void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState &state,
   generate_button_->setEnabled(true);
 }
 
-void ModelGenerationPanel::feedbackCb(const rail_recognition::GenerateModelsFeedbackConstPtr &feedback)
+void ModelGenerationPanel::feedbackCb(const rail_pick_and_place_msgs::GenerateModelsFeedbackConstPtr &feedback)
 {
   model_generation_status_->setText(feedback->message.c_str());
 }
