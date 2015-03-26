@@ -79,6 +79,8 @@ private:
   void executeRecognize(const rail_manipulation_msgs::RecognizeGoalConstPtr &goal);
 
   void executeRecognizeAll(const rail_manipulation_msgs::RecognizeAllGoalConstPtr &goal);
+
+  bool comparePointClouds(const sensor_msgs::PointCloud2 &cloud1, const sensor_msgs::PointCloud2 &cloud2);
 };
 
 } //end namespace pick_and_place
