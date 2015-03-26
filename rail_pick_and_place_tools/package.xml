@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
   <name>rail_pick_and_place_tools</name>
-  <version>0.0.0</version>
-  <description>Tools for collecting grasps, generating models, etc.</description>
+  <version>0.0.2</version>
+  <description>Tools for Collecting Grasps and Generating Models</description>
 
   <author email="davidkent@wpi.edu">David Kent</author>
   <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
