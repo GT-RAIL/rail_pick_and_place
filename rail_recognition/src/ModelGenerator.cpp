@@ -47,10 +47,10 @@ ModelGenerator::ModelGenerator() :
   asGenerateModels.start();
 }
 
-void ModelGenerator::executeGenerateModels(const rail_recognition::GenerateModelsGoalConstPtr &goal)
+void ModelGenerator::executeGenerateModels(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal)
 {
-  rail_recognition::GenerateModelsResult result;
-  rail_recognition::GenerateModelsFeedback feedback;
+  rail_pick_and_place_msgs::GenerateModelsResult result;
+  rail_pick_and_place_msgs::GenerateModelsFeedback feedback;
 
   feedback.message = "Populating model generation graph...";
   asGenerateModels.publishFeedback(feedback);

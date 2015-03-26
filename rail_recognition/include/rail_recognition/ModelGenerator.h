@@ -3,8 +3,8 @@
 #include <actionlib/server/simple_action_server.h>
 #include <geometry_msgs/PoseArray.h>
 #include <graspdb/graspdb.h>
+#include <rail_pick_and_place_msgs/GenerateModelsAction.h>
 #include <rail_pick_and_place_msgs/GraspWithSuccessRate.h>
-#include <rail_recognition/GenerateModelsAction.h>
 #include <rail_recognition/Model.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/point_cloud_conversion.h>
@@ -67,7 +67,7 @@ private:
   ros::Publisher modelGraspsPublisher;
   ros::Publisher targetCloudPublisher;
 
-  actionlib::SimpleActionServer<rail_recognition::GenerateModelsAction> asGenerateModels;
+  actionlib::SimpleActionServer<rail_pick_and_place_msgs::GenerateModelsAction> asGenerateModels;
 
   graspdb::Client *graspdb;
 

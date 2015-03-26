@@ -33,6 +33,7 @@ add_service_files(FILES
 
 ## Generate actions in the 'action' folder
 add_action_files(FILES
+  GenerateModels.action
   GraspAndStore.action
   RetrieveGraspDemonstration.action
 )
