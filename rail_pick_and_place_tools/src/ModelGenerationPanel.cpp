@@ -83,7 +83,7 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
   model_size_spinbox_->setRange(2, 20);
   model_size_spinbox_->setSingleStep(1);
   model_size_spinbox_->setValue(6);
-  QLabel *model_size_label = new QLabel("Max Model Size:");
+  QLabel *model_size_label = new QLabel("Grasps Per Model:");
   QHBoxLayout *model_size_layout = new QHBoxLayout;
   model_size_layout->addWidget(model_size_label);
   model_size_layout->addWidget(model_size_spinbox_);
