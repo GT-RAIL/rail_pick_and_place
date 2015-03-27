@@ -2,6 +2,9 @@
 Changelog for package rail_pick_and_place_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.1 (2015-03-27)
+------------------
+
 1.0.0 (2015-03-27)
 ------------------
 * Removed unused messages

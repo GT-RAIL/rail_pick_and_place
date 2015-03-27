@@ -2,6 +2,13 @@
 Changelog for package rail_pick_and_place_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.1 (2015-03-27)
+------------------
+* Label change
+* installs all correct files
+* typo in install fix
+* Contributors: David Kent, Russell Toris
+
 1.0.0 (2015-03-27)
 ------------------
 * Moved actions from recognition to msgs

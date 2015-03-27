@@ -2,6 +2,11 @@
 Changelog for package rail_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.1 (2015-03-27)
+------------------
+* Removed some old code
+* Contributors: David Kent
+
 1.0.0 (2015-03-27)
 ------------------
 * object recognition listener now checks if segmentation passes in updated information vs. new object information
