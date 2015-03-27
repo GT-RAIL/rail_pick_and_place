@@ -53,19 +53,9 @@ public:
   */
   int registerPointCloudsGraph(std::vector<Model> models, int maxModelSize, std::vector<int> unusedModelIds);
 
-  /**
-  * Point cloud publishing for ROS visualization
-  */
-  void publishTest();
-
 private:
   //ROS publishers, subscribers, and action servers
   ros::NodeHandle n;
-
-  ros::Publisher baseCloudPublisher;
-  ros::Publisher modelCloudPublisher;
-  ros::Publisher modelGraspsPublisher;
-  ros::Publisher targetCloudPublisher;
 
   actionlib::SimpleActionServer<rail_pick_and_place_msgs::GenerateModelsAction> asGenerateModels;
 

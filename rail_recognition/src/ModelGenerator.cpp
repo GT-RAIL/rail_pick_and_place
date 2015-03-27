@@ -31,19 +31,6 @@ ModelGenerator::ModelGenerator() :
   else
     ROS_INFO("Could not connect to grasp database.");
 
-  // private node handle
-  ros::NodeHandle private_nh("~");
-
-  //set output directory for generated models
-  stringstream ss;
-  ss << getenv("HOME");
-  private_nh.param("output_dir", outputDirectory, ss.str());
-
-  baseCloudPublisher = n.advertise<sensor_msgs::PointCloud2>("pc_registration/base_cloud", 1);
-  targetCloudPublisher = n.advertise<sensor_msgs::PointCloud2>("pc_registration/target_cloud", 1);
-  modelCloudPublisher = n.advertise<sensor_msgs::PointCloud2>("pc_registration/model_cloud", 1);
-  modelGraspsPublisher = n.advertise<geometry_msgs::PoseArray>("pc_registration/model_grasps", 1);
-
   asGenerateModels.start();
 }
 
@@ -499,12 +486,6 @@ void ModelGenerator::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cl
   }
 }
 
-void ModelGenerator::publishTest()
-{
-  baseCloudPublisher.publish(baseCloud);
-  targetCloudPublisher.publish(targetCloud);
-}
-
 bool ModelGenerator::classifyMerge(float overlap, float maxDstDiff, float dstError, float avgColorDiff)
 {
   if (overlap <= .795576)
@@ -539,13 +520,7 @@ int main(int argc, char **argv)
 
   ModelGenerator pcr;
 
-  ros::Rate loop_rate(1);
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    pcr.publishTest();
-    loop_rate.sleep();
-  }
+  ros::spin();
 
   return 0;
 }
