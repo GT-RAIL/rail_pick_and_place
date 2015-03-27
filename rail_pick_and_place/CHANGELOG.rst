@@ -2,6 +2,12 @@
 Changelog for package rail_pick_and_place
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.0 (2015-03-27)
+------------------
+* minor cleanup
+* Moved rviz panels to rail_pick_and_place_tools, added an rviz panel for grasp collection
+* Contributors: David Kent, Russell Toris
+
 0.0.2 (2015-02-18)
 ------------------
 * Updated metapackage
