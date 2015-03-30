@@ -9,7 +9,7 @@
   <arg name="db" default="graspdb" />
 
   <!-- Recognition Listener Params -->
-  <arg name="object_topic" default="/rail_segmentation/segmented_objects" />
+  <arg name="segmented_objects_topic" default="/rail_segmentation/segmented_objects" />
 
   <!-- Set Global Params -->
   <param name="/graspdb/host" type="str" value="$(arg host)" />
@@ -19,7 +19,7 @@
   <param name="/graspdb/db" type="str" value="$(arg db)" />
 
   <node pkg="rail_recognition" name="object_recognition_listener" type="object_recognition_listener" output="screen">
-    <param name="object_topic" value="$(arg object_topic)" />
+    <param name="segmented_objects_topic" value="$(arg segmented_objects_topic)" />
   </node>
 
 </launch>
