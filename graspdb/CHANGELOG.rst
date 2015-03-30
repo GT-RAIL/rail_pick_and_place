@@ -2,6 +2,11 @@
 Changelog for package graspdb
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.2 (2015-03-30)
+------------------
+* fixed typo in include install directory
+* Contributors: Russell Toris
+
 1.0.1 (2015-03-27)
 ------------------
 
