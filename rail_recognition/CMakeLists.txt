@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rail_recognition)
 
-find_package(catkin REQUIRED COMPONENTS roscpp roslib actionlib actionlib_msgs graspdb pcl_conversions pcl_ros rail_manipulation_msgs rail_pick_and_place_msgs rail_segmentation sensor_msgs std_msgs std_srvs)
+find_package(catkin REQUIRED COMPONENTS roscpp roslib actionlib actionlib_msgs graspdb pcl_conversions pcl_ros
+rail_manipulation_msgs rail_pick_and_place_msgs rail_segmentation sensor_msgs std_msgs std_srvs tf2)
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -22,11 +23,15 @@ link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a cpp executable
 add_executable(model_generator src/ModelGenerator.cpp)
-add_executable(object_recognizer src/ObjectRecognizer.cpp src/PCRecognizer.cpp)
+add_executable(object_recognizer
+  nodes/object_recognizer.cpp
+  src/ObjectRecognizer.cpp
+  src/PointCloudRecognizer.cpp
+)
 add_executable(object_recognition_listener
   nodes/object_recognition_listener.cpp
   src/ObjectRecognitionListener.cpp
-  src/PCRecognizer.cpp
+  src/PointCloudRecognizer.cpp
 )
 
 ## Specify libraries to link a library or executable target against

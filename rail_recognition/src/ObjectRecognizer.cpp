@@ -1,13 +1,13 @@
 #include <rail_recognition/ObjectRecognizer.h>
+#include <rail_recognition/PointCloudRecognizer.h>
 
 using namespace std;
-using namespace pcl;
 using namespace rail::pick_and_place;
 
-ObjectRecognizer::ObjectRecognizer() :
-    asRecognizeObject(n, "rail_recognition/recognize_object", boost::bind(&ObjectRecognizer::executeRecognizeObject, this, _1), false)
+ObjectRecognizer::ObjectRecognizer()
+    : private_node_("~"),
+      as_(private_node_, "recognize_object", boost::bind(&ObjectRecognizer::recognizeObjectCallback, this, _1), false)
 {
-  //setup connection to grasp database
   // set defaults
   int port = graspdb::Client::DEFAULT_PORT;
   string host("127.0.0.1");
@@ -16,69 +16,71 @@ ObjectRecognizer::ObjectRecognizer() :
   string db("graspdb");
 
   // grab any parameters we need
-  n.getParam("/graspdb/host", host);
-  n.getParam("/graspdb/port", port);
-  n.getParam("/graspdb/user", user);
-  n.getParam("/graspdb/password", password);
-  n.getParam("/graspdb/db", db);
+  node_.getParam("/graspdb/host", host);
+  node_.getParam("/graspdb/port", port);
+  node_.getParam("/graspdb/user", user);
+  node_.getParam("/graspdb/password", password);
+  node_.getParam("/graspdb/db", db);
 
   // connect to the grasp database
-  graspdb = new graspdb::Client(host, port, user, password, db);
-  bool okay = graspdb->connect();
+  graspdb_ = new graspdb::Client(host, port, user, password, db);
+  okay_ = graspdb_->connect();
 
-  if (okay)
-    ROS_INFO("Successfully connected to grasp database.");
-  else
-    ROS_INFO("Could not connect to grasp database.");
+  // start the action server
+  as_.start();
 
-  xTrans = 0.0;
-  yTrans = 0.0;
-  zTrans = 0.0;
-
-  asRecognizeObject.start();
+  if (okay_)
+  {
+    ROS_INFO("Object Recognizer Successfully Initialized");
+  }
 }
 
-void ObjectRecognizer::executeRecognizeObject(const rail_manipulation_msgs::RecognizeObjectGoalConstPtr &goal)
+ObjectRecognizer::~ObjectRecognizer()
 {
-  //populate candidates
-  vector<graspdb::GraspModel> candidates;
+  // cleanup
+  as_.shutdown();
+  graspdb_->disconnect();
+  delete graspdb_;
+}
+
+bool ObjectRecognizer::okay() const
+{
+  return okay_;
+}
+
+void ObjectRecognizer::recognizeObjectCallback(const rail_manipulation_msgs::RecognizeObjectGoalConstPtr &goal)
+{
+  ROS_INFO("Recognize Object Request Received.");
+
+  rail_manipulation_msgs::RecognizeObjectFeedback feedback;
+  feedback.message = "Loading candidate models...";
+  as_.publishFeedback(feedback);
+
+  // populate candidates based on the name if it exists
+  vector <graspdb::GraspModel> candidates;
   if (goal->name.size() > 0)
   {
-    graspdb->loadGraspModelsByObjectName(goal->name, candidates);
+    graspdb_->loadGraspModelsByObjectName(goal->name, candidates);
   }
   else
   {
-    vector<string> names;
-    graspdb->getUniqueGraspModelObjectNames(names);
-    for (unsigned int i = 0; i < names.size(); i ++)
-    {
-      vector<graspdb::GraspModel> tempCandidates;
-      graspdb->loadGraspModelsByObjectName(names[i], tempCandidates);
-      candidates.insert(candidates.end(), tempCandidates.begin(), tempCandidates.end());
-    }
+    graspdb_->loadGraspModels(candidates);
   }
 
-  //perform recognition
+  // copy the information to the result
   rail_manipulation_msgs::RecognizeObjectResult result;
   result.object = goal->object;
-  if (!recognizer.recognizeObject(&result.object, candidates))
+
+  // perform recognition
+  feedback.message = "Running recognition...";
+  as_.publishFeedback(feedback);
+  PointCloudRecognizer recognizer;
+  if (!recognizer.recognizeObject(result.object, candidates))
   {
-    ROS_INFO("Object could not be recognized.");
+    as_.setSucceeded(result, "Object could not be recognized.");
   }
   else
   {
-    ROS_INFO("Object successfully recognized!");
+    as_.setSucceeded(result, "Object successfully recognized.");
   }
-  asRecognizeObject.setSucceeded(result);
-}
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "object_recognezer");
-
-  ObjectRecognizer o;
-
-  ros::spin();
-
-  return 0;
 }
