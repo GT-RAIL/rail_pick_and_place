@@ -364,7 +364,6 @@ bool Client::loadGraspModelsByObjectName(const string &object_name, vector<Grasp
     }
     return true;
   }
-
 }
 
 bool Client::getUniqueGraspDemonstrationObjectNames(vector<string> &names) const

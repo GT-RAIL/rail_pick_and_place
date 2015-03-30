@@ -23,7 +23,11 @@ link_directories(${catkin_LIBRARY_DIRS})
 ## Declare a cpp executable
 add_executable(model_generator src/ModelGenerator.cpp)
 add_executable(object_recognizer src/ObjectRecognizer.cpp src/PCRecognizer.cpp)
-add_executable(object_recognition_listener src/ObjectRecognitionListener.cpp src/PCRecognizer.cpp)
+add_executable(object_recognition_listener
+  nodes/object_recognition_listener.cpp
+  src/ObjectRecognitionListener.cpp
+  src/PCRecognizer.cpp
+)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(model_generator ${catkin_LIBRARIES} ${PCL_LIBRARIES} libvtkCommon.so libvtkFiltering.so libvtkRendering.so libvtkGraphics.so)

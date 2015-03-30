@@ -3,38 +3,8 @@
 
 //ROS
 #include <ros/ros.h>
-#include <actionlib/server/simple_action_server.h>
-#include <boost/thread/recursive_mutex.hpp>
 #include <graspdb/graspdb.h>
-#include <rail_recognition/Model.h>
-#include <rail_recognition/PCRecognizer.h>
-#include <rail_manipulation_msgs/RecognizeAction.h>
-#include <rail_manipulation_msgs/RecognizeAllAction.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
-#include <sensor_msgs/point_cloud_conversion.h>
-#include <sensor_msgs/PointCloud.h>
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
-
-//C++
-#include <boost/thread/thread.hpp>
-#include <stdlib.h>
-
-//PCL
-#include <pcl/io/pcd_io.h>
-#include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/registration/icp.h>
-#include <pcl_conversions/pcl_conversions.h>
-
-//Point Cloud Filtering Constants
-#define RADIUS .01
-#define NUM_NEIGHBORS 23
-#define DST_THRESHOLD .00075
-
-//Recognition Constants
-#define ALPHA .5
 
 namespace rail
 {
@@ -45,45 +15,47 @@ class ObjectRecognitionListener
 {
 public:
 
-/**
-  * Constructor
-  */
   ObjectRecognitionListener();
 
+  /*!
+   * \brief Cleans up a ObjectRecognitionListener.
+   *
+   * Cleans up any connections used by the ObjectRecognitionListener.
+   */
+  virtual ~ObjectRecognitionListener();
+
+  /*!
+   * \brief A check for a valid ObjectRecognitionListener.
+   *
+   * This function will return true if the appropriate connections were created successfully during initialization.
+   *
+   * \return True if the appropriate connections were created successfully during initialization.
+   */
+  bool okay() const;
+
 private:
-  //ROS publishers, subscribers, and action servers
-  ros::NodeHandle n;
+  void segmentedObjectsCallback(const rail_manipulation_msgs::SegmentedObjectList &msg);
 
-  ros::Subscriber segmentedObjectsSubscriber;
-  ros::Publisher recognizedObjectsPublisher;
+  bool comparePointClouds(const sensor_msgs::PointCloud2 &pc1, const sensor_msgs::PointCloud2 &pc2) const;
 
-  actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeAction> asRecognize;
-  actionlib::SimpleActionServer<rail_manipulation_msgs::RecognizeAllAction> asRecognizeAll;
+  void recognize();
 
-  graspdb::Client *graspdb;
-  PCRecognizer recognizer;
-  rail_manipulation_msgs::SegmentedObjectList objectList;
+  /*! The okay check flag. */
+  bool okay_;
+  /* The grasp database connection. */
+  graspdb::Client *graspdb_;
 
-  float xTrans;
-  float yTrans;
-  float zTrans;
-
-  boost::recursive_mutex api_mutex;
-
-  //tf
-  tf::TransformListener tfListener;
-  tf::TransformBroadcaster tfBroadcaster;
-
-  void objectsCallback(const rail_manipulation_msgs::SegmentedObjectList& msg);
-
-  void executeRecognize(const rail_manipulation_msgs::RecognizeGoalConstPtr &goal);
-
-  void executeRecognizeAll(const rail_manipulation_msgs::RecognizeAllGoalConstPtr &goal);
-
-  bool comparePointClouds(const sensor_msgs::PointCloud2 &cloud1, const sensor_msgs::PointCloud2 &cloud2);
+  /*! The public and private ROS node handles. */
+  ros::NodeHandle node_, private_node_;
+  /*! The listener for the segmented objects. */
+  ros::Subscriber segmented_objects_sub_;
+  /*! The recognized objects publisher. */
+  ros::Publisher recognized_objects_pub_;
+  /*! The most recent segmented objects. */
+  rail_manipulation_msgs::SegmentedObjectList object_list_;
 };
 
-} //end namespace pick_and_place
-} //end namespace rail
+}
+}
 
 #endif
