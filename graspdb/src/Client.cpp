@@ -110,6 +110,9 @@ bool Client::connect()
       connection_->prepare("grasp_demonstrations.select",
           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
+      connection_->prepare("grasp_demonstrations.select_all",
+          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations");
       connection_->prepare("grasp_demonstrations.select_object_name",
           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created " \
@@ -122,6 +125,7 @@ bool Client::connect()
           "INSERT INTO grasp_models (object_name, point_cloud) VALUES ($1, $2) RETURNING id, created");
       connection_->prepare("grasp_models.select",
           "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
+      connection_->prepare("grasp_models.select_all", "SELECT id, object_name, point_cloud, created FROM grasp_models");
       connection_->prepare("grasp_models.select_object_name",
           "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE object_name=$1");
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
@@ -245,6 +249,28 @@ bool Client::loadGraspDemonstration(uint32_t id, GraspDemonstration &gd) const
   }
 }
 
+bool Client::loadGraspDemonstrations(vector<GraspDemonstration> &gds) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_demonstrations.select_all").exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      gds.push_back(this->extractGraspDemonstrationFromTuple(result[i]));
+    }
+    return true;
+  }
+}
+
 bool Client::loadGraspDemonstrationsByObjectName(const string &object_name, vector<GraspDemonstration> &gds) const
 {
   // create and execute the query
@@ -330,6 +356,37 @@ bool Client::loadGraspModel(uint32_t id, GraspModel &gm) const
     for (size_t i = 0; i < grasps.size(); i++)
     {
       gm.addGrasp(grasps[i]);
+    }
+    return true;
+  }
+}
+
+bool Client::loadGraspModels(vector<GraspModel> &gms) const
+{
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasp_models.select_all").exec();
+  w.commit();
+
+  // check the result
+  if (result.empty())
+  {
+    return false;
+  } else
+  {
+    // extract each result
+    for (size_t i = 0; i < result.size(); i++)
+    {
+      GraspModel gm = this->extractGraspModelFromTuple(result[i]);
+      // now load the grasps
+      vector<Grasp> grasps;
+      this->loadGraspByGraspModelID(gm.getID(), grasps);
+      // add each grasp
+      for (size_t i = 0; i < grasps.size(); i++)
+      {
+        gm.addGrasp(grasps[i]);
+      }
+      gms.push_back(gm);
     }
     return true;
   }

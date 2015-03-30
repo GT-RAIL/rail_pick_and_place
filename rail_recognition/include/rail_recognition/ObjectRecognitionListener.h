@@ -38,8 +38,6 @@ private:
 
   bool comparePointClouds(const sensor_msgs::PointCloud2 &pc1, const sensor_msgs::PointCloud2 &pc2) const;
 
-  void recognize();
-
   /*! The okay check flag. */
   bool okay_;
   /* The grasp database connection. */

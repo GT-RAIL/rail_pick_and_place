@@ -54,7 +54,6 @@ void ObjectRecognitionListener::segmentedObjectsCallback(const rail_manipulation
 {
   ROS_INFO("Received %li segmented objects.", msg.objects.size());
 
-
   // check against the old list to prevent throwing out data
   rail_manipulation_msgs::SegmentedObjectList new_list;
   for (size_t i = 0; i < msg.objects.size(); i++)
@@ -86,7 +85,21 @@ void ObjectRecognitionListener::segmentedObjectsCallback(const rail_manipulation
 
   // run recognition
   ROS_INFO("Running recognition...");
-  this->recognize();
+  // populate candidates
+  vector<graspdb::GraspModel> candidates;
+  graspdb_->loadGraspModels(candidates);
+  // go through the current list
+  PCRecognizer recognizer;
+  for (size_t i = 0; i < object_list_.objects.size(); i++)
+  {
+    // check if it is already recognized
+    rail_manipulation_msgs::SegmentedObject &object = object_list_.objects[i];
+    if (!object.recognized)
+    {
+      // perform recognition
+      recognizer.recognizeObject(&object, candidates);
+    }
+  }
 
   // republish the new list
   recognized_objects_pub_.publish(object_list_);
@@ -114,34 +127,4 @@ bool ObjectRecognitionListener::comparePointClouds(const sensor_msgs::PointCloud
 
   // all checks passed
   return true;
-}
-
-void ObjectRecognitionListener::recognize()
-{
-  // populate candidates
-  vector<graspdb::GraspModel> candidates;
-  vector<string> names;
-  graspdb_->getUniqueGraspModelObjectNames(names);
-  // grab grasp models by name
-  for (size_t i = 0; i < names.size(); i++)
-  {
-    // load models for the current name
-    vector<graspdb::GraspModel> tmp;
-    graspdb_->loadGraspModelsByObjectName(names[i], tmp);
-    // add it to the global list
-    candidates.insert(candidates.end(), tmp.begin(), tmp.end());
-  }
-
-  // go through the current list
-  PCRecognizer recognizer;
-  for (size_t i = 0; i < object_list_.objects.size(); i++)
-  {
-    // check if it is already recognized
-    rail_manipulation_msgs::SegmentedObject &object = object_list_.objects[i];
-    if (!object.recognized)
-    {
-      // perform recognition
-      recognizer.recognizeObject(&object, candidates);
-    }
-  }
 }

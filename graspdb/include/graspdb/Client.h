@@ -154,6 +154,16 @@ public:
   bool loadGraspDemonstration(uint32_t id, GraspDemonstration &gd) const;
 
   /*!
+   * \brief Load all grasp demonstrations from the database.
+   *
+   * Load all grasp demonstrations data from the database with and store them in the given  vector.
+   *
+   * \param gds The vector to fill with GraspDemonstration objects with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGraspDemonstrations(std::vector<GraspDemonstration> &gds) const;
+
+  /*!
    * \brief Load grasp demonstrations from the database from an object name.
    *
    * Load the grasp demonstrations data from the database with the given object names and store them in the given
@@ -198,6 +208,16 @@ public:
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
   bool loadGraspModel(uint32_t id, GraspModel &gm) const;
+
+  /*!
+   * \brief Load all grasp models from the database.
+   *
+   * Load all grasp models data from the database and store them in the given vector.
+   *
+   * \param gms The vector to fill with GraspModel objects with the loaded data.
+   * \return bool Returns true if a successful load was completed and the data was set correctly.
+   */
+  bool loadGraspModels(std::vector<GraspModel> &gms) const;
 
   /*!
    * \brief Load grasp models from the database from an object name.
