@@ -22,7 +22,10 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a cpp executable
-add_executable(model_generator src/ModelGenerator.cpp)
+add_executable(model_generator
+  nodes/model_generator.cpp
+  src/ModelGenerator.cpp
+)
 add_executable(object_recognizer
   nodes/object_recognizer.cpp
   src/ObjectRecognizer.cpp

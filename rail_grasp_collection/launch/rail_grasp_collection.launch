@@ -30,8 +30,7 @@
   <param name="/graspdb/db" type="str" value="$(arg db)" />
 
   <!-- Main Node -->
-  <node name="rail_grasp_collection" pkg="rail_grasp_collection" type="rail_grasp_collection" respawn="false"
-        output="screen">
+  <node name="rail_grasp_collection" pkg="rail_grasp_collection" type="rail_grasp_collection" output="screen">
     <param name="debug" value="$(arg debug)" />
     <param name="robot_fixed_frame_id" value="$(arg robot_fixed_frame_id)" />
     <param name="eef_frame_id" value="$(arg eef_frame_id)" />

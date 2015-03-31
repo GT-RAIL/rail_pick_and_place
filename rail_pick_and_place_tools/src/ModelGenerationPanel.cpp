@@ -16,7 +16,7 @@ namespace pick_and_place
 {
 
 ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
-    rviz::Panel(parent), ac_generate_models("pc_registration/generate_models", true)
+    rviz::Panel(parent), ac_generate_models("/model_generator/generate_models", true)
 {
   //setup connection to grasp database
   // set defaults
@@ -146,12 +146,12 @@ void ModelGenerationPanel::executeRegistration()
       string selected_item = models_list_->item(i)->text().toStdString();
       int id = atoi(selected_item.substr(5).c_str());
       if (selected_item.at(0) == 'g')
-        generate_models_goal.individualGraspModelIds.push_back(id);
+        generate_models_goal.grasp_demonstration_ids.push_back(id);
       else
-        generate_models_goal.mergedModelIds.push_back(id);
+        generate_models_goal.grasp_model_ids.push_back(id);
     }
   }
-  generate_models_goal.maxModelSize = model_size_spinbox_->value();
+  generate_models_goal.max_model_size = model_size_spinbox_->value();
   ac_generate_models.sendGoal(generate_models_goal, boost::bind(&ModelGenerationPanel::doneCb, this, _1, _2),
       actionlib::SimpleActionClient<rail_pick_and_place_msgs::GenerateModelsAction>::SimpleActiveCallback(),
       boost::bind(&ModelGenerationPanel::feedbackCb, this, _1));

@@ -4,11 +4,13 @@ using namespace std;
 using namespace pcl;
 using namespace rail::pick_and_place;
 
-ModelGenerator::ModelGenerator() :
-    asGenerateModels(n, "pc_registration/generate_models", boost::bind(&ModelGenerator::executeGenerateModels, this, _1), false)
+ModelGenerator::ModelGenerator()
+    : private_node_("~"),
+      as_(private_node_, "generate_models",
+          boost::bind(&ModelGenerator::generateModelsCallback, this, _1), false)
 {
-  //setup connection to grasp database
   // set defaults
+  debug_ = DEFAULT_DEBUG;
   int port = graspdb::Client::DEFAULT_PORT;
   string host("127.0.0.1");
   string user("ros");
@@ -16,53 +18,73 @@ ModelGenerator::ModelGenerator() :
   string db("graspdb");
 
   // grab any parameters we need
-  n.getParam("/graspdb/host", host);
-  n.getParam("/graspdb/port", port);
-  n.getParam("/graspdb/user", user);
-  n.getParam("/graspdb/password", password);
-  n.getParam("/graspdb/db", db);
+  private_node_.getParam("debug", debug_);
+  node_.getParam("/graspdb/host", host);
+  node_.getParam("/graspdb/port", port);
+  node_.getParam("/graspdb/user", user);
+  node_.getParam("/graspdb/password", password);
+  node_.getParam("/graspdb/db", db);
 
   // connect to the grasp database
-  graspdb = new graspdb::Client(host, port, user, password, db);
-  bool okay = graspdb->connect();
+  graspdb_ = new graspdb::Client(host, port, user, password, db);
+  okay_ = graspdb_->connect();
 
-  if (okay)
-    ROS_INFO("Successfully connected to grasp database.");
-  else
-    ROS_INFO("Could not connect to grasp database.");
+  if (okay_)
+  {
+    ROS_INFO("Model Generator Successfully Initialized");
+  }
 
-  asGenerateModels.start();
+  as_.start();
 }
 
-void ModelGenerator::executeGenerateModels(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal)
+ModelGenerator::~ModelGenerator()
 {
+  // cleanup
+  as_.shutdown();
+  graspdb_->disconnect();
+  delete graspdb_;
+}
+
+bool ModelGenerator::okay() const
+{
+  return okay_;
+}
+
+
+
+
+
+void ModelGenerator::generateModelsCallback(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal)
+{
+  ROS_INFO("Model generation request received.");
+
   rail_pick_and_place_msgs::GenerateModelsResult result;
   rail_pick_and_place_msgs::GenerateModelsFeedback feedback;
 
   feedback.message = "Populating model generation graph...";
-  asGenerateModels.publishFeedback(feedback);
+  as_.publishFeedback(feedback);
   vector<Model> models;
-  models.resize(goal->individualGraspModelIds.size() + goal->mergedModelIds.size());
-  for (unsigned int i = 0; i < goal->individualGraspModelIds.size(); i ++)
+  models.resize(goal->grasp_demonstration_ids.size() + goal->grasp_model_ids.size());
+  for (unsigned int i = 0; i < goal->grasp_demonstration_ids.size(); i++)
   {
     graspdb::GraspDemonstration demonstration;
-    graspdb->loadGraspDemonstration(goal->individualGraspModelIds[i], demonstration);
+    graspdb_->loadGraspDemonstration(goal->grasp_demonstration_ids[i], demonstration);
     models[i].copyFromGraspDemonstrationMsg(demonstration.toROSGraspDemonstrationMessage());
   }
-  for (unsigned int i = 0; i < goal->mergedModelIds.size(); i ++)
+  for (unsigned int i = 0; i < goal->grasp_model_ids.size(); i++)
   {
     graspdb::GraspModel model;
-    graspdb->loadGraspModel(goal->mergedModelIds[i], model);
-    models[goal->individualGraspModelIds.size() + i].copyFromGraspModelMsg(model.toROSGraspModelMessage());
+    graspdb_->loadGraspModel(goal->grasp_model_ids[i], model);
+    models[goal->grasp_demonstration_ids.size() + i].copyFromGraspModelMsg(model.toROSGraspModelMessage());
   }
 
   feedback.message = "Registering models, please wait...";
-  asGenerateModels.publishFeedback(feedback);
-  result.newModelsTotal = registerPointCloudsGraph(models, goal->maxModelSize, result.unusedModelIds);
+  as_.publishFeedback(feedback);
+  result.newModelsTotal = registerPointCloudsGraph(models, goal->max_model_size, result.unusedModelIds);
 
   feedback.message = "Model generation complete.";
-  asGenerateModels.publishFeedback(feedback);
-  asGenerateModels.setSucceeded(result);
+  as_.publishFeedback(feedback);
+  as_.setSucceeded(result);
 }
 
 int ModelGenerator::registerPointCloudsGraph(vector<Model> models, int maxModelSize, vector<int> unusedModelIds)
@@ -93,9 +115,9 @@ int ModelGenerator::registerPointCloudsGraph(vector<Model> models, int maxModelS
     if (models.size() > 1)
     {
       random_shuffle(models.begin(), models.end());
-      for (int i = (int)(models.size()) - 1; i >= 1; i--)
+      for (int i = (int) (models.size()) - 1; i >= 1; i--)
       {
-        if (i < (int)(models.size()))
+        if (i < (int) (models.size()))
         {
           for (int j = i - 1; j >= 0; j--)
           {
@@ -142,7 +164,7 @@ int ModelGenerator::registerPointCloudsGraph(vector<Model> models, int maxModelS
   }
 
   //remove any single-grasp (unmerged) models
-  for (int i = models.size() - 1; i >= 0; i --)
+  for (int i = models.size() - 1; i >= 0; i--)
   {
     if (models[i].graspList.size() < 2)
     {
@@ -166,7 +188,7 @@ int ModelGenerator::registerPointCloudsGraph(vector<Model> models, int maxModelS
     toPCLPointCloud2(*models[i].pointCloud, tempCloud);
     pcl_conversions::fromPCL(tempCloud, outCloud);
     graspdb::GraspModel model(models[i].objectName, grasps, outCloud);
-    if (graspdb->addGraspModel(model))
+    if (graspdb_->addGraspModel(model))
     {
       ROS_INFO("Added new model (number %d) to the database with id %d", i, model.getID());
     }
@@ -512,15 +534,4 @@ bool ModelGenerator::classifyMerge(float overlap, float maxDstDiff, float dstErr
     else
       return false;
   }
-}
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "pc_registration");
-
-  ModelGenerator pcr;
-
-  ros::spin();
-
-  return 0;
 }

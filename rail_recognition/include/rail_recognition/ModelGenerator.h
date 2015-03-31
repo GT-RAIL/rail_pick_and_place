@@ -36,10 +36,26 @@ namespace pick_and_place
 class ModelGenerator
 {
 public:
-  /**
-   * Constructor
-   */
+  /*! If a topic should be created to display debug information such as model point clouds. */
+  static const bool DEFAULT_DEBUG = false;
+
   ModelGenerator();
+
+  /*!
+   * \brief Cleans up a ModelGenerator.
+   *
+   * Cleans up any connections used by the ModelGenerator.
+   */
+  virtual ~ModelGenerator();
+
+  /*!
+   * \brief A check for a valid ModelGenerator.
+   *
+   * This function will return true if the appropriate connections were created successfully during initialization.
+   *
+   * \return True if the appropriate connections were created successfully during initialization.
+   */
+  bool okay() const;
 
   /**
   * Register all possible point cloud pairs
@@ -54,12 +70,21 @@ public:
   int registerPointCloudsGraph(std::vector<Model> models, int maxModelSize, std::vector<int> unusedModelIds);
 
 private:
-  //ROS publishers, subscribers, and action servers
-  ros::NodeHandle n;
+  /*! The debug flag. */
+  bool debug_, okay_;
+  /* The grasp database connection. */
+  graspdb::Client *graspdb_;
 
-  actionlib::SimpleActionServer<rail_pick_and_place_msgs::GenerateModelsAction> asGenerateModels;
+  /*! The public and private ROS node handles. */
+  ros::NodeHandle node_, private_node_;
+  /*! The main model generation action server. */
+  actionlib::SimpleActionServer<rail_pick_and_place_msgs::GenerateModelsAction> as_;
 
-  graspdb::Client *graspdb;
+  void generateModelsCallback(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal);
+
+
+
+
 
   //Point clouds
   sensor_msgs::PointCloud2 baseCloud;
@@ -74,7 +99,6 @@ private:
   std::vector<Model> individualGraspModels;
   std::vector<Model> mergedModels;
 
-  void executeGenerateModels(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal);
 
   /**
    * Run pcl's icp on a base and target point cloud

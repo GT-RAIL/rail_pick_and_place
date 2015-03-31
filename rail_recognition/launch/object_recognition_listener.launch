@@ -1,6 +1,10 @@
-<launch>
-  <!-- This launch file starts everything necessary for object recognition. -->
+<!--
+   Author: Russell Toris, Worcester Polytechnic Institute
+   Author: David Kent, Worcester Polytechnic Institute
+  Version: March 31, 2015
+-->
 
+<launch>
   <!-- Grasp Database Connection Params -->
   <arg name="host" default="127.0.0.1" />
   <arg name="port" default="5432" />
@@ -9,7 +13,8 @@
   <arg name="db" default="graspdb" />
 
   <!-- Recognition Listener Params -->
-  <arg name="segmented_objects_topic" default="/rail_segmentation/segmented_objects" />
+  <arg name="segmented_objects_topic" default="/segmentation/segmented_objects" />
+  <arg name="debug" default="false" />
 
   <!-- Set Global Params -->
   <param name="/graspdb/host" type="str" value="$(arg host)" />
@@ -20,6 +25,6 @@
 
   <node pkg="rail_recognition" name="object_recognition_listener" type="object_recognition_listener" output="screen">
     <param name="segmented_objects_topic" value="$(arg segmented_objects_topic)" />
+    <param name="debug" value="$(arg debug)" />
   </node>
-
 </launch>

@@ -1,6 +1,6 @@
 <!--
    Author: Russell Toris, Worcester Polytechnic Institute
-  Version: March 4, 2015
+  Version: March 31, 2015
 -->
 
 <launch>
@@ -18,6 +18,5 @@
   <param name="/graspdb/password" type="str" value="$(arg password)" />
   <param name="/graspdb/db" type="str" value="$(arg db)" />
 
-  <!-- Main Node -->
-  <node name="rail_grasp_retriever" pkg="rail_grasp_collection" type="rail_grasp_retriever" output="screen" />
+  <node pkg="rail_recognition" name="object_recognizer" type="object_recognizer" output="screen" />
 </launch>

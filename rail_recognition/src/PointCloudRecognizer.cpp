@@ -1,7 +1,6 @@
 #include <rail_recognition/PointCloudRecognizer.h>
 
 // ROS
-#include <pcl_conversions/pcl_conversions.h>
 #include <tf2/LinearMath/Transform.h>
 
 // PCL
