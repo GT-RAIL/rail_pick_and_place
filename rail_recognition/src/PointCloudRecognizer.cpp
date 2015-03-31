@@ -75,7 +75,10 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   // fill in recognition information
   object.name = candidates[min_index].getObjectName();
   object.model_id = candidates[min_index].getID();
+  object.confidence = min_score;
   object.recognized = true;
+  // TODO infer object orientation
+  object.orientation.w = 1.0;
   object.grasps.clear();
 
   // extract possible grasps for this model
