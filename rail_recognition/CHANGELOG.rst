@@ -2,6 +2,11 @@
 Changelog for package rail_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.4 (2015-03-31)
+------------------
+* orientation added
+* Contributors: Russell Toris
+
 1.0.3 (2015-03-31)
 ------------------
 * debug is now latched

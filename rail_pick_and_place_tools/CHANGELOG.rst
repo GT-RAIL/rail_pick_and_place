@@ -2,6 +2,11 @@
 Changelog for package rail_pick_and_place_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.4 (2015-03-31)
+------------------
+* removed old recognize actions
+* Contributors: Russell Toris
+
 1.0.3 (2015-03-31)
 ------------------
 * starting to cleanup model generator
