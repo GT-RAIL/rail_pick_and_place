@@ -11,7 +11,6 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <std_srvs/Empty.h>
-#include <rail_manipulation_msgs/RecognizeAllAction.h>
 #include <rviz/panel.h>
 
 #include <QGridLayout>
@@ -52,7 +51,6 @@ public:
 
 protected:
   QPushButton *segment_button_;
-  QPushButton *recognize_all_button_;
   QLabel *action_status_;
 
 protected
@@ -63,31 +61,11 @@ protected
   */
   void executeSegment();
 
-  /**
-  * \brief Start recognizing all of the segmented point clouds and update the interface accordingly
-  */
-  void executeRecognizeAll();
-
 private:
   ros::ServiceClient segmentClient;
 
-  actionlib::SimpleActionClient <rail_manipulation_msgs::RecognizeAllAction> ac_recognize_all_;
-
   // The ROS node handle.
   ros::NodeHandle nh_;
-
-  /**
-  * \brief Callback for when the recognition action finishes
-  * @param state goal state
-  * @param result recognize all result
-  */
-  void doneCb(const actionlib::SimpleClientGoalState& state, const rail_manipulation_msgs::RecognizeAllResultConstPtr& result);
-
-  /**
-  * \brief Callback for feedback from the recognition action server
-  * @param feedback recognize all feedback
-  */
-  void feedbackCb(const rail_manipulation_msgs::RecognizeAllFeedbackConstPtr& feedback);
 
 };
 

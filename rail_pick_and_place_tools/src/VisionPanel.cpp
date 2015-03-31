@@ -15,24 +15,19 @@ namespace pick_and_place
 {
 
 VisionPanel::VisionPanel(QWidget *parent) :
-    rviz::Panel(parent),
-    ac_recognize_all_("rail_recognition/recognize_all", true)
+    rviz::Panel(parent)
 {
   segmentClient = nh_.serviceClient<std_srvs::Empty>("rail_segmentation/segment");
 
   //buttons and such
   QGridLayout *grid_layout = new QGridLayout;
   QLabel *segment_label = new QLabel(": Automatic object segmentation");
-  QLabel *recognize_label = new QLabel(": Recognize all segmented objects");
   segment_button_ = new QPushButton("Segment");
-  recognize_all_button_ = new QPushButton("Recognize");
   grid_layout->addWidget(segment_button_, 0, 0);
-  grid_layout->addWidget(recognize_all_button_, 1, 0);
   grid_layout->addWidget(segment_label, 0, 1);
-  grid_layout->addWidget(recognize_label, 1, 1);
 
   //action feedback
-  action_status_ = new QLabel("Ready to segment and recognize.");
+  action_status_ = new QLabel("Ready to segment.");
 
   //build final layout
   QVBoxLayout *layout = new QVBoxLayout;
@@ -41,7 +36,6 @@ VisionPanel::VisionPanel(QWidget *parent) :
 
   //connect things
   QObject::connect(segment_button_, SIGNAL(clicked()), this, SLOT(executeSegment()));
-  QObject::connect(recognize_all_button_, SIGNAL(clicked()), this, SLOT(executeRecognizeAll()));
 
   setLayout(layout);
 }
@@ -49,7 +43,6 @@ VisionPanel::VisionPanel(QWidget *parent) :
 void VisionPanel::executeSegment()
 {
   segment_button_->setEnabled(false);
-  recognize_all_button_->setEnabled(false);
   std_srvs::Empty srv;
   if (!segmentClient.call(srv))
   {
@@ -61,39 +54,6 @@ void VisionPanel::executeSegment()
     action_status_->setText("Segmentation complete.");
   }
   segment_button_->setEnabled(true);
-  recognize_all_button_->setEnabled(true);
-}
-
-void VisionPanel::executeRecognizeAll()
-{
-  rail_manipulation_msgs::RecognizeAllGoal recognize_all_goal;
-  ac_recognize_all_.sendGoal(recognize_all_goal, boost::bind(&VisionPanel::doneCb, this, _1, _2),
-      actionlib::SimpleActionClient<rail_manipulation_msgs::RecognizeAllAction>::SimpleActiveCallback(),
-      boost::bind(&VisionPanel::feedbackCb, this, _1));
-
-  segment_button_->setEnabled(false);
-  recognize_all_button_->setEnabled(false);
-}
-
-void VisionPanel::doneCb(const actionlib::SimpleClientGoalState& state, const rail_manipulation_msgs::RecognizeAllResultConstPtr& result)
-{
-  int total_recognized = 0;
-  for (unsigned int i = 0; i < result->successes.size(); i ++)
-  {
-    if (result->successes[i])
-      total_recognized ++;
-  }
-  stringstream ss;
-  ss << "Recognized " << total_recognized << " objects.";
-  action_status_->setText(ss.str().c_str());
-
-  segment_button_->setEnabled(true);
-  recognize_all_button_->setEnabled(true);
-}
-
-void VisionPanel::feedbackCb(const rail_manipulation_msgs::RecognizeAllFeedbackConstPtr& feedback)
-{
-  action_status_->setText(feedback->message.c_str());
 }
 
 // Save all configuration data from this panel to the given
