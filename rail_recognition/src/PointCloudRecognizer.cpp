@@ -25,6 +25,11 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
     ROS_WARN("Candidate object list is empty. Nothing to compare segmented object to.");
     return false;
   }
+  if (object.point_cloud.data.empty())
+  {
+    ROS_WARN("Segmented object point cloud is empty. Nothing to compare candidate objects to.");
+    return false;
+  }
 
   // convert to a PCL point cloud
   pcl::PCLPointCloud2 object_converter;
