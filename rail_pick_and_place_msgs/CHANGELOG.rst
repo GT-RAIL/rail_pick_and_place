@@ -2,6 +2,11 @@
 Changelog for package rail_pick_and_place_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.3 (2015-03-31)
+------------------
+* starting to cleanup model generator
+* Contributors: Russell Toris
+
 1.0.2 (2015-03-30)
 ------------------
 

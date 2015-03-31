@@ -2,6 +2,12 @@
 Changelog for package rail_grasp_collection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.3 (2015-03-31)
+------------------
+* debug is now latched
+* starting to cleanup model generator
+* Contributors: Russell Toris
+
 1.0.2 (2015-03-30)
 ------------------
 

@@ -2,6 +2,13 @@
 Changelog for package graspdb
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.3 (2015-03-31)
+------------------
+* correct dev added
+* added select all to database
+* repub of recognized objects addedg
+* Contributors: Russell Toris
+
 1.0.2 (2015-03-30)
 ------------------
 * fixed typo in include install directory

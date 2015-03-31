@@ -2,6 +2,12 @@
 Changelog for package rail_pick_and_place_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.3 (2015-03-31)
+------------------
+* starting to cleanup model generator
+* refactor of point cloud recognizer
+* Contributors: Russell Toris
+
 1.0.2 (2015-03-30)
 ------------------
 

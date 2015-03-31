@@ -2,6 +2,17 @@
 Changelog for package rail_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.3 (2015-03-31)
+------------------
+* debug is now latched
+* checks for empty point cloud
+* starting to cleanup model generator
+* fix in launch
+* refactor of point cloud recognizer
+* added select all to database
+* repub of recognized objects addedg
+* Contributors: Russell Toris
+
 1.0.2 (2015-03-30)
 ------------------
 
