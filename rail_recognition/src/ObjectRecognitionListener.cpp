@@ -32,7 +32,7 @@ ObjectRecognitionListener::ObjectRecognitionListener() : private_node_("~")
   // setup a debug publisher if we need it
   if (debug_)
   {
-    debug_pub_ = private_node_.advertise<geometry_msgs::PoseArray>("debug", 1);
+    debug_pub_ = private_node_.advertise<geometry_msgs::PoseArray>("debug", 1, true);
   }
 
   segmented_objects_sub_ = node_.subscribe(segmented_objects_topic, 1,

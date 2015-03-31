@@ -54,7 +54,7 @@ GraspCollector::GraspCollector()
   // setup a debug publisher if we need it
   if (debug_)
   {
-    debug_pub_ = private_node_.advertise<sensor_msgs::PointCloud2>("debug", 1);
+    debug_pub_ = private_node_.advertise<sensor_msgs::PointCloud2>("debug", 1, true);
   }
 
   // subscribe to the list of segmented objects
