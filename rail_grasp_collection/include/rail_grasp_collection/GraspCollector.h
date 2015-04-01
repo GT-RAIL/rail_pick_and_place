@@ -94,7 +94,7 @@ private:
    *
    * \param object_list The object list returned from the segmented objects topic.
    */
-  void segmentedObjectsCallback(const rail_manipulation_msgs::SegmentedObjectList &object_list);
+  void segmentedObjectsCallback(const rail_manipulation_msgs::SegmentedObjectList::Ptr &object_list);
 
   /*! Mutex for locking on the segmented object list. */
   boost::mutex mutex_;
@@ -113,7 +113,7 @@ private:
   /*! The listener for the segmented objects. */
   ros::Subscriber segmented_objects_sub_;
   /*! The most recent segmented objects. */
-  rail_manipulation_msgs::SegmentedObjectList object_list_;
+  rail_manipulation_msgs::SegmentedObjectList::Ptr object_list_;
   /*! The main grasp collection action server. */
   actionlib::SimpleActionServer<rail_pick_and_place_msgs::GraspAndStoreAction> as_;
   /*! The gripper action client. */
