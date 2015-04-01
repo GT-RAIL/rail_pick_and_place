@@ -64,7 +64,7 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
   ROS_INFO("Received %li segmented objects.", objects->objects.size());
 
   // check against the old list to prevent throwing out data
-  rail_manipulation_msgs::SegmentedObjectList new_list;
+  vector<rail_manipulation_msgs::SegmentedObject> new_list;
   for (size_t i = 0; i < objects->objects.size(); i++)
   {
     bool matched = false;
@@ -77,7 +77,7 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
       {
         ROS_INFO("Found a match from previously recognized objects.");
         matched = true;
-        new_list.objects.push_back(object_list_.objects[j]);
+        new_list.push_back(object_list_.objects[j]);
         break;
       }
     }
@@ -85,12 +85,12 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
     // check if we didn't match
     if (!matched)
     {
-      new_list.objects.push_back(objects->objects[i]);
+      new_list.push_back(objects->objects[i]);
     }
   }
 
   // store the list
-  object_list_ = new_list;
+  object_list_.objects = new_list;
 
   // run recognition
   ROS_INFO("Running recognition...");
