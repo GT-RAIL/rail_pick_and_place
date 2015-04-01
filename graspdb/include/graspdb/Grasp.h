@@ -105,13 +105,22 @@ public:
   void setGraspModelID(const uint32_t grasp_model_id);
 
   /*!
-   * \brief Grasp pose value accessor.
+   * \brief Grasp pose value accessor (immutable).
    *
    * Get the grasp pose value of this Grasp.
    *
    * \return The grasp pose value.
    */
   const Pose &getGraspPose() const;
+
+  /*!
+   * \brief Grasp pose value accessor.
+   *
+   * Get the grasp pose value of this Grasp.
+   *
+   * \return The grasp pose value.
+   */
+  Pose &getGraspPose();
 
   /*!
    * \brief Grasp pose value mutator.

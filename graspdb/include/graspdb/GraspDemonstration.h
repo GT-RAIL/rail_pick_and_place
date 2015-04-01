@@ -104,13 +104,22 @@ public:
   void setObjectName(const std::string &object_name);
 
   /*!
-   * \brief Grasp pose value accessor.
+   * \brief Grasp pose value accessor (immutable).
    *
    * Get the grasp pose value of this GraspDemonstration.
    *
    * \return The grasp pose value.
    */
   const Pose &getGraspPose() const;
+
+  /*!
+   * \brief Grasp pose value accessor.
+   *
+   * Get the grasp pose value of this GraspDemonstration.
+   *
+   * \return The grasp pose value.
+   */
+  Pose &getGraspPose();
 
   /*!
    * \brief Grasp pose value mutator.
@@ -140,13 +149,22 @@ public:
   void setEefFrameID(const std::string &eef_frame_id);
 
   /*!
-   * \brief Point cloud accessor.
+   * \brief Point cloud accessor (immutable).
    *
    * Get the point cloud message.
    *
    * \return The point cloud message.
    */
   const sensor_msgs::PointCloud2 &getPointCloud() const;
+
+  /*!
+   * \brief Point cloud accessor.
+   *
+   * Get the point cloud message.
+   *
+   * \return The point cloud message.
+   */
+  sensor_msgs::PointCloud2 &getPointCloud();
 
   /*!
    * \brief Point cloud buffer mutator.

@@ -119,7 +119,7 @@ public:
   size_t getNumGrasps() const;
 
   /*!
-   * \brief Grasp pose value accessor.
+   * \brief Grasp pose value accessor (immutable).
    *
    * Get the grasp of this GraspModel at the given index.
    *
@@ -128,6 +128,17 @@ public:
    * \throws std::out_of_range Thrown if the grasp at the given index does not exist.
    */
   const Grasp &getGrasp(const size_t index) const;
+
+  /*!
+   * \brief Grasp pose value accessor.
+   *
+   * Get the grasp of this GraspModel at the given index.
+   *
+   * \param i The index of the Pose to get.
+   * \return The grasp pose at the given index.
+   * \throws std::out_of_range Thrown if the grasp at the given index does not exist.
+   */
+  Grasp &getGrasp(const size_t index);
 
   /*!
    * \brief Grasp adder.
@@ -159,6 +170,16 @@ public:
   const Grasp &getBestGrasp() const;
 
   /*!
+   * \brief Get the best grasp (immutable).
+   *
+   * Get the best grasp based on the highest success rate. A tie results in the smaller index.
+   *
+   * \return The grasp with the highest success rate.
+   * \throws std::out_of_range Thrown if there are no grasps in this grasp model.
+   */
+  Grasp &getBestGrasp();
+
+  /*!
    * \brief Get the best grasp index.
    *
    * Get the index of the best grasp based on the highest success rate. A tie results in the smaller index.
@@ -179,7 +200,7 @@ public:
   double getBestSuccessRate() const;
 
   /*!
-   * \brief Get the worst grasp.
+   * \brief Get the worst grasp (immutable).
    *
    * Get the worst grasp based on the lowest success rate. A tie results in the smaller index.
    *
@@ -187,6 +208,16 @@ public:
    * \throws std::out_of_range Thrown if there are no grasps in this grasp model.
    */
   const Grasp &getWorstGrasp() const;
+
+  /*!
+   * \brief Get the worst grasp.
+   *
+   * Get the worst grasp based on the lowest success rate. A tie results in the smaller index.
+   *
+   * \return The grasp with the lowest success rate.
+   * \throws std::out_of_range Thrown if there are no grasps in this grasp model.
+   */
+  Grasp &getWorstGrasp();
 
   /*!
    * \brief Get the worst grasp index.
@@ -209,13 +240,22 @@ public:
   double getWorstSuccessRate() const;
 
   /*!
-   * \brief Point cloud accessor.
+   * \brief Point cloud accessor (immutable).
    *
    * Get the point cloud message.
    *
    * \return The point cloud message.
    */
   const sensor_msgs::PointCloud2 &getPointCloud() const;
+
+  /*!
+   * \brief Point cloud accessor.
+   *
+   * Get the point cloud message.
+   *
+   * \return The point cloud message.
+   */
+  sensor_msgs::PointCloud2 &getPointCloud();
 
   /*!
    * \brief Point cloud buffer mutator.

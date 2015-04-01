@@ -77,12 +77,22 @@ const Position &Pose::getPosition() const
   return position_;
 }
 
+Position &Pose::getPosition()
+{
+  return position_;
+}
+
 void Pose::setOrientation(const Orientation &orientation)
 {
   orientation_ = orientation;
 }
 
 const Orientation &Pose::getOrientation() const
+{
+  return orientation_;
+}
+
+Orientation &Pose::getOrientation()
 {
   return orientation_;
 }

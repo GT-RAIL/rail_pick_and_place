@@ -167,6 +167,15 @@ public:
   const Position &getPosition() const;
 
   /*!
+   * \brief Position value accessor (immutable).
+   *
+   * Get the position value of this Pose.
+   *
+   * \return The position value.
+   */
+  Position &getPosition();
+
+  /*!
    * \brief Orientation value mutator.
    *
    * Set the orientation value of this Pose.
@@ -176,13 +185,22 @@ public:
   void setOrientation(const Orientation &orientation);
 
   /*!
-   * \brief Orientation value accessor.
+   * \brief Orientation value accessor (immutable).
    *
    * Get the orientation value of this Pose.
    *
    * \return The orientation value.
    */
   const Orientation &getOrientation() const;
+
+  /*!
+   * \brief Orientation value accessor.
+   *
+   * Get the orientation value of this Pose.
+   *
+   * \return The orientation value.
+   */
+  Orientation &getOrientation();
 
   /*!
    * Converts this Pose object into a ROS Pose message.

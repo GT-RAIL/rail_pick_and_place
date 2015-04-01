@@ -59,6 +59,11 @@ const Pose &Grasp::getGraspPose() const
   return grasp_pose_;
 }
 
+Pose &Grasp::getGraspPose()
+{
+  return grasp_pose_;
+}
+
 void Grasp::setGraspPose(const Pose &grasp_pose)
 {
   grasp_pose_ = grasp_pose;
