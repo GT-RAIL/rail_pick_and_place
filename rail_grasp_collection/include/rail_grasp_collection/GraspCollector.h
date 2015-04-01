@@ -103,7 +103,7 @@ private:
   bool debug_, okay_;
   /*! Frame IDs to use. */
   std::string robot_fixed_frame_id_, eef_frame_id_;
-  /* The grasp database connection. */
+  /*! The grasp database connection. */
   graspdb::Client *graspdb_;
 
   /*! The public and private ROS node handles. */

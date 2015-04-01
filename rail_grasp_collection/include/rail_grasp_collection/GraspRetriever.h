@@ -71,7 +71,7 @@ private:
 
   /*! The okay check flag. */
   bool okay_;
-  /* The grasp database connection. */
+  /*! The grasp database connection. */
   graspdb::Client *graspdb_;
 
   /*! The public and private ROS node handles. */

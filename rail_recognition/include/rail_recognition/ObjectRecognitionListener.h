@@ -42,7 +42,7 @@ private:
 
   /*! The debug and okay check flags. */
   bool debug_, okay_;
-  /* The grasp database connection. */
+  /*! The grasp database connection. */
   graspdb::Client *graspdb_;
 
   /*! The public and private ROS node handles. */

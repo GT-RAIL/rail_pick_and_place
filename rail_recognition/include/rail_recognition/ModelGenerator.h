@@ -11,10 +11,6 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
-//C++
-#include <boost/thread/thread.hpp>
-#include <stdlib.h>
-
 //PCL
 #include <pcl/io/pcd_io.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -22,6 +18,9 @@
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
 #include <pcl_conversions/pcl_conversions.h>
+
+// Pick and Place
+#include "PointCloudMetrics.h"
 
 //Point Cloud Filtering Constants
 #define RADIUS .01
@@ -72,18 +71,18 @@ public:
 private:
   /*! The debug flag. */
   bool debug_, okay_;
-  /* The grasp database connection. */
+  /*! The grasp database connection. */
   graspdb::Client *graspdb_;
+  /*! Various ranking and matching metrics for point clouds. */
+  PointCloudMetrics metrics_;
 
   /*! The public and private ROS node handles. */
   ros::NodeHandle node_, private_node_;
   /*! The main model generation action server. */
   actionlib::SimpleActionServer<rail_pick_and_place_msgs::GenerateModelsAction> as_;
 
+
   void generateModelsCallback(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal);
-
-
-
 
 
   //Point clouds
@@ -110,10 +109,10 @@ private:
    * @return a pointer to the merged point cloud
    */
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr icpRegistration(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr,
-    std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> baseGrasps,
-    std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> targetGrasps,
-    std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *resultGrasps);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr,
+      std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> baseGrasps,
+      std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> targetGrasps,
+      std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *resultGrasps);
 
   /**
    * Determine if a point cloud registration is successful based on various score metrics
@@ -121,7 +120,7 @@ private:
    * @param targetCloudPtr pointer to the point cloud that will be transformed to the base cloud
    */
   bool checkRegistration(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
 
   /**
    * Calculate a metric for how successful the registration was based on distance error
@@ -130,7 +129,7 @@ private:
    * @return a score representing the success of the registration
    */
   float calculateRegistrationMetricDstError(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
 
   /**
    * Calculate a metric for how successful the registration was based on overlap
@@ -139,7 +138,7 @@ private:
    * @return a score representing the success of the registration
    */
   float calculateRegistrationMetricOverlap(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr, float dstThreshold);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr, float dstThreshold);
 
   /**
    * Calculate a metric for how successful the registration was based on range of colors in each point cloud
@@ -148,7 +147,7 @@ private:
    * @return a score representing the success of the registration
    */
   float calculateRegistrationMetricColorRange(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
 
   /**
    * Calculate a metric for how successful the registration was based on the respective spatial lengths of each point cloud
@@ -157,7 +156,7 @@ private:
    * @return a score representing the success of the registration
    */
   float calculateRegistrationMetricDistance(pcl::PointCloud<pcl::PointXYZRGB>::Ptr baseCloudPtr,
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr targetCloudPtr);
 
   /**
    * Filters point cloud outliers if they have less neighbors than the neighbor threshold within a given radius
@@ -180,7 +179,7 @@ private:
    * @param grasps pointer to the grasps corresponding to the point cloud to be translated
    */
   void translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr,
-    std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *grasps);
+      std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> *grasps);
 
   /**
    * Classify a point cloud merge as successful or not, based on a decision tree learned previously
@@ -192,5 +191,5 @@ private:
   bool classifyMerge(float overlap, float maxDstDiff, float dstError, float avgColorDiff);
 };
 
-} // end namespace pick_and_place
-} // end namespace rail
+}
+}

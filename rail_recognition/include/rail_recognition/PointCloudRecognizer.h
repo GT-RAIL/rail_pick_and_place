@@ -10,6 +10,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+// Pick and Place
+#include "PointCloudMetrics.h"
+
 namespace rail
 {
 namespace pick_and_place
@@ -74,6 +77,8 @@ private:
       const geometry_msgs::Point &centroid,
       const std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> &candidate_grasps,
       std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> &grasps) const;
+
+  PointCloudMetrics metrics_;
 };
 
 }

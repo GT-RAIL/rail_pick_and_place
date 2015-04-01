@@ -9,7 +9,6 @@
 #include <pcl/registration/icp.h>
 
 using namespace std;
-using namespace pcl;
 using namespace rail::pick_and_place;
 
 PointCloudRecognizer::PointCloudRecognizer()
@@ -39,7 +38,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
 
   // pre-process input cloud
   this->filterPointCloudOutliers(object_point_cloud);
-  this->translateToOrigin(object_point_cloud, object.centroid);
+  metrics_.transformToOrigin(object_point_cloud, object.centroid);
 
   // perform recognition
   double min_score = numeric_limits<double>::infinity();
@@ -120,7 +119,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   return true;
 }
 
-void PointCloudRecognizer::filterPointCloudOutliers(PointCloud<PointXYZRGB>::Ptr pc) const
+void PointCloudRecognizer::filterPointCloudOutliers(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc) const
 {
   // use a KD tree to search
   pcl::KdTreeFLANN<pcl::PointXYZRGB> search_tree;
@@ -147,22 +146,8 @@ void PointCloudRecognizer::filterPointCloudOutliers(PointCloud<PointXYZRGB>::Ptr
   extract.filter(*pc);
 }
 
-void PointCloudRecognizer::translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc,
-    const geometry_msgs::Point &centroid) const
-{
-  // transformation matrix
-  Eigen::Matrix4f tf;
-  tf << 1, 0, 0, -centroid.x,
-      0, 1, 0, -centroid.y,
-      0, 0, 1, -centroid.z,
-      0, 0, 0, 1;
-
-  // transform the point cloud
-  pcl::transformPointCloud(*pc, *pc, tf);
-}
-
-double PointCloudRecognizer::scoreRegistration(PointCloud<PointXYZRGB>::ConstPtr candidate,
-    PointCloud<PointXYZRGB>::ConstPtr object, Eigen::Matrix4f &icp_tf, bool &icp_swapped) const
+double PointCloudRecognizer::scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr candidate,
+    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, Eigen::Matrix4f &icp_tf, bool &icp_swapped) const
 {
   // use the larger as the base cloud
   icp_swapped = object->size() > candidate->size();
@@ -197,7 +182,7 @@ double PointCloudRecognizer::calculateRegistrationMetricDistanceError(pcl::Point
     pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr target) const
 {
   // search using a KD tree
-  pcl::KdTreeFLANN<PointXYZRGB> search_tree;
+  pcl::KdTreeFLANN<pcl::PointXYZRGB> search_tree;
   search_tree.setInputCloud(base);
 
   // search for the nearest point to each point
