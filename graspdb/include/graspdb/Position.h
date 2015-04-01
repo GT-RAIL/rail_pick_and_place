@@ -15,6 +15,7 @@
 // ROS
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Vector3.h>
+#include <tf2/LinearMath/Vector3.h>
 
 // C++ Standard Library
 #include <string>
@@ -64,6 +65,15 @@ public:
    * \param point The ROS Vector3 message to extract values from.
    */
   Position(const geometry_msgs::Vector3 &v);
+
+  /*!
+   * \brief Create a new Position.
+   *
+   * Creates a new Position with the given x, y, and z values from the ROS tf2 Vector3.
+   *
+   * \param point The ROS tf2 Vector3 to extract values from.
+   */
+  Position(const tf2::Vector3 &v);
 
   /*!
    * \brief X value mutator.
@@ -132,6 +142,13 @@ public:
    * \return The ROS Vector3 message with this position data.
    */
   geometry_msgs::Vector3 toROSVector3Message() const;
+
+  /*!
+   * Converts this Position object into a ROS tf2 Vector3.
+   *
+   * \return The ROS tf2 Vector3 with this position data.
+   */
+  tf2::Vector3 toTF2Vector3() const;
 
 private:
   /*! Members to hold values. */

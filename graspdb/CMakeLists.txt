@@ -10,6 +10,7 @@ find_package(catkin REQUIRED
   roscpp
   roscpp_serialization
   sensor_msgs
+  tf2
 )
 
 ###################################################

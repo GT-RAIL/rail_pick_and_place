@@ -14,6 +14,8 @@
 
 // ROS
 #include <geometry_msgs/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2/LinearMath/Quaternion.h>
 
 // C++ Standard Library
 #include <string>
@@ -55,6 +57,15 @@ public:
    * \param point The ROS Quaternion message to extract values from.
    */
   Orientation(const geometry_msgs::Quaternion &quaternion);
+
+  /*!
+   * \brief Create a new Orientation.
+   *
+   * Creates a new Orientation with the given x, y, z, and w values from the ROS tf2 Quaternion.
+   *
+   * \param point The ROS tf2 Quaternion to extract values from.
+   */
+  Orientation(const tf2::Quaternion &quaternion);
 
   /*!
    * \brief X value mutator.
@@ -134,6 +145,20 @@ public:
    * \return The ROS Quaternion message with this orientation data.
    */
   geometry_msgs::Quaternion toROSQuaternionMessage() const;
+
+  /*!
+   * Converts this Orientation object into a ROS tf2 Quaternion.
+   *
+   * \return The ROS tf2 Quaternion with this orientation data.
+   */
+  tf2::Quaternion toTF2Quaternion() const;
+
+  /*!
+   * Converts this Orientation object into a ROS tf2 Matrix3x3.
+   *
+   * \return The ROS tf2 Matrix3x3 with this orientation data.
+   */
+  tf2::Matrix3x3 toTF2Matrix3x3() const;
 
 private:
   /*! Members to hold values. */

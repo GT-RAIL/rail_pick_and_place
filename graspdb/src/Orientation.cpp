@@ -32,6 +32,15 @@ Orientation::Orientation(const geometry_msgs::Quaternion &quaternion)
   w_ = quaternion.w;
 }
 
+Orientation::Orientation(const tf2::Quaternion &quaternion)
+{
+  // copy position data
+  x_ = quaternion.getX();
+  y_ = quaternion.getY();
+  z_ = quaternion.getZ();
+  w_ = quaternion.getW();
+}
+
 void Orientation::setX(const double x)
 {
   x_ = x;
@@ -82,3 +91,15 @@ geometry_msgs::Quaternion Orientation::toROSQuaternionMessage() const
   return q;
 }
 
+tf2::Quaternion Orientation::toTF2Quaternion() const
+{
+  tf2::Quaternion q(x_, y_, z_, w_);
+  return q;
+}
+
+tf2::Matrix3x3 Orientation::toTF2Matrix3x3() const
+{
+  tf2::Quaternion q = this->toTF2Quaternion();
+  tf2::Matrix3x3 m(q);
+  return m;
+}
