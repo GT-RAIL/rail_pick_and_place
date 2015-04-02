@@ -138,6 +138,11 @@ void ModelGenerationPanel::deselectAll()
 
 void ModelGenerationPanel::executeRegistration()
 {
+  if (!ac_generate_models.isServerConnected())
+  {
+    model_generation_status_->setText("No model generation action server found!");
+    return;
+  }
   rail_pick_and_place_msgs::GenerateModelsGoal generate_models_goal;
   for (unsigned int i = 0; i < models_list_->count(); i++)
   {
