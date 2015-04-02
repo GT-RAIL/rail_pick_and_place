@@ -61,6 +61,11 @@ void ModelGenerator::generateModelsCallback(const rail_pick_and_place_msgs::Gene
   rail_pick_and_place_msgs::GenerateModelsResult result;
   rail_pick_and_place_msgs::GenerateModelsFeedback feedback;
 
+  feedback.message = "Loading grasp demonstrations...";
+  as_.publishFeedback(feedback);
+  vector<graspdb::GraspDemonstration> demonstrations;
+  //for (size_t i=0; i<goal->)
+
   feedback.message = "Populating model generation graph...";
   as_.publishFeedback(feedback);
   vector<Model> models;

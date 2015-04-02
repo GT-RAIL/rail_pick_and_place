@@ -44,7 +44,6 @@ private:
   */
   void filterPointCloudOutliers(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr) const;
 
-  void translateToOrigin(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc, const geometry_msgs::Point &centroid) const;
 
   /**
   * Determine a score for the registration of two point clouds
@@ -73,11 +72,10 @@ private:
   double calculateRegistrationMetricOverlap(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr base,
       pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr target) const;
 
-  void transformGrasps(const Eigen::Matrix4f &icp_transform, const bool swapped,
-      const geometry_msgs::Point &centroid,
-      const std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> &candidate_grasps,
-      std::vector<rail_pick_and_place_msgs::GraspWithSuccessRate> &grasps) const;
+  std::vector<graspdb::Grasp> computeGraspList(const Eigen::Matrix4f &icp_transform, const bool swapped,
+      const geometry_msgs::Point &centroid, const std::vector<graspdb::Grasp> &candidate_grasps) const;
 
+  /*! Various ranking and matching metrics for point clouds. */
   PointCloudMetrics metrics_;
 };
 

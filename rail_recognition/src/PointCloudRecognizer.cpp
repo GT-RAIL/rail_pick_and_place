@@ -1,8 +1,5 @@
 #include <rail_recognition/PointCloudRecognizer.h>
 
-// ROS
-#include <tf2/LinearMath/Transform.h>
-
 // PCL
 #include <pcl/filters/extract_indices.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -81,16 +78,14 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   object.grasps.clear();
 
   // extract possible grasps for this model
-  vector<rail_pick_and_place_msgs::GraspWithSuccessRate> possible_grasps;
-  this->transformGrasps(min_icp_tf, min_swapped, object.centroid,
-      candidates[min_index].toROSGraspModelMessage().grasps, possible_grasps);
+  vector<graspdb::Grasp> possible_grasps = this->computeGraspList(min_icp_tf, min_swapped, object.centroid,
+      candidates[min_index].getGrasps());
 
   // sort and remove any grasps with 0 success rates
   vector<double> success_rates;
   for (size_t i = 0; i < possible_grasps.size(); i++)
   {
-    double rate = (possible_grasps[i].attempts > 0) ?
-        ((double) possible_grasps[i].successes) / ((double) possible_grasps[i].attempts) : 0.0;
+    double rate = possible_grasps[i].getSuccessRate();
 
     // check the success rate
     if (rate > 0)
@@ -101,7 +96,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
       {
         if (rate <= success_rates[j])
         {
-          object.grasps.insert(object.grasps.begin() + j, possible_grasps[i].grasp_pose);
+          object.grasps.insert(object.grasps.begin() + j, possible_grasps[i].getGraspPose().toROSPoseStampedMessage());
           success_rates.insert(success_rates.begin() + j, rate);
           inserted = true;
           break;
@@ -110,7 +105,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
 
       if (!inserted)
       {
-        object.grasps.push_back(possible_grasps[i].grasp_pose);
+        object.grasps.push_back(possible_grasps[i].getGraspPose().toROSPoseStampedMessage());
         success_rates.push_back(rate);
       }
     }
@@ -239,11 +234,11 @@ double PointCloudRecognizer::calculateRegistrationMetricOverlap(pcl::PointCloud<
   return error;
 }
 
-void PointCloudRecognizer::transformGrasps(const Eigen::Matrix4f &icp_transform, const bool icp_swapped,
-    const geometry_msgs::Point &centroid,
-    const vector<rail_pick_and_place_msgs::GraspWithSuccessRate> &candidate_grasps,
-    vector<rail_pick_and_place_msgs::GraspWithSuccessRate> &grasps) const
+vector<graspdb::Grasp> PointCloudRecognizer::computeGraspList(const Eigen::Matrix4f &icp_transform,
+    const bool icp_swapped, const geometry_msgs::Point &centroid, const vector<graspdb::Grasp> &candidate_grasps) const
 {
+  vector<graspdb::Grasp> grasps;
+
   // convert to a TF2 matrix
   tf2::Matrix3x3 rotation(icp_transform(0, 0), icp_transform(0, 1), icp_transform(0, 2),
       icp_transform(1, 0), icp_transform(1, 1), icp_transform(1, 2),
@@ -255,10 +250,7 @@ void PointCloudRecognizer::transformGrasps(const Eigen::Matrix4f &icp_transform,
   for (size_t i = 0; i < candidate_grasps.size(); i++)
   {
     // convert to tf2 matrix
-    const geometry_msgs::Pose &pose = candidate_grasps[i].grasp_pose.pose;
-    tf2::Quaternion q_pose(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
-    tf2::Vector3 v_pose(pose.position.x, pose.position.y, pose.position.z);
-    tf2::Transform tf_pose(q_pose, v_pose);
+    tf2::Transform tf_pose = candidate_grasps[i].getGraspPose().toTF2Transform();
 
     // push back the basic information
     grasps.push_back(candidate_grasps[i]);
@@ -275,18 +267,14 @@ void PointCloudRecognizer::transformGrasps(const Eigen::Matrix4f &icp_transform,
       result.mult(inverse, tf_pose);
     }
 
-    // copy over the values
-    grasps[i].grasp_pose.pose.position.x = result.getOrigin().x();
-    grasps[i].grasp_pose.pose.position.y = result.getOrigin().y();
-    grasps[i].grasp_pose.pose.position.z = result.getOrigin().z();
-    grasps[i].grasp_pose.pose.orientation.x = result.getRotation().x();
-    grasps[i].grasp_pose.pose.orientation.y = result.getRotation().y();
-    grasps[i].grasp_pose.pose.orientation.z = result.getRotation().z();
-    grasps[i].grasp_pose.pose.orientation.w = result.getRotation().w();
-
     // correct for the origin transform
-    grasps[i].grasp_pose.pose.position.x += centroid.x;
-    grasps[i].grasp_pose.pose.position.y += centroid.y;
-    grasps[i].grasp_pose.pose.position.z += centroid.z;
+    result.getOrigin().setX(result.getOrigin().getX() + centroid.x);
+    result.getOrigin().setY(result.getOrigin().getY() + centroid.y);
+    result.getOrigin().setZ(result.getOrigin().getZ() + centroid.z);
+
+    // copy over the values
+    grasps[i].setGraspPose(graspdb::Pose(grasps[i].getGraspPose().getRobotFixedFrameID(), result));
   }
+
+  return grasps;
 }
