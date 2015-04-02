@@ -242,18 +242,28 @@ void ModelGenerationPanel::removeModel()
     return;
   }
 
+  QMessageBox::StandardButton confirm;
   int id = atoi(selected_item.substr(5).c_str());
   if (selected_item.at(0) == 'g')
   {
     graspdb_->deleteGraspDemonstration(id);
-    current_demonstrations_.erase(current_demonstrations_.begin() + models_list_->currentIndex().row() - 1);
+    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted grasp demonstration?", QMessageBox::Yes|QMessageBox::No);
+    if (confirm == QMessageBox::Yes)
+    {
+      current_demonstrations_.erase(current_demonstrations_.begin() + models_list_->currentIndex().row() - 1);
+      delete models_list_->currentItem();
+    }
   }
   else
   {
     graspdb_->deleteGraspModel(id);
-    current_models_.erase(current_models_.begin() + models_list_->currentIndex().row() - current_demonstrations_.size() - 2);
+    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted object model?", QMessageBox::Yes|QMessageBox::No);
+    if (confirm == QMessageBox::Yes)
+    {
+      current_models_.erase(current_models_.begin() + models_list_->currentIndex().row() - current_demonstrations_.size() - 2);
+      delete models_list_->currentItem();
+    }
   }
-  delete models_list_->currentItem();
 }
 
 void ModelGenerationPanel::updateObjectNames()
