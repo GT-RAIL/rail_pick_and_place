@@ -10,7 +10,7 @@
  * \date March 4, 2015
  */
 
-#include <rail_grasp_collection/GraspRetriever.h>
+#include "rail_grasp_collection/GraspRetriever.h"
 
 using namespace std;
 using namespace rail::pick_and_place;

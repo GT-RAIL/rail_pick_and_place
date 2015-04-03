@@ -10,7 +10,10 @@
  * \date March 3, 2015
  */
 
-#include <rail_grasp_collection/GraspCollector.h>
+// RAIL Grasp Collection
+#include "rail_grasp_collection/GraspCollector.h"
+
+// ROS
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
 using namespace std;

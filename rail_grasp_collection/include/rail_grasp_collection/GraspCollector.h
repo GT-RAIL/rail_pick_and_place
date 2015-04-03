@@ -17,6 +17,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/server/simple_action_server.h>
 #include <geometry_msgs/Point32.h>
+#include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/GripperAction.h>
 #include <rail_manipulation_msgs/LiftAction.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
@@ -25,9 +26,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <tf2_ros/transform_listener.h>
-
-// graspdb
-#include <graspdb/graspdb.h>
 
 // Boost
 #include <boost/thread/mutex.hpp>
