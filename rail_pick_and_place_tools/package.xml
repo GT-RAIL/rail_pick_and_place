@@ -22,7 +22,6 @@
   <build_depend>rail_pick_and_place_msgs</build_depend>
   <build_depend>rail_manipulation_msgs</build_depend>
   <build_depend>rail_recognition</build_depend>
-  <build_depend>rail_segmentation</build_depend>
   <build_depend>rviz</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
@@ -33,7 +32,6 @@
   <run_depend>rail_pick_and_place_msgs</run_depend>
   <run_depend>rail_manipulation_msgs</run_depend>
   <run_depend>rail_recognition</run_depend>
-  <run_depend>rail_segmentation</run_depend>
   <run_depend>rviz</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_srvs</run_depend>
