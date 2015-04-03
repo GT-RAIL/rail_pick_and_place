@@ -1,0 +1,12 @@
+<!--
+   Author: Russell Toris, Worcester Polytechnic Institute
+  Version: April 3, 2015
+-->
+
+<launch>
+  <!-- Panel Params -->
+  <arg name="segment_service" default="/segmentation/segment" />
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rail_pick_and_place_tools)/rviz/model_generation.rviz"
+        output="screen" />
+</launch>

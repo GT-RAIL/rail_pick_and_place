@@ -1,3 +1,8 @@
+<!--
+   Author: Russell Toris, Worcester Polytechnic Institute
+  Version: April 3, 2015
+-->
+
 <launch>
   <!-- Grasp Database Connection Params -->
   <arg name="host" default="127.0.0.1" />
@@ -7,13 +12,12 @@
   <arg name="db" default="graspdb" />
 
   <!-- Set Global Params -->
-  <!--
   <param name="/graspdb/host" type="str" value="$(arg host)" />
   <param name="/graspdb/port" type="int" value="$(arg port)" />
   <param name="/graspdb/user" type="str" value="$(arg user)" />
   <param name="/graspdb/password" type="str" value="$(arg password)" />
   <param name="/graspdb/db" type="str" value="$(arg db)" />
--->
 
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rail_pick_and_place_tools)/rviz/model_generation.rviz" output="screen"/>
+  <!-- Main Node -->
+  <node name="rail_grasp_model_retriever" pkg="rail_recognition" type="rail_grasp_model_retriever" output="screen" />
 </launch>
