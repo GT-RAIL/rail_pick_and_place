@@ -1,6 +1,0 @@
-sensor_msgs/PointCloud cloud
-int8 numAttempts
-int16[] objectIndices # objects to be picked up
----
-bool success
-int16 objectIndex # index of the object successfully picked up

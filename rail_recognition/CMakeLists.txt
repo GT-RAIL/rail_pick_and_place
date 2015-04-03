@@ -4,8 +4,18 @@ project(rail_recognition)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp roslib actionlib actionlib_msgs graspdb pcl_conversions pcl_ros
-rail_manipulation_msgs rail_pick_and_place_msgs rail_segmentation sensor_msgs std_msgs std_srvs tf2)
+find_package(catkin REQUIRED COMPONENTS
+  actionlib
+  geometry_msgs
+  graspdb
+  pcl_conversions
+  pcl_ros
+  rail_manipulation_msgs
+  rail_pick_and_place_msgs
+  roscpp
+  sensor_msgs
+  tf2
+)
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -58,9 +68,15 @@ add_dependencies(object_recognition_listener
 )
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(model_generator ${catkin_LIBRARIES})
-target_link_libraries(object_recognizer ${catkin_LIBRARIES})
-target_link_libraries(object_recognition_listener ${catkin_LIBRARIES})
+target_link_libraries(model_generator
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(object_recognizer
+ ${catkin_LIBRARIES}
+)
+target_link_libraries(object_recognition_listener
+ ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##

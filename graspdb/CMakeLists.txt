@@ -52,7 +52,9 @@ set(GRASPDB_SOURCE
 add_library(${PROJECT_NAME} ${GRASPDB_SOURCE})
 
 ## Add message build dependencies (needed for source build)
-add_dependencies(${PROJECT_NAME} rail_pick_and_place_msgs_gencpp)
+add_dependencies(${PROJECT_NAME}
+  rail_pick_and_place_msgs_gencpp
+)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}

@@ -3,6 +3,7 @@
   <version>1.0.4</version>
   <description>Messages and Services for RAIL Pick and Place</description>
 
+  <author email="rctoris@wpi.edu">Russell Toris</author>
   <author email="davidkent@wpi.edu">David Kent</author>
   <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
   <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>

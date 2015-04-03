@@ -1,5 +1,0 @@
-int8 numAttempts
-int32 objectIndex
-geometry_msgs/PoseStamped[] grasps
----
-bool success

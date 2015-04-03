@@ -1,10 +1,10 @@
 # Define the goal
-uint32[] grasp_demonstration_ids
-uint32[] grasp_model_ids
-uint32 max_model_size
+uint32[] grasp_demonstration_ids  # The IDs of the grasp demonstrations to use
+uint32[] grasp_model_ids          # The IDs of the existing grasp models to use
+uint32 max_model_size             # The maximum number of grasps per model allowed
 ---
 # Define the result
-uint32[] new_model_ids
+uint32[] new_model_ids            # The IDs of the newly constructed models
 ---
 # Define feedback message
-string message
+string message                    # The current state message
