@@ -60,6 +60,11 @@ GraspCollectionPanel::GraspCollectionPanel(QWidget *parent) :
 
 void GraspCollectionPanel::executeGraspAndStore()
 {
+  if (!ac_grasp_and_store_.isServerConnected())
+  {
+    grasp_and_store_status_->setText("No grasp and store action server found!");
+    return;
+  }
   rail_pick_and_place_msgs::GraspAndStoreGoal grasp_and_store_goal;
   grasp_and_store_goal.lift = lift_box_->isChecked();
   grasp_and_store_goal.verify = verify_box_->isChecked();
