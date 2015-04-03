@@ -161,7 +161,7 @@ void ModelGenerationPanel::executeRegistration()
 
 void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState &state, const rail_pick_and_place_msgs::GenerateModelsResultConstPtr &result)
 {
-  int new_models = result->newModelsTotal;
+  int new_models = result->new_model_ids.size();
   stringstream ss;
   if (new_models == 0)
   {

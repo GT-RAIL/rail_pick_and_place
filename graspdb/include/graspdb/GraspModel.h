@@ -101,13 +101,22 @@ public:
   void setObjectName(const std::string &object_name);
 
   /*!
-   * \brief Grasps value accessor.
+   * \brief Grasps value accessor (immutable).
    *
    * Get the grasps of this GraspModel.
    *
    * \return The grasps.
    */
   const std::vector<Grasp> &getGrasps() const;
+
+  /*!
+   * \brief Grasps value accessor.
+   *
+   * Get the grasps of this GraspModel.
+   *
+   * \return The grasps.
+   */
+  std::vector<Grasp> &getGrasps();
 
   /*!
    * \brief Grasps size accessor.
@@ -258,7 +267,7 @@ public:
   sensor_msgs::PointCloud2 &getPointCloud();
 
   /*!
-   * \brief Point cloud buffer mutator.
+   * \brief Point cloud mutator.
    *
    * Set the point cloud message to the given values based on the ROS message.
    *

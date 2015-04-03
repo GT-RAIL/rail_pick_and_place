@@ -1,7 +1,7 @@
 #include <rail_recognition/PointCloudRecognizer.h>
+#include <rail_recognition/PointCloudMetrics.h>
 
 // PCL
-#include <pcl/filters/extract_indices.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/registration/icp.h>
 
@@ -28,14 +28,12 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   }
 
   // convert to a PCL point cloud
-  pcl::PCLPointCloud2 object_converter;
-  pcl_conversions::toPCL(object.point_cloud, object_converter);
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr object_point_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-  pcl::fromPCLPointCloud2(object_converter, *object_point_cloud);
+  point_cloud_metrics::rosPointCloud2ToPCLPointCloud(object.point_cloud, object_point_cloud);
 
   // pre-process input cloud
-  this->filterPointCloudOutliers(object_point_cloud);
-  metrics_.transformToOrigin(object_point_cloud, object.centroid);
+  point_cloud_metrics::filterPointCloudOutliers(object_point_cloud);
+  point_cloud_metrics::transformToOrigin(object_point_cloud, object.centroid);
 
   // perform recognition
   double min_score = numeric_limits<double>::infinity();
@@ -45,10 +43,8 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   for (size_t i = 0; i < candidates.size(); i++)
   {
     // convert the candidate point cloud to a PCL point cloud
-    pcl::PCLPointCloud2 cur_converter;
-    pcl_conversions::toPCL(candidates[i].getPointCloud(), cur_converter);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr candidate_point_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::fromPCLPointCloud2(cur_converter, *candidate_point_cloud);
+    point_cloud_metrics::rosPointCloud2ToPCLPointCloud(candidates[i].getPointCloud(), candidate_point_cloud);
 
     Eigen::Matrix4f cur_icp_tf;
     bool cur_swapped;
@@ -114,33 +110,6 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   return true;
 }
 
-void PointCloudRecognizer::filterPointCloudOutliers(pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc) const
-{
-  // use a KD tree to search
-  pcl::KdTreeFLANN<pcl::PointXYZRGB> search_tree;
-  search_tree.setInputCloud(pc);
-
-  // check each point
-  pcl::IndicesPtr to_keep(new vector<int>);
-  for (size_t i = 0; i < pc->size(); i++)
-  {
-    vector<int> indices;
-    vector<float> distances;
-    // check how many neighbors pass the test
-    int neighbors = search_tree.radiusSearch(pc->at(i), FILTER_SEARCH_RADIUS, indices, distances);
-    if (neighbors >= FILTER_MIN_NUM_NEIGHBORS)
-    {
-      to_keep->push_back(i);
-    }
-  }
-
-  // extract the point we wish to keep
-  pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-  extract.setInputCloud(pc);
-  extract.setIndices(to_keep);
-  extract.filter(*pc);
-}
-
 double PointCloudRecognizer::scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr candidate,
     pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, Eigen::Matrix4f &icp_tf, bool &icp_swapped) const
 {
@@ -150,12 +119,12 @@ double PointCloudRecognizer::scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>
   pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
   if (icp_swapped)
   {
-    icp.setInputSource(candidate);
     icp.setInputTarget(object);
+    icp.setInputSource(candidate);
   } else
   {
-    icp.setInputSource(object);
     icp.setInputTarget(candidate);
+    icp.setInputSource(object);
   }
 
   // run ICP on the two point clouds
@@ -165,74 +134,14 @@ double PointCloudRecognizer::scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>
   icp_tf = icp.getFinalTransformation();
 
   // calculate the distance and color error
-  double distance_error = this->calculateRegistrationMetricDistanceError(candidate, aligned);
-  double color_error = this->calculateRegistrationMetricOverlap(candidate, aligned);
+  double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(candidate, aligned);
+  double color_error = point_cloud_metrics::calculateRegistrationMetricOverlap(candidate, aligned, true);
 
   // calculate the final weighted result
   double result = ALPHA * (3.0 * distance_error) + (1.0 - ALPHA) * (color_error / 100.0);
   return result;
 }
 
-double PointCloudRecognizer::calculateRegistrationMetricDistanceError(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr base,
-    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr target) const
-{
-  // search using a KD tree
-  pcl::KdTreeFLANN<pcl::PointXYZRGB> search_tree;
-  search_tree.setInputCloud(base);
-
-  // search for the nearest point to each point
-  double score = 0;
-  for (size_t i = 0; i < target->size(); i++)
-  {
-    vector<int> indices;
-    vector<float> distances;
-    search_tree.nearestKSearch(target->at(i), 1, indices, distances);
-    score += (double) distances[0];
-  }
-
-  return score;
-}
-
-double PointCloudRecognizer::calculateRegistrationMetricOverlap(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr base,
-    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr target) const
-{
-  // search with a KD tree
-  pcl::KdTreeFLANN<pcl::PointXYZRGB> search_tree;
-  search_tree.setInputCloud(base);
-
-  // search each point
-  int score = 0;
-  float error = 0;
-  for (size_t i = 0; i < target->size(); i++)
-  {
-    // get the current point
-    vector<int> indices;
-    vector<float> distances;
-    const pcl::PointXYZRGB &search_point = target->at(i);
-    // perform a radius search to see how many neighbors are found
-    int neighbors = search_tree.radiusSearch(search_point, OVERLAP_SEARCH_RADIUS, indices, distances);
-    // check if there are enough neighbors
-    if (neighbors > 0)
-    {
-      score++;
-      // check the average RGB color distance
-      double rgb_distance = 0;
-      for (size_t j = 0; j < indices.size(); j++)
-      {
-        const pcl::PointXYZRGB &point = base->at(indices[j]);
-        rgb_distance += sqrt(pow(search_point.r - point.r, 2) + pow(search_point.g - point.g, 2) +
-            pow(search_point.b - point.b, 2));
-      }
-      // normalize the distance
-      rgb_distance /= neighbors;
-      error += rgb_distance;
-    }
-  }
-
-  // normalize the error
-  error /= ((double) score);
-  return error;
-}
 
 vector<graspdb::Grasp> PointCloudRecognizer::computeGraspList(const Eigen::Matrix4f &icp_transform,
     const bool icp_swapped, const geometry_msgs::Point &centroid, const vector<graspdb::Grasp> &candidate_grasps) const
@@ -258,11 +167,10 @@ vector<graspdb::Grasp> PointCloudRecognizer::computeGraspList(const Eigen::Matri
     tf2::Transform result;
     if (icp_swapped)
     {
-      tf2::Transform result;
       result.mult(tf_icp, tf_pose);
     } else
     {
-      // use the invese for the result
+      // use the inverse for the result
       tf2::Transform inverse = tf_icp.inverse();
       result.mult(inverse, tf_pose);
     }

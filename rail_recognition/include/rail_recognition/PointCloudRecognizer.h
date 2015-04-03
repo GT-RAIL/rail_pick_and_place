@@ -3,15 +3,13 @@
 
 // ROS
 #include <graspdb/graspdb.h>
-#include <rail_recognition/Model.h>
 #include <sensor_msgs/PointCloud.h>
+#include <ros/ros.h>
+#include <rail_manipulation_msgs/SegmentedObject.h>
 
 // PCL
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-
-// Pick and Place
-#include "PointCloudMetrics.h"
 
 namespace rail
 {
@@ -38,11 +36,6 @@ public:
       const std::vector<graspdb::GraspModel> &candidates) const;
 
 private:
-  /**
-  * Filters point cloud outliers if they have less neighbors than the neighbor threshold within a given radius
-  * @param cloudPtr pointer to the point cloud to be filtered
-  */
-  void filterPointCloudOutliers(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPtr) const;
 
 
   /**
@@ -55,15 +48,6 @@ private:
       pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, Eigen::Matrix4f &icp_tf, bool &icp_swapped) const;
 
   /**
-  * Calculate a metric for how successful the registration was based on distance error
-  * @param baseCloudPtr pointer to the point cloud to which the target will be transformed
-  * @param targetCloudPtr pointer to the point cloud that will be transformed to the base cloud
-  * @return a score representing the success of the registration
-  */
-  double calculateRegistrationMetricDistanceError(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr base,
-      pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr target) const;
-
-  /**
   * Calculate a metric for how successful the registration was based on overlap
   * @param baseCloudPtr pointer to the point cloud to which the target will be transformed
   * @param targetCloudPtr pointer to the point cloud that will be transformed to the base cloud
@@ -74,9 +58,6 @@ private:
 
   std::vector<graspdb::Grasp> computeGraspList(const Eigen::Matrix4f &icp_transform, const bool swapped,
       const geometry_msgs::Point &centroid, const std::vector<graspdb::Grasp> &candidate_grasps) const;
-
-  /*! Various ranking and matching metrics for point clouds. */
-  PointCloudMetrics metrics_;
 };
 
 }

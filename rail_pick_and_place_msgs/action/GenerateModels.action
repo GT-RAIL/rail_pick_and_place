@@ -4,8 +4,7 @@ uint32[] grasp_model_ids
 uint32 max_model_size
 ---
 # Define the result
-int32[] unusedModelIds
-uint32 newModelsTotal
+uint32[] new_model_ids
 ---
 # Define feedback message
 string message

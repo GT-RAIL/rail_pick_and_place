@@ -29,6 +29,7 @@ include_directories(include
 add_executable(model_generator
   nodes/model_generator.cpp
   src/ModelGenerator.cpp
+  src/PCLGraspModel.cpp
   src/PointCloudMetrics.cpp
 )
 add_executable(object_recognizer

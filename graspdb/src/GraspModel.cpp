@@ -57,6 +57,11 @@ const vector<Grasp> &GraspModel::getGrasps() const
   return grasps_;
 }
 
+vector<Grasp> &GraspModel::getGrasps()
+{
+  return grasps_;
+}
+
 size_t GraspModel::getNumGrasps() const
 {
   return grasps_.size();
