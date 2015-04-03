@@ -11,7 +11,8 @@
  * \date March 11, 2015
  */
 
-#include <graspdb/GraspDemonstration.h>
+// graspdb
+#include "graspdb/GraspDemonstration.h"
 
 using namespace std;
 using namespace rail::pick_and_place::graspdb;

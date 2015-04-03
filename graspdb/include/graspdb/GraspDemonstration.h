@@ -14,16 +14,16 @@
 #ifndef RAIL_PICK_AND_PLACE_GRASPDB_GRASP_DEMONSTRATION_H_
 #define RAIL_PICK_AND_PLACE_GRASPDB_GRASP_DEMONSTRATION_H_
 
+// graspdb
+#include "Entity.h"
+#include "Pose.h"
+
 // ROS
 #include <rail_pick_and_place_msgs/GraspDemonstration.h>
 #include <sensor_msgs/PointCloud2.h>
 
 // C++ Standard Library
 #include <string>
-
-// graspdb
-#include "Entity.h"
-#include "Pose.h"
 
 namespace rail
 {

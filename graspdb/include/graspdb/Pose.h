@@ -13,6 +13,10 @@
 #ifndef RAIL_PICK_AND_PLACE_GRASPDB_POSE_H_
 #define RAIL_PICK_AND_PLACE_GRASPDB_POSE_H_
 
+// graspdb
+#include "Orientation.h"
+#include "Position.h"
+
 // ROS
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -24,10 +28,6 @@
 
 // C++ Standard Library
 #include <string>
-
-// graspdb
-#include "Orientation.h"
-#include "Position.h"
 
 namespace rail
 {

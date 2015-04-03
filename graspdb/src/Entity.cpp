@@ -8,7 +8,8 @@
  * \date March 11, 2015
  */
 
-#include <graspdb/Entity.h>
+// graspdb
+#include "graspdb/Entity.h"
 
 using namespace rail::pick_and_place::graspdb;
 

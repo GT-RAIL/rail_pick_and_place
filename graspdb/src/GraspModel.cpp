@@ -11,7 +11,10 @@
  * \date March 12, 2015
  */
 
-#include <graspdb/GraspModel.h>
+// graspdb
+#include "graspdb/GraspModel.h"
+
+// ROS
 #include <ros/ros.h>
 
 using namespace std;

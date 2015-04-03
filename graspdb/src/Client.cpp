@@ -8,7 +8,10 @@
  * \date March 11, 2015
  */
 
-#include <graspdb/Client.h>
+// graspdb
+#include "graspdb/Client.h"
+
+// ROS
 #include <ros/ros.h>
 
 using namespace std;

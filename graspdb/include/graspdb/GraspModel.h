@@ -14,6 +14,9 @@
 #ifndef RAIL_PICK_AND_PLACE_GRASPDB_GRASP_MODEL_H_
 #define RAIL_PICK_AND_PLACE_GRASPDB_GRASP_MODEL_H_
 
+// graspdb
+#include "Grasp.h"
+
 // ROS
 #include <rail_pick_and_place_msgs/GraspModel.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -21,9 +24,6 @@
 // C++ Standard Library
 #include <string>
 #include <vector>
-
-// graspdb
-#include "Grasp.h"
 
 namespace rail
 {

@@ -10,7 +10,8 @@
  * \date March 11, 2015
  */
 
-#include <graspdb/Pose.h>
+// graspdb
+#include "graspdb/Pose.h"
 
 using namespace std;
 using namespace rail::pick_and_place::graspdb;
