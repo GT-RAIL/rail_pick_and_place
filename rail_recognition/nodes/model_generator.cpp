@@ -1,4 +1,4 @@
-#include <rail_recognition/ModelGenerator.h>
+#include "rail_recognition/ModelGenerator.h"
 
 using namespace std;
 using namespace rail::pick_and_place;

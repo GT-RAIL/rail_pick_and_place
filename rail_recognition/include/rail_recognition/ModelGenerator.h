@@ -1,3 +1,9 @@
+#ifndef RAIL_PICK_AND_PLACE_MODEL_GENERATOR_H_
+#define RAIL_PICK_AND_PLACE_MODEL_GENERATOR_H_
+
+// RAIL Recognition
+#include "PCLGraspModel.h"
+
 // ROS
 #include <actionlib/server/simple_action_server.h>
 #include <graspdb/graspdb.h>
@@ -7,9 +13,6 @@
 // PCL
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-
-// RAIL Recognition
-#include "PCLGraspModel.h"
 
 namespace rail
 {
@@ -63,3 +66,5 @@ private:
 
 }
 }
+
+#endif

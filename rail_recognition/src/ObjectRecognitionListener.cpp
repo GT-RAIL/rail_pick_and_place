@@ -1,6 +1,9 @@
+// RAIL Recognition
+#include "rail_recognition/ObjectRecognitionListener.h"
+#include "rail_recognition/PointCloudRecognizer.h"
+
+// ROS
 #include <geometry_msgs/PoseArray.h>
-#include <rail_recognition/ObjectRecognitionListener.h>
-#include <rail_recognition/PointCloudRecognizer.h>
 
 using namespace std;
 using namespace rail::pick_and_place;
@@ -133,22 +136,6 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
 bool ObjectRecognitionListener::comparePointClouds(const sensor_msgs::PointCloud2 &pc1,
     const sensor_msgs::PointCloud2 &pc2) const
 {
-  // check the size first
-  if (pc1.data.size() != pc2.data.size())
-  {
-    return false;
-  }
-
-  // check each data point
-  for (size_t i = 0; i < pc1.data.size(); i++)
-  {
-    if (pc1.data[i] != pc2.data[i])
-    {
-      // break early
-      return false;
-    }
-  }
-
-  // all checks passed
-  return true;
+  // check the size first then compare
+  return (pc1.data.size() == pc2.data.size()) && (pc1.data == pc1.data);
 }

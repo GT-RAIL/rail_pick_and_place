@@ -1,7 +1,10 @@
+// RAIL Recognition
+#include "rail_recognition/ModelGenerator.h"
+#include "rail_recognition/PointCloudMetrics.h"
+
+// ROS
 #include <geometry_msgs/PoseArray.h>
 #include <pcl_ros/point_cloud.h>
-#include <rail_recognition/ModelGenerator.h>
-#include <rail_recognition/PointCloudMetrics.h>
 
 using namespace std;
 using namespace rail::pick_and_place;
