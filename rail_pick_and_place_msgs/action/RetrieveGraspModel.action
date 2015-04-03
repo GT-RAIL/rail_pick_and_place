@@ -1,0 +1,9 @@
+# Define the goal
+uint32 id               # The ID of the grasp model to retrieve
+---
+# Define the result
+bool success            # If the grasp model retrieval was successful
+GraspModel grasp_model  # The grasp model information
+---
+# Define a feedback message
+string message          # The current state message

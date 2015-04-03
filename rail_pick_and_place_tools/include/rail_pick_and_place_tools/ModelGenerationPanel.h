@@ -110,7 +110,7 @@ private:
   ros::Publisher display_grasps_pub;
 
   // The ROS node handle.
-  ros::NodeHandle nh_;
+  ros::NodeHandle node_;
 
   graspdb::Client *graspdb_;
   std::vector<graspdb::GraspDemonstration> current_demonstrations_;

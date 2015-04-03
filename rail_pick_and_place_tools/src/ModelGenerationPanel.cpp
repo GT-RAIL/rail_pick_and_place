@@ -6,7 +6,11 @@
  * \date March 2, 2015
  */
 
-#include <rail_pick_and_place_tools/ModelGenerationPanel.h>
+// RAIL Pick and Place Tools
+#include "rail_pick_and_place_tools/ModelGenerationPanel.h"
+
+// ROS
+#include <pluginlib/class_list_macros.h>
 
 using namespace std;
 
@@ -15,10 +19,9 @@ namespace rail
 namespace pick_and_place
 {
 
-ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
-    rviz::Panel(parent), ac_generate_models("/model_generator/generate_models", true)
+ModelGenerationPanel::ModelGenerationPanel(QWidget *parent)
+    : rviz::Panel(parent), ac_generate_models("/model_generator/generate_models", true)
 {
-  //setup connection to grasp database
   // set defaults
   int port = graspdb::Client::DEFAULT_PORT;
   string host("127.0.0.1");
@@ -27,28 +30,31 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
   string db("graspdb");
 
   // grab any parameters we need
-  nh_.getParam("/graspdb/host", host);
-  nh_.getParam("/graspdb/port", port);
-  nh_.getParam("/graspdb/user", user);
-  nh_.getParam("/graspdb/password", password);
-  nh_.getParam("/graspdb/db", db);
+  node_.getParam("/graspdb/host", host);
+  node_.getParam("/graspdb/port", port);
+  node_.getParam("/graspdb/user", user);
+  node_.getParam("/graspdb/password", password);
+  node_.getParam("/graspdb/db", db);
 
   // connect to the grasp database
   graspdb_ = new graspdb::Client(host, port, user, password, db);
-  okay_ = graspdb_->connect();
+  bool okay = graspdb_->connect();
 
-  if (okay_)
-    ROS_INFO("Successfully connected to grasp database.");
-  else
-    ROS_INFO("Could not connect to grasp database.");
+  if (!okay)
+  {
+    ROS_WARN("Could not connect to grasp database.");
+  }
 
-  display_cloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("pc_registration/model_cloud", 1);
-  display_grasps_pub = nh_.advertise<geometry_msgs::PoseArray>("pc_registration/model_grasps", 1);
+  display_cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("pc_registration/model_cloud", 1);
+  display_grasps_pub = node_.advertise<geometry_msgs::PoseArray>("pc_registration/model_grasps", 1);
 
-  models_list_ = new QListWidget;
-  object_list_ = new QComboBox;
 
-  QObject::connect(object_list_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(populateModelsList(const QString &)));
+  models_list_ = new QListWidget();
+  object_list_ = new QComboBox();
+
+  QObject::connect(object_list_, SIGNAL(currentIndexChanged(
+      const QString &)), this, SLOT(populateModelsList(
+      const QString &)));
 
   updateObjectNames();
 
@@ -122,7 +128,9 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent) :
 
 ModelGenerationPanel::~ModelGenerationPanel()
 {
+  // cleanup
   graspdb_->disconnect();
+  delete graspdb_;
 }
 
 void ModelGenerationPanel::deselectAll()
@@ -222,7 +230,7 @@ void ModelGenerationPanel::displayModel()
     cloud = current_models_[i].getPointCloud();
     cloud.header.frame_id = "base_footprint";
     poses.header.frame_id = "base_footprint";
-    for (unsigned int j = 0; j < current_models_[i].getNumGrasps(); j ++)
+    for (unsigned int j = 0; j < current_models_[i].getNumGrasps(); j++)
     {
       poses.poses.push_back(current_models_[i].getGrasp(j).getGraspPose().toROSPoseMessage());
     }
@@ -252,7 +260,7 @@ void ModelGenerationPanel::removeModel()
   if (selected_item.at(0) == 'g')
   {
     graspdb_->deleteGraspDemonstration(id);
-    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted grasp demonstration?", QMessageBox::Yes|QMessageBox::No);
+    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted grasp demonstration?", QMessageBox::Yes | QMessageBox::No);
     if (confirm == QMessageBox::Yes)
     {
       current_demonstrations_.erase(current_demonstrations_.begin() + models_list_->currentIndex().row() - 1);
@@ -262,7 +270,7 @@ void ModelGenerationPanel::removeModel()
   else
   {
     graspdb_->deleteGraspModel(id);
-    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted object model?", QMessageBox::Yes|QMessageBox::No);
+    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted object model?", QMessageBox::Yes | QMessageBox::No);
     if (confirm == QMessageBox::Yes)
     {
       current_models_.erase(current_models_.begin() + models_list_->currentIndex().row() - current_demonstrations_.size() - 2);
@@ -281,7 +289,7 @@ void ModelGenerationPanel::updateObjectNames()
   object_names.insert(object_names.end(), model_names.begin(), model_names.end());
   sort(object_names.begin(), object_names.end());
   object_names.erase(unique(object_names.begin(), object_names.end()), object_names.end());
-  for (unsigned int i = 0; i < object_names.size(); i ++)
+  for (unsigned int i = 0; i < object_names.size(); i++)
   {
     object_list_->addItem(object_names[i].c_str());
   }
@@ -300,7 +308,7 @@ void ModelGenerationPanel::populateModelsList(const QString &text)
 
   QListWidgetItem *grasps_label = new QListWidgetItem("--Grasp Demonstrations--", models_list_);
   grasps_label->setFlags(Qt::ItemIsEnabled);
-  for (unsigned int i = 0; i < current_demonstrations_.size(); i ++)
+  for (unsigned int i = 0; i < current_demonstrations_.size(); i++)
   {
     stringstream ss;
     ss << "grasp" << current_demonstrations_[i].getID();
@@ -311,7 +319,7 @@ void ModelGenerationPanel::populateModelsList(const QString &text)
 
   QListWidgetItem *models_label = new QListWidgetItem("--Object Models--", models_list_);
   models_label->setFlags(Qt::ItemIsEnabled);
-  for (unsigned int i = 0; i < current_models_.size(); i ++)
+  for (unsigned int i = 0; i < current_models_.size(); i++)
   {
     stringstream ss;
     ss << "model" << current_models_[i].getID();
@@ -333,7 +341,7 @@ void ModelGenerationPanel::updateModelInfo()
   }
   int row = models_list_->count();
   graspdb_->loadGraspModelsByObjectName(object_list_->currentText().toStdString(), models);
-  for (int i = models.size() - 1; i >= 0; i --)
+  for (int i = models.size() - 1; i >= 0; i--)
   {
     if (models[i].getID() <= max_id)
     {
@@ -373,8 +381,5 @@ void ModelGenerationPanel::load(const rviz::Config &config)
 }
 }
 
-// Tell pluginlib about this class.  Every class which should be
-// loadable by pluginlib::ClassLoader must have these two lines
-// compiled in its .cpp file, outside of any namespace scope.
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(rail::pick_and_place::ModelGenerationPanel,rviz::Panel )
+// Tell pluginlib about this class (must outside of any namespace scope)
+PLUGINLIB_EXPORT_CLASS(rail::pick_and_place::ModelGenerationPanel, rviz::Panel)

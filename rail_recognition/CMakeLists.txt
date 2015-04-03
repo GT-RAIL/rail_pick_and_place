@@ -54,6 +54,10 @@ add_executable(object_recognition_listener
   src/PointCloudMetrics.cpp
   src/PointCloudRecognizer.cpp
 )
+add_executable(rail_grasp_model_retriever
+  nodes/rail_grasp_model_retriever.cpp
+  src/GraspModelRetriever.cpp
+)
 
 ## Add message build dependencies (needed for source build)
 add_dependencies(model_generator
@@ -64,6 +68,9 @@ add_dependencies(object_recognizer
   rail_manipulation_msgs_generate_messages_cpp
 )
 add_dependencies(object_recognition_listener
+  rail_manipulation_msgs_generate_messages_cpp
+)
+add_dependencies(rail_grasp_model_retriever
   rail_manipulation_msgs_generate_messages_cpp
 )
 
@@ -77,13 +84,16 @@ target_link_libraries(object_recognizer
 target_link_libraries(object_recognition_listener
  ${catkin_LIBRARIES}
 )
+target_link_libraries(rail_grasp_model_retriever
+ ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS model_generator object_recognizer object_recognition_listener
+install(TARGETS model_generator object_recognizer object_recognition_listener rail_grasp_model_retriever
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

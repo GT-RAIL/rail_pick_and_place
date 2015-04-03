@@ -5,37 +5,36 @@
  * \author David Kent, WPI - davidkent@wpi.edu
  * \date March 11, 2015
  */
-#ifndef VISION_PANEL_H
-#define VISION_PANEL_H
+#ifndef RAIL_PICK_AND_PLACE_SEGMENT_PANEL_H_
+#define RAIL_PICK_AND_PLACE_SEGMENT_PANEL_H_
 
+// ROS
 #include <ros/ros.h>
-#include <actionlib/client/simple_action_client.h>
-#include <std_srvs/Empty.h>
 #include <rviz/panel.h>
 
+// QT
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
-
-class QLineEdit;
 
 namespace rail
 {
 namespace pick_and_place
 {
 
-class VisionPanel : public rviz::Panel
+class SegmentPanel : public rviz::Panel
 {
-// This class uses Qt slots and is a subclass of QObject, so it needs
-// the Q_OBJECT macro.
-  Q_OBJECT
+
+// this class uses Qt slots and is a subclass of QObject, so it needs the Q_OBJECT macro
+Q_OBJECT
+
 public:
   /**
   * \brief constructor
   * @param parent parent widget
   */
-  VisionPanel(QWidget *parent = 0);
+  SegmentPanel(QWidget *parent = NULL);
 
   /**
   * \brief rviz load function
@@ -49,27 +48,27 @@ public:
   */
   virtual void save(rviz::Config config) const;
 
-protected:
-  QPushButton *segment_button_;
-  QLabel *action_status_;
+private:
+  /*! The ROS node handle. */
+  ros::NodeHandle node_;
+  /*! The main segmentation service. */
+  ros::ServiceClient segment_srv_;
 
-protected
-  Q_SLOTS:
+  /*! The main segmentation button. */
+  QPushButton *segment_button_;
+  /*! The segmentation service. */
+  QLabel *segment_status_;
+
+// used as UI callbacks
+private Q_SLOTS:
 
   /**
   * \brief Call segmentation service and update the interface accordingly
   */
   void executeSegment();
-
-private:
-  ros::ServiceClient segmentClient;
-
-  // The ROS node handle.
-  ros::NodeHandle nh_;
-
 };
 
-} // end namespace pick_and_place
-} // end namespace rail
+}
+}
 
-#endif // VISION_PANEL_H
+#endif

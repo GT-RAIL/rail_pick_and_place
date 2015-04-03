@@ -13,8 +13,8 @@
       A panel widget allowing interactive recognition and grasping model generation.
     </description>
   </class>
-  <class name="rail_pick_and_place_tools/Vision"
-         type="rail::pick_and_place::VisionPanel"
+  <class name="rail_pick_and_place_tools/Segment"
+         type="rail::pick_and_place::SegmentPanel"
          base_class_type="rviz::Panel">
     <description>
       A panel widget for point cloud segmentation and recognition.

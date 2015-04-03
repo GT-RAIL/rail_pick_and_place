@@ -28,6 +28,7 @@ add_action_files(FILES
   GenerateModels.action
   GraspAndStore.action
   RetrieveGraspDemonstration.action
+  RetrieveGraspModel.action
 )
 
 generate_messages(DEPENDENCIES
