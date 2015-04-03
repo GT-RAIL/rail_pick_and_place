@@ -2,6 +2,15 @@
 Changelog for package graspdb
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2015-04-03)
+------------------
+* general cleanup
+* header cleanup
+* major refactor of model generation
+* mutable accessors added
+* added TF2 data types
+* Contributors: Russell Toris
+
 1.0.4 (2015-03-31)
 ------------------
 

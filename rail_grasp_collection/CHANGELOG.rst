@@ -2,6 +2,14 @@
 Changelog for package rail_grasp_collection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2015-04-03)
+------------------
+* new launch files
+* header cleanup
+* moved to ptr based storage
+* begin refactor of metrics
+* Contributors: Russell Toris
+
 1.0.4 (2015-03-31)
 ------------------
 

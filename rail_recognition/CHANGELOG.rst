@@ -2,6 +2,18 @@
 Changelog for package rail_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2015-04-03)
+------------------
+* new launch files
+* grasp model retriever added
+* general cleanup
+* refactor of model generator
+* major refactor of model generation
+* adds vector for search
+* more refactoring
+* begin refactor of metrics
+* Contributors: Russell Toris
+
 1.0.4 (2015-03-31)
 ------------------
 * orientation added

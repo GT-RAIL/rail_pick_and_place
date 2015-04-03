@@ -2,6 +2,18 @@
 Changelog for package rail_pick_and_place_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2015-04-03)
+------------------
+* new launch files
+* grasp model retriever added
+* travis fix
+* travis fix
+* Merge branch 'develop' of github.com:WPI-RAIL/rail_pick_and_place into develop
+* major refactor of model generation
+* Buttons should now correctly handle the case of an unconnected action client - server pair
+* Added confirmation dialog for model removal
+* Contributors: David Kent, Russell Toris
+
 1.0.4 (2015-03-31)
 ------------------
 * removed old recognize actions
