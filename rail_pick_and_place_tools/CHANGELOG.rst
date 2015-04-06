@@ -2,6 +2,12 @@
 Changelog for package rail_pick_and_place_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2015-04-06)
+------------------
+* refactor of RViz GUIs
+* cleanup of grasp collection panel
+* Contributors: Russell Toris
+
 1.1.0 (2015-04-03)
 ------------------
 * new launch files

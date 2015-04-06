@@ -1,10 +1,14 @@
 /*!
- * \VisionPanel.h
- * \brief Rviz plugin for point cloud segmentation and recognition.
+ * \file SegmentPanel.h
+ * \brief RViz plugin for point cloud segmentation.
+ *
+ * The segmentation panel allows for sending segmentation service requests.
  *
  * \author David Kent, WPI - davidkent@wpi.edu
- * \date March 11, 2015
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 6, 2015
  */
+
 #ifndef RAIL_PICK_AND_PLACE_SEGMENT_PANEL_H_
 #define RAIL_PICK_AND_PLACE_SEGMENT_PANEL_H_
 
@@ -21,6 +25,12 @@ namespace rail
 namespace pick_and_place
 {
 
+/*!
+ * \class SegmentPanel
+ * \brief RViz plugin for point cloud segmentation.
+ *
+ * The segmentation panel allows for sending segmentation service requests.
+ */
 class SegmentPanel : public rviz::Panel
 {
 
@@ -28,22 +38,31 @@ class SegmentPanel : public rviz::Panel
 Q_OBJECT
 
 public:
-  /**
-  * \brief constructor
-  * @param parent parent widget
-  */
+  /*!
+   * \brief Create a new SegmentPanel.
+   *
+   * Creates a new SegmentPanel and adds the correct widgets.
+   *
+   * \param parent The parent widget for this panel (defaults to NULL).
+   */
   SegmentPanel(QWidget *parent = NULL);
 
-  /**
-  * \brief rviz load function
-  * @param config rviz configuration
-  */
+  /*!
+   * \brief Load RViz configuration settings.
+   *
+   * No settings are saved or loaded for this panel.
+   *
+   * \param config The RViz configuration settings to load.
+   */
   virtual void load(const rviz::Config &config);
 
-  /**
-  * \brief rviz save function
-  * @param config rviz configuration
-  */
+  /*!
+   * \brief Save RViz configuration settings.
+   *
+   * No settings are saved or loaded for this panel.
+   *
+   * \param config The RViz configuration settings to save.
+   */
   virtual void save(rviz::Config config) const;
 
 private:
@@ -60,9 +79,11 @@ private:
 // used as UI callbacks
 private Q_SLOTS:
 
-  /**
-  * \brief Call segmentation service and update the interface accordingly
-  */
+  /*!
+   * \brief Callback for the segment button.
+   *
+   * Calls the segmentation service.
+   */
   void executeSegment();
 };
 
