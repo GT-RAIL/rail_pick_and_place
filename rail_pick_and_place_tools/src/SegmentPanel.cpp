@@ -13,12 +13,11 @@
 #include <pluginlib/class_list_macros.h>
 #include <std_srvs/Empty.h>
 
-using namespace std;
+// QT
+#include <QGridLayout>
 
-namespace rail
-{
-namespace pick_and_place
-{
+using namespace std;
+using namespace rail::pick_and_place;
 
 SegmentPanel::SegmentPanel(QWidget *parent) : rviz::Panel(parent)
 {
@@ -41,10 +40,12 @@ SegmentPanel::SegmentPanel(QWidget *parent) : rviz::Panel(parent)
   // service label
   string service_label_text = "Calling on " + segment_service;
   QLabel *segment_label = new QLabel(service_label_text.c_str());
+  segment_label->setAlignment(Qt::AlignCenter);
   layout->addWidget(segment_label);
 
   // service feedback
   segment_status_ = new QLabel("Ready to segment.");
+  segment_status_->setAlignment(Qt::AlignCenter);
   layout->addWidget(segment_status_);
 
   // connect the segmentation button
@@ -93,8 +94,5 @@ void SegmentPanel::load(const rviz::Config &config)
   rviz::Panel::load(config);
 }
 
-}
-}
-
-// Tell pluginlib about this class (must outside of any namespace scope)
+// tell pluginlib about this class (must outside of any namespace scope)
 PLUGINLIB_EXPORT_CLASS(rail::pick_and_place::SegmentPanel, rviz::Panel)

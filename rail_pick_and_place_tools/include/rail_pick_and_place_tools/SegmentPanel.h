@@ -13,10 +13,8 @@
 #include <rviz/panel.h>
 
 // QT
-#include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QVBoxLayout>
 
 namespace rail
 {
