@@ -6,27 +6,24 @@
  * \date March 2, 2015
  */
 
-#ifndef MODEL_GENERATION_PANEL_H
-#define MODEL_GENERATION_PANEL_H
+#ifndef RAIL_PICK_AND_PLACE_MODEL_GENERATION_PANEL_H_
+#define RAIL_PICK_AND_PLACE_MODEL_GENERATION_PANEL_H_
 
-#include <ros/ros.h>
+// ROS
 #include <actionlib/client/simple_action_client.h>
 #include <graspdb/graspdb.h>
-#include <geometry_msgs/PoseArray.h>
 #include <rail_pick_and_place_msgs/GenerateModelsAction.h>
+#include <rail_pick_and_place_msgs/RetrieveGraspDemonstrationAction.h>
+#include <rail_pick_and_place_msgs/RetrieveGraspModelAction.h>
+#include <ros/ros.h>
 #include <rviz/panel.h>
-#include <sensor_msgs/PointCloud2.h>
 
+// Qt
 #include <QComboBox>
-#include <QGridLayout>
 #include <QLabel>
 #include <QListWidget>
-#include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QVBoxLayout>
-
-class QLineEdit;
 
 namespace rail
 {
@@ -35,20 +32,21 @@ namespace pick_and_place
 
 class ModelGenerationPanel : public rviz::Panel
 {
-// This class uses Qt slots and is a subclass of QObject, so it needs
-// the Q_OBJECT macro.
-  Q_OBJECT
+
+// this class uses Qt slots and is a subclass of QObject, so it needs the Q_OBJECT macro
+Q_OBJECT
+
 public:
   /**
   * \brief constructor
   * @param parent parent widget
   */
-  ModelGenerationPanel(QWidget *parent = 0);
+  ModelGenerationPanel(QWidget *parent = NULL);
 
   /**
   * \brief destructor
   */
-  ~ModelGenerationPanel();
+  virtual ~ModelGenerationPanel();
 
   /**
   * \brief rviz load function, will load option check box states
@@ -62,15 +60,40 @@ public:
   */
   virtual void save(rviz::Config config) const;
 
-protected:
+private:
+  /**
+  * \brief Callback for the registration action server finishing
+  * @param state goal state
+  * @param result registration result
+  */
+  void doneCallback(const actionlib::SimpleClientGoalState &state, const rail_pick_and_place_msgs::GenerateModelsResultConstPtr &result);
+
+  /**
+  * \brief Callback for feedback from the registration action server
+  * @param feedback registration feedback
+  */
+  void feedbackCallback(const rail_pick_and_place_msgs::GenerateModelsFeedbackConstPtr &feedback);
+
+  /*! The grasp database connection. */
+  graspdb::Client *graspdb_;
+
+  /*! The public ROS node handle. */
+  ros::NodeHandle node_;
+  /*! The generate model action client. */
+  actionlib::SimpleActionClient<rail_pick_and_place_msgs::GenerateModelsAction> generate_models_ac_;
+  /*! The retrieve grasp demonstration action client. */
+  actionlib::SimpleActionClient<rail_pick_and_place_msgs::RetrieveGraspDemonstrationAction> retrieve_grasp_ac_;
+  /*! The retrieve grasp model action client. */
+  actionlib::SimpleActionClient<rail_pick_and_place_msgs::RetrieveGraspModelAction> retrieve_grasp_model_ac_;
+
   QLabel *model_generation_status_;
   QComboBox *object_list_;
   QListWidget *models_list_;
-  QSpinBox *model_size_spinbox_;
-  QPushButton *generate_button_;
-  QPushButton *remove_button_;
+  QSpinBox *model_size_spin_box_;
+  QPushButton *refresh_button_, *select_all_button_, *deselect_all_button_, *generate_models_button_, *delete_button_;
 
-protected
+// used as UI callbacks
+private
   Q_SLOTS:
 
   /**
@@ -78,17 +101,15 @@ protected
   *
   * Checked individual grasps and merged models will be used as input for the registration graph.
   */
-  void executeRegistration();
+  void executeGenerateModels();
 
-  /**
-  * \brief Display the currently selected individual grasp or object model
-  */
-  void displayModel();
 
   /**
   * \brief Remove the currently selected individual grasp or object model
   */
-  void removeModel();
+  void deleteModel();
+
+  void selectAll();
 
   /**
   * \brief Uncheck any checked items in the models list
@@ -101,44 +122,12 @@ protected
   */
   void populateModelsList(const QString &text);
 
-  void updateObjectNames();
+  void modelSelectionChanged();
 
-private:
-  actionlib::SimpleActionClient <rail_pick_and_place_msgs::GenerateModelsAction> ac_generate_models;
-
-  ros::Publisher display_cloud_pub;
-  ros::Publisher display_grasps_pub;
-
-  // The ROS node handle.
-  ros::NodeHandle node_;
-
-  graspdb::Client *graspdb_;
-  std::vector<graspdb::GraspDemonstration> current_demonstrations_;
-  std::vector<graspdb::GraspModel> current_models_;
-
-  bool okay_;
-
-  /**
-  * \brief Read merged models and add new models to the list
-  */
-  void updateModelInfo();
-
-  /**
-  * \brief Callback for the registration action server finishing
-  * @param state goal state
-  * @param result registration result
-  */
-  void doneCb(const actionlib::SimpleClientGoalState &state, const rail_pick_and_place_msgs::GenerateModelsResultConstPtr &result);
-
-  /**
-  * \brief Callback for feedback from the registration action server
-  * @param feedback registration feedback
-  */
-  void feedbackCb(const rail_pick_and_place_msgs::GenerateModelsFeedbackConstPtr &feedback);
-
+  void refresh();
 };
 
-} // end namespace pick_and_place
-} // end namespace rail
+}
+}
 
-#endif // MODEL_GENERATION_PANEL_H
+#endif

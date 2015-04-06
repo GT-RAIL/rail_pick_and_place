@@ -12,7 +12,7 @@
 #include <ros/ros.h>
 #include <rviz/panel.h>
 
-// QT
+// Qt
 #include <QLabel>
 #include <QPushButton>
 

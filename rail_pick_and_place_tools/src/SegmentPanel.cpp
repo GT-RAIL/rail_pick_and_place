@@ -13,7 +13,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <std_srvs/Empty.h>
 
-// QT
+// Qt
 #include <QGridLayout>
 
 using namespace std;
@@ -30,22 +30,22 @@ SegmentPanel::SegmentPanel(QWidget *parent) : rviz::Panel(parent)
   // setup the segmentation service
   segment_srv_ = node_.serviceClient<std_srvs::Empty>(segment_service);
 
-  // final layout
-  QVBoxLayout *layout = new QVBoxLayout();
-
   // main segmentation button
   segment_button_ = new QPushButton("Segment");
-  layout->addWidget(segment_button_);
 
   // service label
   string service_label_text = "Calling on " + segment_service;
   QLabel *segment_label = new QLabel(service_label_text.c_str());
   segment_label->setAlignment(Qt::AlignCenter);
-  layout->addWidget(segment_label);
 
   // service feedback
   segment_status_ = new QLabel("Ready to segment.");
   segment_status_->setAlignment(Qt::AlignCenter);
+
+  // build the final layout
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(segment_button_);
+  layout->addWidget(segment_label);
   layout->addWidget(segment_status_);
 
   // connect the segmentation button

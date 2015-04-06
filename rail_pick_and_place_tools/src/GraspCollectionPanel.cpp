@@ -12,7 +12,7 @@
 // ROS
 #include <pluginlib/class_list_macros.h>
 
-// QT
+// Qt
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>

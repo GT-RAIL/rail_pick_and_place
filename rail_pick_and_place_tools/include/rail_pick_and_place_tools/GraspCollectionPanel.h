@@ -11,11 +11,10 @@
 
 // ROS
 #include <actionlib/client/simple_action_client.h>
-#include <ros/ros.h>
 #include <rail_pick_and_place_msgs/GraspAndStoreAction.h>
 #include <rviz/panel.h>
 
-// QT
+// Qt
 #include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
@@ -69,8 +68,7 @@ private:
   /*! The main grasp and store action client */
   actionlib::SimpleActionClient<rail_pick_and_place_msgs::GraspAndStoreAction> grasp_and_store_ac_;
 
-  QCheckBox *lift_box_;
-  QCheckBox *verify_box_;
+  QCheckBox *lift_box_, *verify_box_;
   QLabel *grasp_and_store_status_;
   QLineEdit *name_input_;
   QPushButton *grasp_and_store_button_;

@@ -12,15 +12,17 @@
 // ROS
 #include <pluginlib/class_list_macros.h>
 
-using namespace std;
+// Qt
+#include <QGridLayout>
+#include <QMessageBox>
 
-namespace rail
-{
-namespace pick_and_place
-{
+using namespace std;
+using namespace rail::pick_and_place;
 
 ModelGenerationPanel::ModelGenerationPanel(QWidget *parent)
-    : rviz::Panel(parent), ac_generate_models("/model_generator/generate_models", true)
+    : rviz::Panel(parent), generate_models_ac_("/model_generator/generate_models", true),
+      retrieve_grasp_ac_("/rail_grasp_retriever/retrieve_grasp", true),
+      retrieve_grasp_model_ac_("/rail_grasp_model_retriever/retrieve_grasp_model", true)
 {
   // set defaults
   int port = graspdb::Client::DEFAULT_PORT;
@@ -45,85 +47,74 @@ ModelGenerationPanel::ModelGenerationPanel(QWidget *parent)
     ROS_WARN("Could not connect to grasp database.");
   }
 
-  display_cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("pc_registration/model_cloud", 1);
-  display_grasps_pub = node_.advertise<geometry_msgs::PoseArray>("pc_registration/model_grasps", 1);
-
-
-  models_list_ = new QListWidget();
+  // list of current objects
+  QHBoxLayout *objects_layout = new QHBoxLayout();
+  QLabel *object_name_label = new QLabel("Object:");
+  object_name_label->setAlignment(Qt::AlignRight);
   object_list_ = new QComboBox();
+  objects_layout->addWidget(object_name_label);
+  objects_layout->addWidget(object_list_);
+  objects_layout->setAlignment(Qt::AlignCenter);
 
+  // refresh and selection buttons
+  QHBoxLayout *refresh_and_selections_layout = new QHBoxLayout();
+  refresh_button_ = new QPushButton("Refresh");
+  select_all_button_ = new QPushButton("Select All");
+  deselect_all_button_ = new QPushButton("Deselect All");
+  refresh_and_selections_layout->addWidget(refresh_button_);
+  refresh_and_selections_layout->addWidget(select_all_button_);
+  refresh_and_selections_layout->addWidget(deselect_all_button_);
+
+  // delete button
+  delete_button_ = new QPushButton("Delete");
+  delete_button_->setEnabled(false);
+
+  // grasp demonstration and model lists
+  models_list_ = new QListWidget();
+
+  // model generation options
+  QHBoxLayout *generation_layout = new QHBoxLayout();
+  // max model size options
+  QLabel *model_size_label = new QLabel("Max Grasps Per Model:");
+  model_size_label->setAlignment(Qt::AlignRight);
+  model_size_spin_box_ = new QSpinBox();
+  model_size_spin_box_->setRange(1, 99);
+  model_size_spin_box_->setSingleStep(1);
+  model_size_spin_box_->setValue(6);
+  // model generation button
+  generate_models_button_ = new QPushButton("Generate Models");
+  generation_layout->addWidget(model_size_label);
+  generation_layout->addWidget(model_size_spin_box_);
+  generation_layout->addWidget(generate_models_button_);
+
+  // action client feedback
+  model_generation_status_ = new QLabel("Ready to generate models.");
+
+  // build the final layout
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addLayout(objects_layout);
+  layout->addLayout(refresh_and_selections_layout);
+  layout->addWidget(delete_button_);
+  layout->addWidget(models_list_);
+  layout->addLayout(generation_layout);
+  layout->addWidget(model_generation_status_);
+
+  // connect event callbacks
   QObject::connect(object_list_, SIGNAL(currentIndexChanged(
       const QString &)), this, SLOT(populateModelsList(
       const QString &)));
+  QObject::connect(refresh_button_, SIGNAL(clicked()), this, SLOT(refresh()));
+  QObject::connect(select_all_button_, SIGNAL(clicked()), this, SLOT(selectAll()));
+  QObject::connect(deselect_all_button_, SIGNAL(clicked()), this, SLOT(deselectAll()));
+  QObject::connect(delete_button_, SIGNAL(clicked()), this, SLOT(deleteModel()));
+  QObject::connect(models_list_, SIGNAL(itemSelectionChanged()), this, SLOT(modelSelectionChanged()));
+  QObject::connect(generate_models_button_, SIGNAL(clicked()), this, SLOT(executeGenerateModels()));
 
-  updateObjectNames();
+  // update with the initial state
+  this->refresh();
 
-  //grasp/model list
-  QVBoxLayout *models_layout = new QVBoxLayout;
-  QHBoxLayout *object_name_layout = new QHBoxLayout;
-  QLabel *object_name_label = new QLabel("Object:");
-  object_name_layout->addWidget(object_name_label);
-  object_name_layout->addWidget(object_list_);
-  QHBoxLayout *models_layout_header = new QHBoxLayout;
-  QLabel *list_label = new QLabel("Model List:");
-  QPushButton *refresh_button = new QPushButton("Refresh");
-  models_layout_header->addWidget(list_label);
-  models_layout_header->addWidget(refresh_button);
-  QPushButton *deselect_all_button = new QPushButton("Deselect All");
-  models_layout->addLayout(models_layout_header);
-  models_layout->addLayout(object_name_layout);
-  models_layout->addWidget(models_list_);
-  models_layout->addWidget(deselect_all_button);
-
-  //model generation instructions
-  QVBoxLayout *generate_layout = new QVBoxLayout;
-  QLabel *generate_label = new QLabel("Model Generation:");
-  generate_label->setAlignment(Qt::AlignTop);
-  QLabel *generate_instructions = new QLabel("New models will be generated from the grasps and models selected from the list.");
-  generate_instructions->setWordWrap(true);
-  generate_layout->addWidget(generate_label);
-  generate_layout->addWidget(generate_instructions);
-
-  //max model size setting
-  model_size_spinbox_ = new QSpinBox;
-  model_size_spinbox_->setRange(2, 20);
-  model_size_spinbox_->setSingleStep(1);
-  model_size_spinbox_->setValue(6);
-  QLabel *model_size_label = new QLabel("Grasps Per Model:");
-  QHBoxLayout *model_size_layout = new QHBoxLayout;
-  model_size_layout->addWidget(model_size_label);
-  model_size_layout->addWidget(model_size_spinbox_);
-  generate_layout->addLayout(model_size_layout);
-
-  //generate and display buttons
-  generate_button_ = new QPushButton("Generate Models");
-  QPushButton *display_button = new QPushButton("Display Model");
-  remove_button_ = new QPushButton("Remove Model");
-  generate_layout->addWidget(generate_button_);
-  generate_layout->addWidget(display_button);
-  generate_layout->addWidget(remove_button_);
-
-  //feedback
-  model_generation_status_ = new QLabel("Ready to generate models.");
-
-  //build final layout
-  QGridLayout *grid_layout = new QGridLayout;
-  grid_layout->addLayout(models_layout, 0, 0);
-  grid_layout->addLayout(generate_layout, 0, 1);
-  grid_layout->setColumnMinimumWidth(0, 150);
-  grid_layout->setRowMinimumHeight(0, 185);
-  QVBoxLayout *layout = new QVBoxLayout;
-  layout->addLayout(grid_layout);
-  layout->addWidget(model_generation_status_);
-
-  //connect things
-  QObject::connect(refresh_button, SIGNAL(clicked()), this, SLOT(updateObjectNames()));
-  QObject::connect(deselect_all_button, SIGNAL(clicked()), this, SLOT(deselectAll()));
-  QObject::connect(generate_button_, SIGNAL(clicked()), this, SLOT(executeRegistration()));
-  QObject::connect(display_button, SIGNAL(clicked()), this, SLOT(displayModel()));
-  QObject::connect(remove_button_, SIGNAL(clicked()), this, SLOT(removeModel()));
-
-  setLayout(layout);
+  // set the final layout
+  this->setLayout(layout);
 }
 
 ModelGenerationPanel::~ModelGenerationPanel()
@@ -133,253 +124,309 @@ ModelGenerationPanel::~ModelGenerationPanel()
   delete graspdb_;
 }
 
-void ModelGenerationPanel::deselectAll()
+void ModelGenerationPanel::refresh()
 {
-  for (unsigned int i = 0; i < models_list_->count(); i++)
-  {
-    if (models_list_->item(i)->checkState() == Qt::Checked)
-    {
-      models_list_->item(i)->setCheckState(Qt::Unchecked);
-    }
-  }
-}
+  // disable the button as we work
+  refresh_button_->setEnabled(false);
 
-void ModelGenerationPanel::executeRegistration()
-{
-  if (!ac_generate_models.isServerConnected())
-  {
-    model_generation_status_->setText("No model generation action server found!");
-    return;
-  }
-  rail_pick_and_place_msgs::GenerateModelsGoal generate_models_goal;
-  for (unsigned int i = 0; i < models_list_->count(); i++)
-  {
-    if (models_list_->item(i)->checkState() == Qt::Checked)
-    {
-      string selected_item = models_list_->item(i)->text().toStdString();
-      int id = atoi(selected_item.substr(5).c_str());
-      if (selected_item.at(0) == 'g')
-        generate_models_goal.grasp_demonstration_ids.push_back(id);
-      else
-        generate_models_goal.grasp_model_ids.push_back(id);
-    }
-  }
-  generate_models_goal.max_model_size = model_size_spinbox_->value();
-  ac_generate_models.sendGoal(generate_models_goal, boost::bind(&ModelGenerationPanel::doneCb, this, _1, _2),
-      actionlib::SimpleActionClient<rail_pick_and_place_msgs::GenerateModelsAction>::SimpleActiveCallback(),
-      boost::bind(&ModelGenerationPanel::feedbackCb, this, _1));
-
-  generate_button_->setEnabled(false);
-}
-
-void ModelGenerationPanel::doneCb(const actionlib::SimpleClientGoalState &state, const rail_pick_and_place_msgs::GenerateModelsResultConstPtr &result)
-{
-  int new_models = result->new_model_ids.size();
-  stringstream ss;
-  if (new_models == 0)
-  {
-    ss << "No new models generated.";
-  }
-  else if (new_models == 1)
-  {
-    ss << "Added 1 new model.";
-  }
-  else
-  {
-    ss << "Added " << new_models << " new models.";
-  }
-  model_generation_status_->setText(ss.str().c_str());
-  updateModelInfo();
-
-  generate_button_->setEnabled(true);
-}
-
-void ModelGenerationPanel::feedbackCb(const rail_pick_and_place_msgs::GenerateModelsFeedbackConstPtr &feedback)
-{
-  model_generation_status_->setText(feedback->message.c_str());
-}
-
-void ModelGenerationPanel::displayModel()
-{
-  if (models_list_->currentItem() == NULL)
-  {
-    ROS_INFO("No item selected.");
-    return;
-  }
-  int i = models_list_->currentIndex().row() - 1; //the 1 is the adjustment for the demonstrations label
-  string selected_item = models_list_->currentItem()->text().toStdString();
-  if (selected_item.at(0) == '-')
-  {
-    ROS_INFO("No item selected.");
-    return;
-  }
-
-  sensor_msgs::PointCloud2 cloud;
-  geometry_msgs::PoseArray poses;
-  if (selected_item.at(0) == 'g')
-  {
-    cloud = current_demonstrations_[i].getPointCloud();
-    cloud.header.frame_id = "base_footprint";
-    poses.header.frame_id = "base_footprint";
-    //poses.header = current_demonstrations_[i].getGraspPose().toROSPoseStampedMessage().header;
-    poses.poses.push_back(current_demonstrations_[i].getGraspPose().toROSPoseMessage());
-  }
-  else
-  {
-    i -= current_demonstrations_.size() + 1; //the 1 is an adjustment for the models label
-    cloud = current_models_[i].getPointCloud();
-    cloud.header.frame_id = "base_footprint";
-    poses.header.frame_id = "base_footprint";
-    for (unsigned int j = 0; j < current_models_[i].getNumGrasps(); j++)
-    {
-      poses.poses.push_back(current_models_[i].getGrasp(j).getGraspPose().toROSPoseMessage());
-    }
-  }
-
-  display_cloud_pub.publish(cloud);
-  display_grasps_pub.publish(poses);
-}
-
-void ModelGenerationPanel::removeModel()
-{
-  if (models_list_->currentItem() == NULL)
-  {
-    ROS_INFO("No item selected.");
-    return;
-  }
-
-  string selected_item = models_list_->currentItem()->text().toStdString();
-  if (selected_item.at(0) == '-')
-  {
-    ROS_INFO("No item selected.");
-    return;
-  }
-
-  QMessageBox::StandardButton confirm;
-  int id = atoi(selected_item.substr(5).c_str());
-  if (selected_item.at(0) == 'g')
-  {
-    graspdb_->deleteGraspDemonstration(id);
-    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted grasp demonstration?", QMessageBox::Yes | QMessageBox::No);
-    if (confirm == QMessageBox::Yes)
-    {
-      current_demonstrations_.erase(current_demonstrations_.begin() + models_list_->currentIndex().row() - 1);
-      delete models_list_->currentItem();
-    }
-  }
-  else
-  {
-    graspdb_->deleteGraspModel(id);
-    confirm = QMessageBox::question(this, "Remove Model Confirmation", "Are you sure you want to remove the highlighted object model?", QMessageBox::Yes | QMessageBox::No);
-    if (confirm == QMessageBox::Yes)
-    {
-      current_models_.erase(current_models_.begin() + models_list_->currentIndex().row() - current_demonstrations_.size() - 2);
-      delete models_list_->currentItem();
-    }
-  }
-}
-
-void ModelGenerationPanel::updateObjectNames()
-{
+  // clear the current objects
   object_list_->clear();
+  // load from both the demonstration and model lists
   vector<string> object_names;
   vector<string> model_names;
   graspdb_->getUniqueGraspDemonstrationObjectNames(object_names);
   graspdb_->getUniqueGraspModelObjectNames(model_names);
+  // combine the lists
   object_names.insert(object_names.end(), model_names.begin(), model_names.end());
+  // sort the names
   sort(object_names.begin(), object_names.end());
+  // make the lise unique
   object_names.erase(unique(object_names.begin(), object_names.end()), object_names.end());
-  for (unsigned int i = 0; i < object_names.size(); i++)
+  // add each item name
+  for (size_t i = 0; i < object_names.size(); i++)
   {
     object_list_->addItem(object_names[i].c_str());
+  }
+
+  // re-enable the button
+  refresh_button_->setEnabled(true);
+}
+
+void ModelGenerationPanel::selectAll()
+{
+  // disable the button as we work
+  select_all_button_->setEnabled(false);
+
+  // simply go through the current list
+  for (size_t i = 0; i < models_list_->count(); i++)
+  {
+    if (models_list_->item(i)->flags() & Qt::ItemIsUserCheckable)
+    {
+      models_list_->item(i)->setCheckState(Qt::Checked);
+    }
+  }
+
+  // re-enable the button
+  select_all_button_->setEnabled(true);
+}
+
+void ModelGenerationPanel::deselectAll()
+{
+  // disable the button as we work
+  deselect_all_button_->setEnabled(false);
+
+  // simply go through the current list
+  for (size_t i = 0; i < models_list_->count(); i++)
+  {
+    if (models_list_->item(i)->flags() & Qt::ItemIsUserCheckable)
+    {
+      models_list_->item(i)->setCheckState(Qt::Unchecked);
+    }
+  }
+
+  // re-enable the button
+  deselect_all_button_->setEnabled(true);
+}
+
+void ModelGenerationPanel::modelSelectionChanged()
+{
+  // check if the user has selected a valid demonstration or model
+  QList<QListWidgetItem *> selected_items = models_list_->selectedItems();
+
+  // there should only be one selected
+  if (selected_items.size() == 1 && selected_items[0]->flags() & Qt::ItemIsUserCheckable)
+  {
+    // grab the current item
+    string selected_item = models_list_->currentItem()->text().toStdString();
+    // extract the ID
+    int id = atoi(selected_item.substr(selected_item.find(' ')).c_str());
+
+    // enable the delete button
+    string delete_text = "Delete " + selected_item;
+    delete_button_->setText(delete_text.c_str());
+    delete_button_->setEnabled(true);
+
+    // make calls to visualize the model or grasp
+    if (selected_item[0] == 'G' && retrieve_grasp_ac_.isServerConnected())
+    {
+      rail_pick_and_place_msgs::RetrieveGraspDemonstrationGoal goal;
+      goal.id = id;
+      retrieve_grasp_ac_.sendGoal(goal);
+    } else if (retrieve_grasp_model_ac_.isServerConnected())
+    {
+      rail_pick_and_place_msgs::RetrieveGraspModelGoal goal;
+      goal.id = id;
+      retrieve_grasp_model_ac_.sendGoal(goal);
+    }
+  } else
+  {
+    // disable the delete button
+    delete_button_->setText("Delete");
+    delete_button_->setEnabled(false);
+  }
+}
+
+void ModelGenerationPanel::deleteModel()
+{
+  if (models_list_->currentItem() != NULL)
+  {
+    // grab the current item
+    string selected_item = models_list_->currentItem()->text().toStdString();
+    // extract the ID
+    int id = atoi(selected_item.substr(selected_item.find(' ')).c_str());
+
+    // confirmation dialog
+    string delete_text = "Are you sure you want to delete " + selected_item + "?";
+    QMessageBox::StandardButton confirm = QMessageBox::question(this, "Delete?", delete_text.c_str(),
+        QMessageBox::Yes | QMessageBox::No);
+    if (confirm == QMessageBox::Yes)
+    {
+      // check for a grasp or a model
+      if (selected_item[0] == 'G')
+      {
+        graspdb_->deleteGraspDemonstration(id);
+      } else
+      {
+        graspdb_->deleteGraspModel(id);
+      }
+      delete models_list_->currentItem();
+    }
   }
 }
 
 void ModelGenerationPanel::populateModelsList(const QString &text)
 {
-  if (object_list_->count() <= 0)
-    return;
-
-  models_list_->clear();
-  current_demonstrations_.clear();
-  current_models_.clear();
-  graspdb_->loadGraspDemonstrationsByObjectName(text.toStdString(), current_demonstrations_);
-  graspdb_->loadGraspModelsByObjectName(text.toStdString(), current_models_);
-
-  QListWidgetItem *grasps_label = new QListWidgetItem("--Grasp Demonstrations--", models_list_);
-  grasps_label->setFlags(Qt::ItemIsEnabled);
-  for (unsigned int i = 0; i < current_demonstrations_.size(); i++)
+  // check if an object exists
+  if (object_list_->count() > 0)
   {
-    stringstream ss;
-    ss << "grasp" << current_demonstrations_[i].getID();
-    QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
-  }
+    // clear the current list
+    models_list_->clear();
 
-  QListWidgetItem *models_label = new QListWidgetItem("--Object Models--", models_list_);
-  models_label->setFlags(Qt::ItemIsEnabled);
-  for (unsigned int i = 0; i < current_models_.size(); i++)
-  {
-    stringstream ss;
-    ss << "model" << current_models_[i].getID();
-    QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
-  }
-}
+    // load grasps/models
+    vector<graspdb::GraspDemonstration> demonstrations;
+    vector<graspdb::GraspModel> models;
+    graspdb_->loadGraspDemonstrationsByObjectName(text.toStdString(), demonstrations);
+    graspdb_->loadGraspModelsByObjectName(text.toStdString(), models);
 
-void ModelGenerationPanel::updateModelInfo()
-{
-  vector<graspdb::GraspModel> models;
-  int max_id = 0;
-  int insert_id = 0;
-  if (!current_models_.empty())
-  {
-    max_id = current_models_[current_models_.size() - 1].getID();
-    insert_id = current_models_.size();
-  }
-  int row = models_list_->count();
-  graspdb_->loadGraspModelsByObjectName(object_list_->currentText().toStdString(), models);
-  for (int i = models.size() - 1; i >= 0; i--)
-  {
-    if (models[i].getID() <= max_id)
+    // first add grasp demonstrations
+    if (demonstrations.size() > 0)
     {
-      break;
+      // header
+      QListWidgetItem *grasps_label = new QListWidgetItem("--Grasp Demonstrations--", models_list_);
+      grasps_label->setTextAlignment(Qt::AlignCenter);
+      // makes it so the user can't select this label
+      grasps_label->setFlags(Qt::ItemIsEnabled);
+      // add each demonstration
+      for (size_t i = 0; i < demonstrations.size(); i++)
+      {
+        stringstream ss;
+        ss << "Grasp " << demonstrations[i].getID();
+        QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+      }
     }
-    stringstream ss;
-    ss << "model" << models[i].getID();
-    QListWidgetItem *item = new QListWidgetItem(ss.str().c_str());
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
-    models_list_->insertItem(row, item);
-    if (i == models.size() - 1)
-      current_models_.push_back(models[i]);
-    else
-      current_models_.insert(current_models_.begin() + insert_id, models[i]);
+
+    if (models.size() > 0)
+    {
+      QListWidgetItem *models_label = new QListWidgetItem("--Object Models--", models_list_);
+      models_label->setTextAlignment(Qt::AlignCenter);
+      // makes it so the user can't select this label
+      models_label->setFlags(Qt::ItemIsEnabled);
+      // add each model
+      for (size_t i = 0; i < models.size(); i++)
+      {
+        stringstream ss;
+        ss << "Model " << models[i].getID();
+        QListWidgetItem *item = new QListWidgetItem(ss.str().c_str(), models_list_);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+      }
+    }
   }
 }
 
-// Save all configuration data from this panel to the given
-// Config object.  It is important here that you call save()
-// on the parent class so the class id and panel name get saved.
+void ModelGenerationPanel::executeGenerateModels()
+{
+  // disable the button first
+  generate_models_button_->setEnabled(false);
+
+  if (!generate_models_ac_.isServerConnected())
+  {
+    model_generation_status_->setText("Model generation action server not found!");
+    // make sure to re-enable the button
+    generate_models_button_->setEnabled(true);
+  } else
+  {
+    // grab the selected models
+    rail_pick_and_place_msgs::GenerateModelsGoal goal;
+    for (size_t i = 0; i < models_list_->count(); i++)
+    {
+      if (models_list_->item(i)->checkState() == Qt::Checked)
+      {
+        // grab the current item
+        string selected_item = models_list_->item(i)->text().toStdString();
+        // extract the ID
+        int id = atoi(selected_item.substr(selected_item.find(' ')).c_str());
+
+        if (selected_item[0] == 'G')
+        {
+          goal.grasp_demonstration_ids.push_back(id);
+        } else
+        {
+          goal.grasp_model_ids.push_back(id);
+        }
+      }
+    }
+
+    // check the size
+    if (goal.grasp_demonstration_ids.size() + goal.grasp_model_ids.size() == 0)
+    {
+      model_generation_status_->setText("No grasps or models selected.");
+      // make sure to re-enable the button
+      generate_models_button_->setEnabled(true);
+    } else
+    {
+      // get the max model size
+      goal.max_model_size = model_size_spin_box_->value();
+      // send the goal asynchronously
+      generate_models_ac_.sendGoal(goal, boost::bind(&ModelGenerationPanel::doneCallback, this, _1, _2),
+          actionlib::SimpleActionClient<rail_pick_and_place_msgs::GenerateModelsAction>::SimpleActiveCallback(),
+          boost::bind(&ModelGenerationPanel::feedbackCallback, this, _1));
+    }
+  }
+}
+
+void ModelGenerationPanel::doneCallback(const actionlib::SimpleClientGoalState &state,
+    const rail_pick_and_place_msgs::GenerateModelsResultConstPtr &result)
+{
+  // check if the action was successful
+  if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
+  {
+    // check how models were generated
+    if (result->new_model_ids.size() > 0)
+    {
+      // built the final status string
+      stringstream ss;
+      ss << result->new_model_ids.size() << " model(s) successfully stored with ID(s) [";
+      // update the model list while getting the IDs
+      for (size_t i = 0; i < result->new_model_ids.size(); i++)
+      {
+        // add to the status message
+        ss << result->new_model_ids[i];
+        if (i < result->new_model_ids.size() - 2)
+        {
+          ss << ", ";
+        }
+
+        // add to the models list
+        stringstream ss2;
+        ss2 << "Model " << result->new_model_ids[i];
+        QListWidgetItem *item = new QListWidgetItem(ss2.str().c_str(), models_list_);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(Qt::Unchecked);
+      }
+      ss << "].";
+      model_generation_status_->setText(ss.str().c_str());
+    } else
+    {
+      model_generation_status_->setText("No valid models generated.");
+    }
+  } else
+  {
+    // state text should represent what went wrong
+    model_generation_status_->setText(state.getText().c_str());
+  }
+
+  // re-enable the button
+  generate_models_button_->setEnabled(true);
+}
+
+void ModelGenerationPanel::feedbackCallback(const rail_pick_and_place_msgs::GenerateModelsFeedbackConstPtr &feedback)
+{
+  // simply set the status to the current message
+  model_generation_status_->setText(feedback->message.c_str());
+}
+
 void ModelGenerationPanel::save(rviz::Config config) const
 {
+  // first call the super class
   rviz::Panel::save(config);
-  config.mapSetValue("MaxModelSize", model_size_spinbox_->value());
+  // save the model config
+  config.mapSetValue("MaxModelSize", model_size_spin_box_->value());
 }
 
-// Load all configuration data for this panel from the given Config object.
 void ModelGenerationPanel::load(const rviz::Config &config)
 {
+  // first call the super class
   rviz::Panel::load(config);
+  // load the model config
   int max_model_size;
   if (config.mapGetInt("MaxModelSize", &max_model_size))
-    model_size_spinbox_->setValue(max_model_size);
+  {
+    model_size_spin_box_->setValue(max_model_size);
+  }
 }
 
-}
-}
-
-// Tell pluginlib about this class (must outside of any namespace scope)
+// tell pluginlib about this class (must outside of any namespace scope)
 PLUGINLIB_EXPORT_CLASS(rail::pick_and_place::ModelGenerationPanel, rviz::Panel)
