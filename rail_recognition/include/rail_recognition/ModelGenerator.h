@@ -88,7 +88,7 @@ private:
    * \param new_model_ids The vector to fill with the new grasp model IDs.
    */
   void generateAndStoreModels(std::vector<PCLGraspModel> &grasp_models, const int max_model_size,
-      std::vector<uint32_t> &new_model_ids) const;
+      std::vector<uint32_t> &new_model_ids);
 
   /*!
    * \brief Check the point cloud registration for the two models.

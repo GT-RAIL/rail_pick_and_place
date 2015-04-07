@@ -114,7 +114,7 @@ void ModelGenerator::generateModelsCallback(const rail_pick_and_place_msgs::Gene
   }
 
   // generate and store the models
-  feedback.message = "Registering models, please wait...";
+  feedback.message = "Registering models...";
   as_.publishFeedback(feedback);
   this->generateAndStoreModels(grasp_models, goal->max_model_size, result.new_model_ids);
 
@@ -123,9 +123,13 @@ void ModelGenerator::generateModelsCallback(const rail_pick_and_place_msgs::Gene
 }
 
 void ModelGenerator::generateAndStoreModels(vector<PCLGraspModel> &grasp_models, const int max_model_size,
-    vector<uint32_t> &new_model_ids) const
+    vector<uint32_t> &new_model_ids)
 {
+  rail_pick_and_place_msgs::GenerateModelsFeedback feedback;
+
   // filter each point cloud, move to the origin, set unique IDs, and ensure they are flagged as original
+  feedback.message = "Filtinering point clouds...";
+  as_.publishFeedback(feedback);
   uint32_t id_counter = 0;
   for (size_t i = 0; i < grasp_models.size(); i++)
   {
@@ -139,86 +143,111 @@ void ModelGenerator::generateAndStoreModels(vector<PCLGraspModel> &grasp_models,
   }
 
   // create the initial pairings between all vertices
-  vector<pair<const PCLGraspModel *, const PCLGraspModel *> > edges;
+  vector<pair<uint32_t, uint32_t> > edges;
   for (size_t i = 0; i < grasp_models.size() - 1; i++)
   {
     for (size_t j = i + 1; j < grasp_models.size(); j++)
     {
-      // add the pairing as an edge
-      pair<const PCLGraspModel *, const PCLGraspModel *> edge(&grasp_models[i], &grasp_models[j]);
-      // set the IDs as the current index
+      // add the pairing as an edge (use the larger as the first)
+      pair<uint32_t, uint32_t> edge;
+      if (grasp_models[i].getPCLPointCloud()->size() > grasp_models[j].getPCLPointCloud()->size())
+      {
+        edge.first = grasp_models[i].getID();
+        edge.second = grasp_models[j].getID();
+      } else
+      {
+        edge.first = grasp_models[j].getID();
+        edge.second = grasp_models[i].getID();
+      }
       edges.push_back(edge);
     }
   }
 
   // attempt to pair models
-  ROS_INFO("Searching graph for model matches...");
+  feedback.message = "Searching graph for valid registrations...";
+  as_.publishFeedback(feedback);
+  ROS_INFO("%s", feedback.message.c_str());
   while (!edges.empty())
   {
-    // randomly order the elements to increase variability
-    random_shuffle(edges.begin(), edges.end());
+    // TODO do we really need this? randomly order the elements to increase variability
+    //random_shuffle(edges.begin(), edges.end());
 
     // pop the edge
-    pair<const PCLGraspModel *, const PCLGraspModel *> edge = edges.back();
+    pair<uint32_t, uint32_t> edge = edges.back();
     edges.pop_back();
 
-    // keep track of the base and the target models
-    const PCLGraspModel *base;
-    const PCLGraspModel *target;
-    // use the larger of the point clouds as the base
-    if (edge.first->getPCLPointCloud()->size() > edge.second->getPCLPointCloud()->size())
+    // search for the base and target models
+    size_t base_index, target_index;
+    for (size_t i = 0; i < grasp_models.size(); i++)
     {
-      base = edge.first;
-      target = edge.second;
-    } else
-    {
-      base = edge.second;
-      target = edge.first;
+      if (grasp_models[i].getID() == edge.first)
+      {
+        base_index = i;
+      } else if (grasp_models[i].getID() == edge.second)
+      {
+        target_index = i;
+      }
     }
 
+    // keep track of the base and the target models
+    PCLGraspModel &base = grasp_models[base_index];
+    PCLGraspModel &target = grasp_models[target_index];
+
+    // used in feedback messages
+    stringstream ss;
+    ss << base.getID() << "-" << target.getID();
+    string pair_str = ss.str();
+
+    feedback.message = "Checking pair " + pair_str + "...";
+    as_.publishFeedback(feedback);
+
     // check if the maximum size would be allowed
-    if (base->getNumGrasps() + target->getNumGrasps() > max_model_size)
+    if (base.getNumGrasps() + target.getNumGrasps() > max_model_size)
     {
-      ROS_INFO("Skipping pair %d-%d as a merge would exceed the maximum model size.", base->getID(), target->getID());
+      feedback.message = "Skipping pair " + pair_str + "as a merge would exceed the maximum model size.";
+      as_.publishFeedback(feedback);
+      ROS_WARN("%s", feedback.message.c_str());
     } else
     {
       // check if the registration passes
       PCLGraspModel result;
-      if (this->registrationCheck(*base, *target, result))
+      if (this->registrationCheck(base, target, result))
       {
-        ROS_INFO("Registration match found for pair %d-%d.", base->getID(), target->getID());
+        feedback.message = "Registration match found for pair " + pair_str + ".";
+        as_.publishFeedback(feedback);
+        ROS_INFO("%s", feedback.message.c_str());
 
         // remove any edges containing these nodes
         for (int i = (int) edges.size() - 1; i >= 0; i--)
         {
-          if (edges[i].first->getID() == base->getID() || edges[i].second->getID() == base->getID()
-              || edges[i].first->getID() == target->getID() || edges[i].second->getID() == target->getID())
+          if (edges[i].first == base.getID() || edges[i].second == base.getID() || edges[i].first == target.getID()
+              || edges[i].second == target.getID())
           {
             edges.erase(edges.begin() + i);
           }
         }
 
         // remove both models from the global list
-        int removed = 0;
-        for (int i = (int) grasp_models.size() - 1; i >= 0 && removed < 2; i--)
+        for (int i = (int) grasp_models.size() - 1; i >= 0; i--)
         {
-          if (grasp_models[i].getID() == base->getID() || grasp_models[i].getID() == target->getID())
+          if (grasp_models[i].getID() == base.getID() || grasp_models[i].getID() == target.getID())
           {
             grasp_models.erase(grasp_models.begin() + i);
-            removed++;
           }
         }
 
-        // add the new model
+        // set a unique ID
         result.setID(id_counter++);
-        grasp_models.push_back(result);
 
         // add a new edges with this new model
-        for (size_t i = 0; i < grasp_models.size() - 1; i++)
+        for (size_t i = 0; i < grasp_models.size(); i++)
         {
-          pair<const PCLGraspModel *, const PCLGraspModel *> edge(&grasp_models[i], &grasp_models.back());
+          pair<uint32_t, uint32_t> edge(result.getID(), grasp_models[i].getID());
           edges.push_back(edge);
         }
+
+        // add the new model
+        grasp_models.push_back(result);
 
         // check if we are running debug
         if (debug_)
@@ -240,6 +269,8 @@ void ModelGenerator::generateAndStoreModels(vector<PCLGraspModel> &grasp_models,
   }
 
   // remove any original (unmerged) models and save the rest
+  feedback.message = "Saving new models...";
+  as_.publishFeedback(feedback);
   for (int i = ((int) grasp_models.size()) - 1; i >= 0; i--)
   {
     if (grasp_models[i].isOriginal())
@@ -260,7 +291,6 @@ void ModelGenerator::generateAndStoreModels(vector<PCLGraspModel> &grasp_models,
       }
     }
   }
-  ROS_INFO("Point cloud merging resulted in %lu models.", grasp_models.size());
 }
 
 bool ModelGenerator::registrationCheck(const PCLGraspModel &base, const PCLGraspModel &target,
