@@ -21,7 +21,7 @@
   <param name="/graspdb/password" type="str" value="$(arg password)" />
   <param name="/graspdb/db" type="str" value="$(arg db)" />
 
-  <node pkg="rail_recognition" name="model_generator" type="model_generator" output="screen">
+  <node pkg="rail_recognition" name="model_generator" type="model_generator" output="screen" >
     <param name="debug" value="$(arg debug)" />
   </node>
 </launch>

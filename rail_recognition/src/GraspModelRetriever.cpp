@@ -69,8 +69,6 @@ bool GraspModelRetriever::okay() const
 
 void GraspModelRetriever::retrieveGraspModel(const rail_pick_and_place_msgs::RetrieveGraspModelGoalConstPtr &goal)
 {
-  ROS_INFO("Retrieve grasp model request received.");
-
   rail_pick_and_place_msgs::RetrieveGraspModelFeedback feedback;
   rail_pick_and_place_msgs::RetrieveGraspModelResult result;
 

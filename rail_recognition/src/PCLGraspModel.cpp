@@ -9,6 +9,9 @@ PCLGraspModel::PCLGraspModel(const graspdb::GraspModel &grasp_model)
     : graspdb::GraspModel(grasp_model),
       pc_(new pcl::PointCloud<pcl::PointXYZRGB>)
 {
+  // default to false
+  original_ = false;
+
   // copy the point cloud if it exists
   if (grasp_model.getPointCloud().data.size() > 0)
   {
@@ -18,6 +21,16 @@ PCLGraspModel::PCLGraspModel(const graspdb::GraspModel &grasp_model)
     // simply store the header information
     pc_->header.frame_id = grasp_model.getPointCloud().header.frame_id;
   }
+}
+
+bool PCLGraspModel::isOriginal() const
+{
+  return original_;
+}
+
+void PCLGraspModel::setOriginal(const bool original)
+{
+  original_ = original;
 }
 
 const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &PCLGraspModel::getPCLPointCloud() const

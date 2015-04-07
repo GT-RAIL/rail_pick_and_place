@@ -18,6 +18,10 @@ class PCLGraspModel : public graspdb::GraspModel
 public:
   PCLGraspModel(const graspdb::GraspModel &grasp_model = graspdb::GraspModel());
 
+  bool isOriginal() const;
+
+  void setOriginal(const bool original);
+
   /*!
    * \brief PCL point cloud accessor.
    *
@@ -59,6 +63,7 @@ public:
   graspdb::GraspModel toGraspModel() const;
 
 private:
+  bool original_;
   /*! The internal shared pointer to the PCL point cloud. */
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc_;
 };
