@@ -36,6 +36,11 @@ include_directories(include
 )
 
 ## Declare a cpp executable
+add_executable(metric_trainer
+  nodes/metric_trainer.cpp
+  src/MetricTrainer.cpp
+  src/PointCloudMetrics.cpp
+)
 add_executable(model_generator
   nodes/model_generator.cpp
   src/ModelGenerator.cpp
@@ -58,17 +63,13 @@ add_executable(rail_grasp_model_retriever
   nodes/rail_grasp_model_retriever.cpp
   src/GraspModelRetriever.cpp
 )
-add_executable(metric_trainer
-  nodes/metric_trainer.cpp
-  src/MetricTrainer.cpp
-  src/PCLGraspModel.cpp
-  src/PointCloudMetrics.cpp
-)
 
 ## Add message build dependencies (needed for source build)
+add_dependencies(metric_trainer
+  rail_pick_and_place_msgs_generate_messages_cpp
+)
 add_dependencies(model_generator
   rail_pick_and_place_msgs_generate_messages_cpp
-  rail_manipulation_msgs_generate_messages_cpp
 )
 add_dependencies(object_recognizer
   rail_manipulation_msgs_generate_messages_cpp
@@ -77,13 +78,13 @@ add_dependencies(object_recognition_listener
   rail_manipulation_msgs_generate_messages_cpp
 )
 add_dependencies(rail_grasp_model_retriever
-  rail_manipulation_msgs_generate_messages_cpp
-)
-add_dependencies(metric_trainer
-  rail_manipulation_msgs/generate_messages_cpp
+  rail_pick_and_place_msgs_generate_messages_cpp
 )
 
 ## Specify libraries to link a library or executable target against
+target_link_libraries(metric_trainer
+  ${catkin_LIBRARIES}
+)
 target_link_libraries(model_generator
   ${catkin_LIBRARIES}
 )
@@ -96,16 +97,13 @@ target_link_libraries(object_recognition_listener
 target_link_libraries(rail_grasp_model_retriever
  ${catkin_LIBRARIES}
 )
-target_link_libraries(metric_trainer
-  ${catkin_LIBRARIES}
-)
 
 #############
 ## Install ##
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS model_generator object_recognizer object_recognition_listener rail_grasp_model_retriever metric_trainer
+install(TARGETS metric_trainer model_generator object_recognizer object_recognition_listener rail_grasp_model_retriever
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

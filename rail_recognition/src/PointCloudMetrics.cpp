@@ -225,10 +225,9 @@ double point_cloud_metrics::calculateAverageColor(const pcl::PointCloud<pcl::Poi
 {
   // averages
   double avg_r = 0, avg_g = 0, avg_b = 0;
-  for (unsigned int i = 0; i < pc->size(); i ++)
+  for (size_t i = 0; i < pc->size(); i++)
   {
     const pcl::PointXYZRGB &point = pc->at(i);
-
     avg_r += point.r;
     avg_g += point.g;
     avg_b += point.b;
@@ -247,21 +246,21 @@ double point_cloud_metrics::calculateRegistrationMetricColorRange(
   return fabs(avg_base - avg_target);
 }
 
-double point_cloud_metrics::calculateRegistrationMetricStdDevRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
+double point_cloud_metrics::calculateRegistrationMetricStdDevColorRange(
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base, const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
   // calculate the standard deviation for each
-  double std_dev_base = point_cloud_metrics::calculateStdDev(base);
-  double std_dev_target = point_cloud_metrics::calculateStdDev(target);
+  double std_dev_base = point_cloud_metrics::calculateStdDevColor(base);
+  double std_dev_target = point_cloud_metrics::calculateStdDevColor(target);
   // return the absolute difference
   return fabs(std_dev_base - std_dev_target);
 }
 
-double point_cloud_metrics::calculateStdDev(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
+double point_cloud_metrics::calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
 {
   double variance = 0;
   double avg = point_cloud_metrics::calculateAverageColor(pc);
-  for (unsigned int i = 0; i < pc->size(); i ++)
+  for (size_t i = 0; i < pc->size(); i++)
   {
     const pcl::PointXYZRGB &point = pc->at(i);
     variance += pow((point.r + point.g + point.b) - avg, 2);

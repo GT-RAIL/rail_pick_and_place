@@ -4,7 +4,7 @@ using namespace std;
 using namespace rail::pick_and_place;
 
 /*!
- * Creates and runs the model_generator node.
+ * Creates and runs the metric_trainer node.
  *
  * \param argc argument count that is passed to ros::init.
  * \param argv arguments that are passed to ros::init.
