@@ -65,7 +65,12 @@ double calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB
 double calculateRegistrationMetricColorRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
 
-double calculateAverageColorRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
+double calculateAverageColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
+
+double calculateRegistrationMetricStdDevRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
+
+double calculateStdDev(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
 
 double calculateRegistrationMetricDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);

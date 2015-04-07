@@ -221,11 +221,11 @@ double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointC
   return (return_color_error) ? (error / score) : (score /= ((double) target->size()));
 }
 
-double point_cloud_metrics::calculateAverageColorRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
+double point_cloud_metrics::calculateAverageColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
 {
   // averages
   double avg_r = 0, avg_g = 0, avg_b = 0;
-  for (unsigned int i = 0; i < pc->size(); i++)
+  for (unsigned int i = 0; i < pc->size(); i ++)
   {
     const pcl::PointXYZRGB &point = pc->at(i);
 
@@ -241,10 +241,33 @@ double point_cloud_metrics::calculateRegistrationMetricColorRange(
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base, const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
   // calculate the average for each
-  double avg_base = point_cloud_metrics::calculateAverageColorRange(base);
-  double avg_target = point_cloud_metrics::calculateAverageColorRange(target);
+  double avg_base = point_cloud_metrics::calculateAverageColor(base);
+  double avg_target = point_cloud_metrics::calculateAverageColor(target);
   // return the absolute difference
   return fabs(avg_base - avg_target);
+}
+
+double point_cloud_metrics::calculateRegistrationMetricStdDevRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
+{
+  // calculate the standard deviation for each
+  double std_dev_base = point_cloud_metrics::calculateStdDev(base);
+  double std_dev_target = point_cloud_metrics::calculateStdDev(target);
+  // return the absolute difference
+  return fabs(std_dev_base - std_dev_target);
+}
+
+double point_cloud_metrics::calculateStdDev(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
+{
+  double variance = 0;
+  double avg = point_cloud_metrics::calculateAverageColor(pc);
+  for (unsigned int i = 0; i < pc->size(); i ++)
+  {
+    const pcl::PointXYZRGB &point = pc->at(i);
+    variance += pow((point.r + point.g + point.b) - avg, 2);
+  }
+  variance /= pc->size();
+  return sqrt(variance);
 }
 
 double point_cloud_metrics::calculateMaxDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)

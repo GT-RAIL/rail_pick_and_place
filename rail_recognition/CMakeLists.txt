@@ -58,6 +58,12 @@ add_executable(rail_grasp_model_retriever
   nodes/rail_grasp_model_retriever.cpp
   src/GraspModelRetriever.cpp
 )
+add_executable(metric_trainer
+  nodes/metric_trainer.cpp
+  src/MetricTrainer.cpp
+  src/PCLGraspModel.cpp
+  src/PointCloudMetrics.cpp
+)
 
 ## Add message build dependencies (needed for source build)
 add_dependencies(model_generator
@@ -73,6 +79,9 @@ add_dependencies(object_recognition_listener
 add_dependencies(rail_grasp_model_retriever
   rail_manipulation_msgs_generate_messages_cpp
 )
+add_dependencies(metric_trainer
+  rail_manipulation_msgs/generate_messages_cpp
+)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(model_generator
@@ -87,13 +96,16 @@ target_link_libraries(object_recognition_listener
 target_link_libraries(rail_grasp_model_retriever
  ${catkin_LIBRARIES}
 )
+target_link_libraries(metric_trainer
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS model_generator object_recognizer object_recognition_listener rail_grasp_model_retriever
+install(TARGETS model_generator object_recognizer object_recognition_listener rail_grasp_model_retriever metric_trainer
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

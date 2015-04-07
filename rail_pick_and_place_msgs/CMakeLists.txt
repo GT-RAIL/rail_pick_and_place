@@ -23,6 +23,11 @@ add_message_files(FILES
   GraspWithSuccessRate.msg
 )
 
+## Generate services in the 'srv' folder
+add_service_files(FILES
+  TrainMetrics.srv
+)
+
 ## Generate actions in the 'action' folder
 add_action_files(FILES
   GenerateModels.action
