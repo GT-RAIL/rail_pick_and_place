@@ -169,12 +169,10 @@ void ModelGenerator::generateAndStoreModels(vector<PCLGraspModel> &grasp_models,
   ROS_INFO("%s", feedback.message.c_str());
   while (!edges.empty())
   {
-    // TODO do we really need this? randomly order the elements to increase variability
-    //random_shuffle(edges.begin(), edges.end());
-
-    // pop the edge
-    pair<uint32_t, uint32_t> edge = edges.back();
-    edges.pop_back();
+    // randomly select the element to increase variability
+    int rand_index = rand() % edges.size();
+    pair<uint32_t, uint32_t> edge = edges[rand_index];
+    edges.erase(edges.begin() + rand_index);
 
     // search for the base and target models
     size_t base_index, target_index;
