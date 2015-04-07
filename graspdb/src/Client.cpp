@@ -109,7 +109,7 @@ bool Client::connect()
       connection_->prepare("grasp_demonstrations.delete", "DELETE FROM grasp_demonstrations WHERE id=$1");
       connection_->prepare("grasp_demonstrations.insert",
           "INSERT INTO grasp_demonstrations (object_name, grasp_pose, eef_frame_id, point_cloud) " \
-          "VALUES ($1, $2, $3, $4) RETURNING id, created");
+          "VALUES (UPPER($1), $2, $3, $4) RETURNING id, created");
       connection_->prepare("grasp_demonstrations.select",
           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
@@ -119,18 +119,18 @@ bool Client::connect()
       connection_->prepare("grasp_demonstrations.select_object_name",
           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created " \
-          "FROM grasp_demonstrations WHERE LOWER(object_name)=LOWER($1)");
+          "FROM grasp_demonstrations WHERE UPPER(object_name)=UPPER($1)");
       connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
 
       // grasp_models statements
       connection_->prepare("grasp_models.delete", "DELETE FROM grasp_models WHERE id=$1");
       connection_->prepare("grasp_models.insert",
-          "INSERT INTO grasp_models (object_name, point_cloud) VALUES ($1, $2) RETURNING id, created");
+          "INSERT INTO grasp_models (object_name, point_cloud) VALUES (UPPER($1), $2) RETURNING id, created");
       connection_->prepare("grasp_models.select",
           "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
       connection_->prepare("grasp_models.select_all", "SELECT id, object_name, point_cloud, created FROM grasp_models");
       connection_->prepare("grasp_models.select_object_name",
-          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE LOWER(object_name)=LOWER($1)");
+          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE UPPER(object_name)=UPPER($1)");
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
 
       // grasps statements
