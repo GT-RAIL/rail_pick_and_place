@@ -89,7 +89,6 @@ void point_cloud_metrics::filterPointCloudOutliers(const pcl::PointCloud<pcl::Po
 
   // check each point
   pcl::IndicesPtr to_keep(new vector<int>);
-  vector<int> removeIndices; // TODO remove this
   for (size_t i = 0; i < pc->size(); i++)
   {
     // check how many neighbors pass the test
@@ -97,25 +96,14 @@ void point_cloud_metrics::filterPointCloudOutliers(const pcl::PointCloud<pcl::Po
     if (neighbors >= filter_outlier_min_num_neighbors)
     {
       to_keep->push_back(i);
-    } else
-    {
-      removeIndices.push_back(i); // TODO remove this
     }
   }
 
-  // TODO this is a known bug, we will need to retrain the decision tree later
-  sort(removeIndices.begin(), removeIndices.end());
-  reverse(removeIndices.begin(), removeIndices.end());
-  for (int i = (int) (removeIndices.size()) - 1; i >= 0; i--)
-  {
-    pc->erase(pc->begin() + i);
-  }
-
   // extract the point we wish to keep
-  //  pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-  //  extract.setInputCloud(pc);
-  //  extract.setIndices(to_keep);
-  //  extract.filter(*pc);
+  pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+  extract.setInputCloud(pc);
+  extract.setIndices(to_keep);
+  extract.filter(*pc);
 }
 
 void point_cloud_metrics::filterRedundantPoints(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
