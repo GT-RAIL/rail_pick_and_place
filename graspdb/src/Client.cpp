@@ -119,7 +119,7 @@ bool Client::connect()
       connection_->prepare("grasp_demonstrations.select_object_name",
           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, point_cloud, created " \
-          "FROM grasp_demonstrations WHERE object_name=$1");
+          "FROM grasp_demonstrations WHERE LOWER(object_name)=LOWER($1)");
       connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
 
       // grasp_models statements
@@ -130,7 +130,7 @@ bool Client::connect()
           "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
       connection_->prepare("grasp_models.select_all", "SELECT id, object_name, point_cloud, created FROM grasp_models");
       connection_->prepare("grasp_models.select_object_name",
-          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE object_name=$1");
+          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE LOWER(object_name)=LOWER($1)");
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
 
       // grasps statements
