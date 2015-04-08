@@ -17,6 +17,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>actionlib</build_depend>
+  <build_depend>boost</build_depend>
   <build_depend>graspdb</build_depend>
   <build_depend>rail_pick_and_place_msgs</build_depend>
   <build_depend>roscpp</build_depend>
@@ -24,6 +25,7 @@
   <build_depend>std_srvs</build_depend>
 
   <run_depend>actionlib</run_depend>
+  <run_depend>boost</run_depend>
   <run_depend>graspdb</run_depend>
   <run_depend>rail_grasp_collection</run_depend>
   <run_depend>rail_pick_and_place_msgs</run_depend>

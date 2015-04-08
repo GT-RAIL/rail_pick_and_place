@@ -13,9 +13,7 @@
 #include <pluginlib/class_list_macros.h>
 
 // Qt
-#include <QGridLayout>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
+#include <QBoxLayout>
 
 using namespace std;
 using namespace rail::pick_and_place;

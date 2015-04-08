@@ -87,6 +87,7 @@ private:
   actionlib::SimpleActionClient<rail_pick_and_place_msgs::RetrieveGraspModelAction> retrieve_grasp_model_ac_;
 
   QLabel *model_generation_status_;
+  /*! The current list of objects */
   QComboBox *object_list_;
   QListWidget *models_list_;
   QSpinBox *model_size_spin_box_;
@@ -124,6 +125,11 @@ private
 
   void modelSelectionChanged();
 
+  /*!
+   * \brief Refresh with the latest object and model lists.
+   *
+   * Refreshes the interface with the latest object and model lists.
+   */
   void refresh();
 };
 

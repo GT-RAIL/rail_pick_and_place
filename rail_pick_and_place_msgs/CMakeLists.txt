@@ -16,24 +16,21 @@ find_package(catkin REQUIRED COMPONENTS
 ## Declare ROS messages, services and actions ##
 ################################################
 
+## Generate actions in the 'action' folder
+add_action_files(FILES
+  GenerateModels.action
+  GetYesNoFeedback.action
+  GraspAndStore.action
+  RetrieveGraspDemonstration.action
+  RetrieveGraspModel.action
+  TrainMetrics.action
+)
+
 ## Generate messages in the 'msg' folder
 add_message_files(FILES
   GraspDemonstration.msg
   GraspModel.msg
   GraspWithSuccessRate.msg
-)
-
-## Generate services in the 'srv' folder
-add_service_files(FILES
-  TrainMetrics.srv
-)
-
-## Generate actions in the 'action' folder
-add_action_files(FILES
-  GenerateModels.action
-  GraspAndStore.action
-  RetrieveGraspDemonstration.action
-  RetrieveGraspModel.action
 )
 
 generate_messages(DEPENDENCIES

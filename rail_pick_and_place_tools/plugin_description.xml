@@ -3,6 +3,10 @@
          base_class_type="rviz::Panel">
     <description>A panel widget allowing for the collection of grasp demonstrations.</description>
   </class>
+  <class name="rail_pick_and_place_tools/Metric Training" type="rail::pick_and_place::MetricTrainingPanel"
+         base_class_type="rviz::Panel">
+    <description>A panel widget allowing for the training of registration metrics.</description>
+  </class>
   <class name="rail_pick_and_place_tools/Object Model Generation" type="rail::pick_and_place::ModelGenerationPanel"
          base_class_type="rviz::Panel">
     <description>A panel widget allowing interactive recognition and grasping model generation.</description>

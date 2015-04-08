@@ -1,0 +1,6 @@
+# Define the goal
+---
+# Define the result
+bool yes  # True = yes, false = no
+---
+# Define a feedback message

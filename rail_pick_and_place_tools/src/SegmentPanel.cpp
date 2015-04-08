@@ -14,7 +14,7 @@
 #include <std_srvs/Empty.h>
 
 // Qt
-#include <QGridLayout>
+#include <QBoxLayout>
 
 using namespace std;
 using namespace rail::pick_and_place;

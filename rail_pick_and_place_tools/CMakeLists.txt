@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_srvs
 )
+find_package(Boost REQUIRED COMPONENTS thread)
 
 ## This plugin includes Qt widgets, so we must include Qt
 find_package(Qt4 REQUIRED COMPONENTS
@@ -34,6 +35,7 @@ catkin_package()
 
 ## Specify additional locations of header files
 include_directories(include
+  ${boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -46,6 +48,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 ## Specify which header files need to be run through "moc" (Qt's meta-object compiler).
 qt4_wrap_cpp(MOC_FILES
   include/rail_pick_and_place_tools/GraspCollectionPanel.h
+  include/rail_pick_and_place_tools/MetricTrainingPanel.h
   include/rail_pick_and_place_tools/ModelGenerationPanel.h
   include/rail_pick_and_place_tools/SegmentPanel.h
 )
@@ -53,6 +56,7 @@ qt4_wrap_cpp(MOC_FILES
 ## Specify plugin source files
 set(SOURCE_FILES
   src/GraspCollectionPanel.cpp
+  src/MetricTrainingPanel.cpp
   src/ModelGenerationPanel.cpp
   src/SegmentPanel.cpp
   ${MOC_FILES}
@@ -68,8 +72,9 @@ add_dependencies(${PROJECT_NAME}
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}
-  ${QT_LIBRARIES}
+  ${boost_LIBRARIES}
   ${catkin_LIBRARIES}
+  ${QT_LIBRARIES}
 )
 
 #############

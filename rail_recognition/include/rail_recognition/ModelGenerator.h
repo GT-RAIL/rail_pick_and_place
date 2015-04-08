@@ -73,7 +73,7 @@ private:
    *
    * The main callback for the model generation action server.
    *
-   * \param goal The goal specifying the paramters for the model generation.
+   * \param goal The goal specifying the parameters for the model generation.
    */
   void generateModelsCallback(const rail_pick_and_place_msgs::GenerateModelsGoalConstPtr &goal);
 

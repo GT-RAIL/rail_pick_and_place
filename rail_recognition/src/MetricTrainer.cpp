@@ -8,7 +8,10 @@
 using namespace std;
 using namespace rail::pick_and_place;
 
-MetricTrainer::MetricTrainer() : private_node_("~")
+MetricTrainer::MetricTrainer()
+    : private_node_("~"), get_yes_and_no_feedback_ac_(private_node_, "get_yes_no_feedback", true),
+      as_(private_node_, "train_metrics", boost::bind(&MetricTrainer::trainMetricsCallback,
+          this, _1), false)
 {
   // set defaults
   int port = graspdb::Client::DEFAULT_PORT;
@@ -28,20 +31,21 @@ MetricTrainer::MetricTrainer() : private_node_("~")
   graspdb_ = new graspdb::Client(host, port, user, password, db);
   okay_ = graspdb_->connect();
 
+  // setup the point cloud publishers
   base_pc_pub_ = private_node_.advertise<pcl::PointCloud<pcl::PointXYZRGB> >("base_pc", 1, true);
   aligned_pc_pub_ = private_node_.advertise<pcl::PointCloud<pcl::PointXYZRGB> >("aligned_pc", 1, true);
-
-  train_metrics_srv_ = private_node_.advertiseService("train_metrics", &MetricTrainer::trainMetrics, this);
 
   if (okay_)
   {
     ROS_INFO("Metric Trainer Successfully Initialized");
+    as_.start();
   }
 }
 
 MetricTrainer::~MetricTrainer()
 {
   // cleanup
+  as_.shutdown();
   graspdb_->disconnect();
   delete graspdb_;
 }
@@ -51,39 +55,56 @@ bool MetricTrainer::okay() const
   return okay_;
 }
 
-bool MetricTrainer::trainMetrics(rail_pick_and_place_msgs::TrainMetrics::Request &req,
-    rail_pick_and_place_msgs::TrainMetrics::Response &res)
+void MetricTrainer::trainMetricsCallback(const rail_pick_and_place_msgs::TrainMetricsGoalConstPtr &goal)
 {
-  ROS_INFO("Gathering metrics for %s. Check RViz to see the matches, and use this command line to give feedback.",
-      req.object_name.c_str());
+  ROS_INFO("Gathering metrics for %s. Check RViz to see the matches.", goal->object_name.c_str());
+
+  // default to false
+  rail_pick_and_place_msgs::TrainMetricsFeedback feedback;
+  rail_pick_and_place_msgs::TrainMetricsResult result;
+  result.success = false;
 
   // get all of the grasp demonstrations for the given object name
+  feedback.message = "Loading grasp demonstrations...";
+  as_.publishFeedback(feedback);
   vector<graspdb::GraspDemonstration> demonstrations;
-  graspdb_->loadGraspDemonstrationsByObjectName(req.object_name, demonstrations);
+  graspdb_->loadGraspDemonstrationsByObjectName(goal->object_name, demonstrations);
 
   // try merging every combination of grasps and gather metrics for each
   if (demonstrations.size() >= 2)
   {
-    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > point_clouds;
-    point_clouds.resize(demonstrations.size());
-    for (unsigned int i = 0; i < point_clouds.size(); i ++)
+    // convert to PCL point clouds and filter them
+    feedback.message = "Converting to PCL point clouds...";
+    as_.publishFeedback(feedback);
+    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> point_clouds;
+    for (size_t i = 0; i < demonstrations.size(); i++)
     {
+      // create the PCL point cloud
+      point_clouds.push_back(pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>));
+      // convert from a ROS message
       point_cloud_metrics::rosPointCloud2ToPCLPointCloud(demonstrations[i].getPointCloud(), point_clouds[i]);
+      // filter and move to the origin
       point_cloud_metrics::filterPointCloudOutliers(point_clouds[i]);
       point_cloud_metrics::transformToOrigin(point_clouds[i]);
     }
 
+    // create the output file
     ofstream output_file;
     output_file.open("registration_metrics.txt", ios::out | ios::app);
 
+    // check all pairs
     for (size_t i = 0; i < point_clouds.size() - 1; i++)
     {
       for (size_t j = i + 1; j < point_clouds.size(); j++)
       {
-        ROS_INFO("Merging point clouds %ld and %ld...", i, j);
+        stringstream ss;
+        ss << i << " and " << j;
+        string i_j_str = ss.str();
+        feedback.message = "Merging point clouds " + i_j_str + "...";
+        as_.publishFeedback(feedback);
 
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr base_pc(new pcl::PointCloud<pcl::PointXYZRGB>);
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_pc(new pcl::PointCloud<pcl::PointXYZRGB>);
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr base_pc;
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_pc;
 
         // set the larger point cloud as the base point cloud
         if (point_clouds[i]->size() > point_clouds[j]->size())
@@ -105,6 +126,13 @@ bool MetricTrainer::trainMetrics(rail_pick_and_place_msgs::TrainMetrics::Request
         base_pc_pub_.publish(base_pc);
         aligned_pc_pub_.publish(aligned_pc);
 
+        // wait for input denoting positive or negative registration
+        feedback.message = "Getting metrics for point clouds " + i_j_str + "...";
+        as_.publishFeedback(feedback);
+        // send the request
+        rail_pick_and_place_msgs::GetYesNoFeedbackGoal goal;
+        get_yes_and_no_feedback_ac_.sendGoal(goal);
+
         // calculate all metrics
         double m_o = point_cloud_metrics::calculateRegistrationMetricOverlap(base_pc, aligned_pc, false);
         double m_d_err = point_cloud_metrics::calculateRegistrationMetricDistanceError(base_pc, aligned_pc);
@@ -113,13 +141,11 @@ bool MetricTrainer::trainMetrics(rail_pick_and_place_msgs::TrainMetrics::Request
         double m_c_dev = point_cloud_metrics::calculateRegistrationMetricStdDevColorRange(base_pc, aligned_pc);
         double m_spread = point_cloud_metrics::calculateRegistrationMetricDistance(base_pc, aligned_pc);
 
-        // wait for command line input denoting positive or negative registration
-        string input;
-        do
-        {
-          cout << "Is this a successful merge? (y/n) " << endl;
-          cin >> input;
-        } while (input != "y" && input != "n");
+        // wait for a response
+        feedback.message = "Waiting for feedback on point clouds " + i_j_str + "...";
+        as_.publishFeedback(feedback);
+        get_yes_and_no_feedback_ac_.waitForResult();
+        string input = (get_yes_and_no_feedback_ac_.getResult()->yes) ? "y" : "n";
 
         // write the data to the file
         output_file << m_o << "," << m_d_err << "," << m_c_err << "," << m_c_avg << "," << m_c_dev << "," << m_spread
@@ -127,13 +153,15 @@ bool MetricTrainer::trainMetrics(rail_pick_and_place_msgs::TrainMetrics::Request
       }
     }
 
+    // save the file and finish
     output_file.close();
-
-    ROS_INFO("All pairs attempted, metric training data gathering complete.");
+    result.success = true;
+    as_.setSucceeded(result);
   } else
   {
-    ROS_WARN("Less than 2 models found for '%s', ignoring request.", req.object_name.c_str());
+    // not enough models
+    string message = "Less than 2 models found for " + goal->object_name + ", ignoring request.";
+    ROS_WARN("%s", message.c_str());
+    as_.setSucceeded(result, message);
   }
-
-  return true;
 }

@@ -41,6 +41,15 @@
     <arg name="segmented_objects_topic" value="$(arg segmented_objects_topic)" />
   </include>
 
+  <!-- Metric Training Node -->
+  <include file="$(find rail_recognition)/launch/metric_trainer.launch">
+    <arg name="host" value="$(arg host)" />
+    <arg name="port" value="$(arg port)" />
+    <arg name="user" value="$(arg user)" />
+    <arg name="password" value="$(arg password)" />
+    <arg name="db" value="$(arg db)" />
+  </include>
+
   <!-- Grasp Model Node -->
   <include file="$(find rail_recognition)/launch/model_generator.launch">
     <arg name="host" value="$(arg host)" />
