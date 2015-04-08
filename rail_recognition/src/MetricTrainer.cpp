@@ -64,12 +64,21 @@ bool MetricTrainer::trainMetrics(rail_pick_and_place_msgs::TrainMetrics::Request
   // try merging every combination of grasps and gather metrics for each
   if (demonstrations.size() >= 2)
   {
+    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > point_clouds;
+    point_clouds.resize(demonstrations.size());
+    for (unsigned int i = 0; i < point_clouds.size(); i ++)
+    {
+      point_cloud_metrics::rosPointCloud2ToPCLPointCloud(demonstrations[i].getPointCloud(), point_clouds[i]);
+      point_cloud_metrics::filterPointCloudOutliers(point_clouds[i]);
+      point_cloud_metrics::transformToOrigin(point_clouds[i]);
+    }
+
     ofstream output_file;
     output_file.open("registration_metrics.txt", ios::out | ios::app);
 
-    for (size_t i = 0; i < demonstrations.size() - 1; i++)
+    for (size_t i = 0; i < point_clouds.size() - 1; i++)
     {
-      for (size_t j = i + 1; j < demonstrations.size(); j++)
+      for (size_t j = i + 1; j < point_clouds.size(); j++)
       {
         ROS_INFO("Merging point clouds %ld and %ld...", i, j);
 
@@ -77,17 +86,15 @@ bool MetricTrainer::trainMetrics(rail_pick_and_place_msgs::TrainMetrics::Request
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_pc(new pcl::PointCloud<pcl::PointXYZRGB>);
 
         // set the larger point cloud as the base point cloud
-        if (demonstrations[i].getPointCloud().data.size() > demonstrations[j].getPointCloud().data.size())
+        if (point_clouds[i]->size() > point_clouds[j]->size())
         {
-          // convert to pcl point clouds
-          point_cloud_metrics::rosPointCloud2ToPCLPointCloud(demonstrations[i].getPointCloud(), base_pc);
-          point_cloud_metrics::rosPointCloud2ToPCLPointCloud(demonstrations[j].getPointCloud(), target_pc);
+          base_pc = point_clouds[i];
+          target_pc = point_clouds[j];
         }
         else
         {
-          // convert to pcl point clouds
-          point_cloud_metrics::rosPointCloud2ToPCLPointCloud(demonstrations[i].getPointCloud(), target_pc);
-          point_cloud_metrics::rosPointCloud2ToPCLPointCloud(demonstrations[j].getPointCloud(), base_pc);
+          base_pc = point_clouds[j];
+          target_pc = point_clouds[i];
         }
 
         // perform ICP on the point clouds
