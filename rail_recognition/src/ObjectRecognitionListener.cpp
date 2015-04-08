@@ -1,3 +1,15 @@
+/*!
+ * \file ObjectRecognitionListener.cpp
+ * \brief The object recognition listener node object.
+ *
+ * The object recognition listener will listen to a specified SegmentedObjectsArray topic and attempt to recognize
+ * all segmented objects. The new list are republished on a separate topic.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 // RAIL Recognition
 #include "rail_recognition/ObjectRecognitionListener.h"
 #include "rail_recognition/PointCloudRecognizer.h"

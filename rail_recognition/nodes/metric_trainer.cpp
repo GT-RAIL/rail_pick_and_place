@@ -1,3 +1,15 @@
+/*!
+ * \file metric_trainer.cpp
+ * \brief The metric trainer node.
+ *
+ * The metric trainer allows for generating data sets for training registration metric decision trees. An action server
+ * is used to provide the object name and files are dumped to "registration_metrics.txt".
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 #include "rail_recognition/MetricTrainer.h"
 
 using namespace std;

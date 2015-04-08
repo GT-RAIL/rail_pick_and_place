@@ -1,3 +1,15 @@
+/*!
+ * \file PointCloudRecognizer.cpp
+ * \brief The main recognition object for segmented point clouds.
+ *
+ * The point cloud recognizer takes a segmented object and a list of grasp model candidates and attempts to recognize
+ * the object.
+ *
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 // RAIL Recognition
 #include "rail_recognition/PointCloudMetrics.h"
 #include "rail_recognition/PointCloudRecognizer.h"

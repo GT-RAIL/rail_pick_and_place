@@ -1,3 +1,15 @@
+/*!
+ * \file PointCloudRecognizer.h
+ * \brief The main recognition object for segmented point clouds.
+ *
+ * The point cloud recognizer takes a segmented object and a list of grasp model candidates and attempts to recognize
+ * the object.
+ *
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 #ifndef RAIL_PICK_AND_PLACE_POINT_CLOUD_RECOGNIZER_H_
 #define RAIL_PICK_AND_PLACE_POINT_CLOUD_RECOGNIZER_H_
 
@@ -17,46 +29,72 @@ namespace rail
 namespace pick_and_place
 {
 
+/*!
+ * \class PointCloudRecognizer
+ * \brief The main recognition object for segmented point clouds.
+ *
+ * The point cloud recognizer takes a segmented object and a list of grasp model candidates and attempts to recognize
+ * the object.
+ */
 class PointCloudRecognizer
 {
 public:
-  /*! The radius to search within for neighbors during pre-processing. */
-  static const double FILTER_SEARCH_RADIUS = 0.01;
-  /*! The minimum number of neighbors required to keep a point during pre-processing. */
-  static const int FILTER_MIN_NUM_NEIGHBORS = 23;
   /*! The weighting constant for the match score metric. */
   static const double ALPHA = 0.5;
-  /*! The radius to search within for neighbors during the overlap metric search. */
-  static const double OVERLAP_SEARCH_RADIUS = 0.005;
   /*! The confidence threshold for a recognition score. */
   static const double SCORE_CONFIDENCE_THRESHOLD = 0.8;
 
+  /*!
+   * \brief Creates a new PointCloudRecognizer.
+   *
+   * Creates a new PointCloudRecognizer.
+   */
   PointCloudRecognizer();
 
+  /*!
+   * \brief The main recognition function.
+   *
+   * Attempt to recognize the given object against the list of candidates. The object is compared to each candidate
+   * and registration metrics are calculated. The weighted score is checked and the model with the lowest error score
+   * is picked as the object. If this score meets the threshold, the segmented object is updated with the correct
+   * grasps and object information.
+   *
+   * \param object The segmented object to recognize and update if recognition is successful.
+   * \param candidates The list of candidate models for this object.
+   * \return True if the segmented object was recognized and updated accordingly.
+   */
   bool recognizeObject(rail_manipulation_msgs::SegmentedObject &object,
       const std::vector<graspdb::GraspModel> &candidates) const;
 
 private:
-
-
-  /**
-  * Determine a score for the registration of two point clouds
-  * @param baseCloudPtr pointer to the point cloud to which the target will be transformed
-  * @param targetCloudPtr pointer to the point cloud that will be transformed to the base cloud
-  * @return score representing the success of the registration, calculated as a weighted combination of color and shape metrics
-  */
+  /*!
+   * \brief Score the point cloud registration for the two point clouds.
+   *
+   * Perform registration from the object to the candidate and return the resulting weighted registration score (a
+   * measure of error). The tf_icp transform is filled with the transform used to shift the object to the candidate.
+   * The larger of the two points clouds will always be used as the base. If this occurs, the icp_swapped boolean
+   * will be set to true (that is, the above was performed with candidate onto object).
+   *
+   * \param candidate The candidate point cloud.
+   * \param object The point cloud of the object in question.
+   * \param tf_icp The transform from object to candidate used after ICP (or reversed if icp_swapped was set to true).
+   * \param icp_swapped If object was used as the base instead of candidate.
+   * \return The score representing the weighted success of the registration (a measure of error).
+   */
   double scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr candidate,
       pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, tf2::Transform &tf_icp, bool &icp_swapped) const;
 
-  /**
-  * Calculate a metric for how successful the registration was based on overlap
-  * @param baseCloudPtr pointer to the point cloud to which the target will be transformed
-  * @param targetCloudPtr pointer to the point cloud that will be transformed to the base cloud
-  * @return a score representing the success of the registration
-  */
-  double calculateRegistrationMetricOverlap(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr base,
-      pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr target) const;
-
+  /*!
+   * \brief Compute the grasps for the recognized object.
+   *
+   * Compute the grasps to the recognized object based on the grasps from the model.
+   *
+   * \param tf_icp The transform between the candidate model and the segmented object.
+   * \param icp_swapped If ICP was swapped during registration.
+   * \param centroid The centroid of the object point cloud.
+   * \param candidate_grasps The candidate grasps from the model.
+   * \param grasps The transformed grasps with respect to the recognized object.
+   */
   void computeGraspList(const tf2::Transform &tf_icp, const bool icp_swapped, const geometry_msgs::Point &centroid,
       const std::vector<graspdb::Grasp> &candidate_grasps, std::vector<graspdb::Grasp> &grasps) const;
 };

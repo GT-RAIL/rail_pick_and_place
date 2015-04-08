@@ -1,3 +1,14 @@
+/*!
+ * \file object_recognizer.cpp
+ * \brief The object recognizer node.
+ *
+ * The object recognizer sets up an action server that allows the recognition of a single segmented object.
+ *
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 #include "rail_recognition/ObjectRecognizer.h"
 
 using namespace std;

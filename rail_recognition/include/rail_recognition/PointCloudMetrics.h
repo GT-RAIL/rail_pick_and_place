@@ -1,3 +1,14 @@
+/*!
+ * \file PointCloudMetrics.h
+ * \brief Various point cloud metric calculations and utilities.
+ *
+ * A collection of static functions for calculating various point cloud metrics and utility functions.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 #ifndef RAIL_PICK_AND_PLACE_POINT_CLOUD_METRICS_H_
 #define RAIL_PICK_AND_PLACE_POINT_CLOUD_METRICS_H_
 
@@ -30,9 +41,25 @@ static const int DEFAULT_FILTER_OUTLIER_MIN_NUM_NEIGHBORS = 6;
 /*! The radius to search within for neighbors during the overlap metric search. */
 static const double DEFAULT_METRIC_OVERLAP_SEARCH_RADIUS = 0.005;
 
+/*!
+ * \brief Convert a ROS point cloud message to a PCL point cloud.
+ *
+ * Converts the given ROS point cloud message to a PCL point cloud.
+ *
+ * \param in The input ROS point cloud message.
+ * \param out The PCL point cloud to create.
+ */
 void rosPointCloud2ToPCLPointCloud(const sensor_msgs::PointCloud2 in,
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out);
 
+/*!
+ * \brief Convert a PCL point cloud to a ROS point cloud message.
+ *
+ * Converts the given PCL point cloud to a ROS point cloud message.
+ *
+ * \param in The input PCL point cloud message.
+ * \param out The ROS point cloud message to create.
+ */
 void pclPointCloudToROSPointCloud2(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &in,
     sensor_msgs::PointCloud2 &out);
 

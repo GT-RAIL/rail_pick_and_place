@@ -1,3 +1,15 @@
+/*!
+ * \file PCLGraspModel.cpp
+ * \brief A wrapper around a graspdb GrapsModel with a PCL point cloud.
+ *
+ * The PCLGraspModel is simply a wrapper around the graspdb GrapsModel with a PCL point cloud. A flag can also be set
+ * to mark the grasp model as an original (as apposed to newly generated during model generation). All accessors to
+ * the ROS point cloud message are disabled.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 // RAIL Recognition
 #include "rail_recognition/PCLGraspModel.h"
 #include "rail_recognition/PointCloudMetrics.h"

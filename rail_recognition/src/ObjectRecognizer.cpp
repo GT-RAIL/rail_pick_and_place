@@ -1,3 +1,14 @@
+/*!
+ * \file ObjectRecognizer.cpp
+ * \brief The object recognizer node object.
+ *
+ * The object recognizer sets up an action server that allows the recognition of a single segmented object.
+ *
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 // RAIL Recognition
 #include "rail_recognition/ObjectRecognizer.h"
 #include "rail_recognition/PointCloudRecognizer.h"
@@ -58,7 +69,7 @@ void ObjectRecognizer::recognizeObjectCallback(const rail_manipulation_msgs::Rec
   as_.publishFeedback(feedback);
 
   // populate candidates based on the name if it exists
-  vector <graspdb::GraspModel> candidates;
+  vector<graspdb::GraspModel> candidates;
   if (goal->name.size() > 0)
   {
     graspdb_->loadGraspModelsByObjectName(goal->name, candidates);
