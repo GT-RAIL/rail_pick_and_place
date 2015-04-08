@@ -104,6 +104,12 @@ install(DIRECTORY rviz/
   FILES_MATCHING PATTERN "*.rviz"
 )
 
+## Copy splash screen files
+install(DIRECTORY images/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/images
+  FILES_MATCHING PATTERN "*.png"
+)
+
 ## Copy plugin config files
 install(FILES plugin_description.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
