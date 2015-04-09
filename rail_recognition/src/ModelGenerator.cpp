@@ -1,3 +1,15 @@
+/*!
+ * \file ModelGenerator.cpp
+ * \brief The grasp model generator node object.
+ *
+ * The grasp model generator allows for generating graspdb models based on registration criteria. An action server is
+ * used to provide the model/grasp demonstration IDs to use during registration.
+ *
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 6, 2015
+ */
+
 // RAIL Recognition
 #include "rail_recognition/ModelGenerator.h"
 #include "rail_recognition/PointCloudMetrics.h"

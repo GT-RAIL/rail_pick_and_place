@@ -1,3 +1,15 @@
+/*!
+ * \file MetricTrainer.h
+ * \brief The metric trainer node object.
+ *
+ * The metric trainer allows for generating data sets for training registration metric decision trees. An action server
+ * is used to provide the object name and files are dumped to "registration_metrics.txt".
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 #ifndef RAIL_PICK_AND_PLACE_METRIC_TRAINER_H_
 #define RAIL_PICK_AND_PLACE_METRIC_TRAINER_H_
 
@@ -14,20 +26,32 @@ namespace rail
 namespace pick_and_place
 {
 
+/*!
+ * \class MetricTrainer
+ * \brief The metric trainer node object.
+ *
+ * The metric trainer allows for generating data sets for training registration metric decision trees. An action server
+ * is used to provide the object name and files are dumped to "registration_metrics.txt".
+ */
 class MetricTrainer
 {
 public:
+  /*!
+   * \brief Creates a new MetricTrainer.
+   *
+   * Creates a new MetricTrainer with the associated topics and action servers.
+   */
   MetricTrainer();
 
   /*!
-   * \brief Cleans up a ModelGenerator.
+   * \brief Cleans up a MetricTrainer.
    *
-   * Cleans up any connections used by the ModelGenerator.
+   * Cleans up any connections used by the MetricTrainer.
    */
   virtual ~MetricTrainer();
 
   /*!
-   * \brief A check for a valid ModelGenerator.
+   * \brief A check for a valid MetricTrainer.
    *
    * This function will return true if the appropriate connections were created successfully during initialization.
    *
@@ -36,6 +60,15 @@ public:
   bool okay() const;
 
 private:
+  /*!
+   * \brief The train metrics action server callback.
+   *
+   * This function starts by loading any grasps with the object name from the goal. All pairs of grasps are joined
+   * and published to two different point cloud topics (~/base_pc and ~/aligned_pc). User feedback is requested via
+   * an action client call to ~/get_yes_no_feedback. The metrics and the responses are recoreded in the data file.
+   *
+   * \param goal The goal specifying the object name.
+   */
   void trainMetricsCallback(const rail_pick_and_place_msgs::TrainMetricsGoalConstPtr &goal);
 
   /*! The okay check flag. */

@@ -1,3 +1,13 @@
+/*!
+ * \file MetricTrainingPanel.cpp
+ * \brief RViz plugin for registration metric training.
+ *
+ * The metric training panel allows for sending metric training requests and getting user Yes/No feedback.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 // RAIL Pick and Place Tools
 #include "rail_pick_and_place_tools/MetricTrainingPanel.h"
 

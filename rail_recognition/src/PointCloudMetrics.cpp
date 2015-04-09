@@ -1,3 +1,14 @@
+/*!
+ * \file PointCloudMetrics.cpp
+ * \brief Various point cloud metric calculations and utilities.
+ *
+ * A collection of static functions for calculating various point cloud metrics and utility functions.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 // RAIL Recognition
 #include "rail_recognition/PointCloudMetrics.h"
 

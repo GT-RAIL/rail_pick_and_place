@@ -1,9 +1,12 @@
 /*!
- * \ModelGenerationPanel.cpp
- * \brief Rviz plugin for generating object recognition/grasping models.
+ * \file ModelGenerationPanel.cpp
+ * \brief RViz plugin for model generation.
+ *
+ * The model generation panel allows for model generation requests to be made using a selection of grasps and models.
  *
  * \author David Kent, WPI - davidkent@wpi.edu
- * \date March 2, 2015
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
  */
 
 // RAIL Pick and Place Tools

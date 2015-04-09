@@ -1,3 +1,14 @@
+/*!
+ * \file ObjectRecognizer.h
+ * \brief The object recognizer node object.
+ *
+ * The object recognizer sets up an action server that allows the recognition of a single segmented object.
+ *
+ * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date April 8, 2015
+ */
+
 #ifndef RAIL_PICK_AND_PLACE_OBJECT_RECOGNIZER_H_
 #define RAIL_PICK_AND_PLACE_OBJECT_RECOGNIZER_H_
 
@@ -12,9 +23,20 @@ namespace rail
 namespace pick_and_place
 {
 
+/*!
+ * \class ObjectRecognizer
+ * \brief The object recognizer node object.
+ *
+ * The object recognizer sets up an action server that allows the recognition of a single segmented object.
+ */
 class ObjectRecognizer
 {
 public:
+  /*!
+   * \brief Creates a new ObjectRecognizer.
+   *
+   * Creates a new ObjectRecognizer with the associated action server.
+   */
   ObjectRecognizer();
 
   /*!
@@ -34,6 +56,13 @@ public:
   bool okay() const;
 
 private:
+  /*!
+   * \brief The recognize object action server callback.
+   *
+   * Attempts to recognize the object given in the goal and return it in the result.
+   *
+   * \param goal The goal specifying the segmented object to recognize.
+   */
   void recognizeObjectCallback(const rail_manipulation_msgs::RecognizeObjectGoalConstPtr &goal);
 
   /*! The okay check flag. */
