@@ -1,6 +1,6 @@
 <package>
   <name>rail_recognition</name>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <description>Construction and Use of a Recognition Database for Grasping Purposes</description>
 
   <author email="davidkent@wpi.edu">David Kent</author>

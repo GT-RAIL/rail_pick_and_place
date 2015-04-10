@@ -1,6 +1,6 @@
 <package>
   <name>graspdb</name>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <description>Grasp Training SQL Database Client Library</description>
 
   <author email="rctoris@wpi.edu">Russell Toris</author>
