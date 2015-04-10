@@ -303,11 +303,21 @@ bool point_cloud_metrics::classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>:
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
   // calculate the metrics
-  double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(base, target);
+  //double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(base, target);
   double overlap_score = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target);
-  double avg_color_diff = point_cloud_metrics::calculateRegistrationMetricColorRange(base, target);
-  double max_dist_diff = point_cloud_metrics::calculateRegistrationMetricDistance(base, target);
+  double color_error = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target, true);
+  //double avg_color_diff = point_cloud_metrics::calculateRegistrationMetricColorRange(base, target);
+  //double max_dist_diff = point_cloud_metrics::calculateRegistrationMetricDistance(base, target);
 
+  // New decision tree
+  // values found via decision tree training
+  if (overlap_score <= 0.471303)
+    return false;
+  else
+    return (color_error <= 97.0674);
+
+  /*
+  // Old decision tree
   // values found via decision tree training
   if (overlap_score <= 0.795576)
   {
@@ -317,6 +327,7 @@ bool point_cloud_metrics::classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>:
   {
     return (avg_color_diff <= 91.010641) && (max_dist_diff > 0.000304);
   }
+  */
 }
 
 tf2::Transform point_cloud_metrics::performICP(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
