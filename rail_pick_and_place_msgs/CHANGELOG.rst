@@ -2,6 +2,13 @@
 Changelog for package rail_pick_and_place_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2015-04-10)
+------------------
+* new metric trainier
+* metric trainer addition
+* Added metric data collection for decision tree training
+* Contributors: David Kent, Russell Toris
+
 1.1.1 (2015-04-06)
 ------------------
 

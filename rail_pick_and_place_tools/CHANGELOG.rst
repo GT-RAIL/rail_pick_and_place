@@ -2,6 +2,14 @@
 Changelog for package rail_pick_and_place_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2015-04-10)
+------------------
+* docs added for rail_pick_and_place_tools
+* splash screen added
+* new metric trainier
+* graph search used
+* Contributors: Russell Toris
+
 1.1.1 (2015-04-06)
 ------------------
 * refactor of RViz GUIs

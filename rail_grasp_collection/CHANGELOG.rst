@@ -2,6 +2,11 @@
 Changelog for package rail_grasp_collection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2015-04-10)
+------------------
+* graph search used
+* Contributors: Russell Toris
+
 1.1.1 (2015-04-06)
 ------------------
 

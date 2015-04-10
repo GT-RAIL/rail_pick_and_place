@@ -2,6 +2,23 @@
 Changelog for package rail_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2015-04-10)
+------------------
+* removed the swap check from recognition
+* Merge branch 'develop' of github.com:WPI-RAIL/rail_pick_and_place into develop
+* New decision tree for object models
+* docs finished
+* more docs
+* new metric trainier
+* Metric trainer filters point clouds first
+* bug removed
+* metric trainer addition
+* Added metric data collection for decision tree training
+* random selection added
+* fixes segfaults in graph search
+* graph search used
+* Contributors: David Kent, Russell Toris
+
 1.1.1 (2015-04-06)
 ------------------
 

@@ -2,6 +2,12 @@
 Changelog for package graspdb
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2015-04-10)
+------------------
+* changed to upper case checking for names
+* changed to lower case checking for names
+* Contributors: Russell Toris
+
 1.1.1 (2015-04-06)
 ------------------
 
