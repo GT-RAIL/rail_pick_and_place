@@ -52,7 +52,6 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   double min_score = numeric_limits<double>::infinity();
   size_t min_index;
   tf2::Transform min_icp_tf;
-  bool min_swapped;
   for (size_t i = 0; i < candidates.size(); i++)
   {
     // quick check for a valid point cloud
@@ -63,14 +62,12 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
       point_cloud_metrics::rosPointCloud2ToPCLPointCloud(candidates[i].getPointCloud(), candidate_point_cloud);
 
       tf2::Transform cur_icp_tf;
-      bool cur_swapped;
-      double score = this->scoreRegistration(candidate_point_cloud, object_point_cloud, cur_icp_tf, cur_swapped);
+      double score = this->scoreRegistration(candidate_point_cloud, object_point_cloud, cur_icp_tf);
       if (score < min_score)
       {
         min_score = score;
         min_index = i;
         min_icp_tf = cur_icp_tf;
-        min_swapped = cur_swapped;
       }
     }
   }
@@ -92,7 +89,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
 
   // extract possible grasps for this model
   vector<graspdb::Grasp> possible_grasps;
-  this->computeGraspList(min_icp_tf, min_swapped, object.centroid, candidates[min_index].getGrasps(), possible_grasps);
+  this->computeGraspList(min_icp_tf, object.centroid, candidates[min_index].getGrasps(), possible_grasps);
 
   // sort and remove any grasps with 0 success rates
   vector<double> success_rates;
@@ -131,19 +128,11 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
 }
 
 double PointCloudRecognizer::scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr candidate,
-    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, tf2::Transform &tf_icp, bool &icp_swapped) const
+    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, tf2::Transform &tf_icp) const
 {
-  // use the larger as the base cloud
-  icp_swapped = object->size() > candidate->size();
   // use ICP to for matching
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZRGB>);
-  if (icp_swapped)
-  {
-    tf_icp = point_cloud_metrics::performICP(object, candidate, aligned);
-  } else
-  {
-    tf_icp = point_cloud_metrics::performICP(candidate, object, aligned);
-  }
+  tf_icp = point_cloud_metrics::performICP(candidate, object, aligned);
 
   // calculate the distance and color error
   double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(candidate, aligned);
@@ -154,9 +143,8 @@ double PointCloudRecognizer::scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>
   return result;
 }
 
-void PointCloudRecognizer::computeGraspList(const tf2::Transform &tf_icp, const bool icp_swapped,
-    const geometry_msgs::Point &centroid, const vector<graspdb::Grasp> &candidate_grasps,
-    vector<graspdb::Grasp> &grasps) const
+void PointCloudRecognizer::computeGraspList(const tf2::Transform &tf_icp, const geometry_msgs::Point &centroid,
+    const vector<graspdb::Grasp> &candidate_grasps, vector<graspdb::Grasp> &grasps) const
 {
   // ensure an empty list
   grasps.clear();
@@ -170,15 +158,8 @@ void PointCloudRecognizer::computeGraspList(const tf2::Transform &tf_icp, const 
     // push back the basic information
     grasps.push_back(candidate_grasps[i]);
 
-    tf2::Transform result;
-    if (icp_swapped)
-    {
-      result = tf_icp * tf_pose;
-    } else
-    {
-      // use the inverse for the result
-      result = tf_icp.inverseTimes(tf_pose);
-    }
+    // use the inverse for the result
+    tf2::Transform result = tf_icp.inverseTimes(tf_pose);
 
     // correct for the origin transform
     result.getOrigin().setX(result.getOrigin().getX() + centroid.x);

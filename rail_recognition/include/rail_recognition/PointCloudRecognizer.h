@@ -72,17 +72,14 @@ private:
    *
    * Perform registration from the object to the candidate and return the resulting weighted registration score (a
    * measure of error). The tf_icp transform is filled with the transform used to shift the object to the candidate.
-   * The larger of the two points clouds will always be used as the base. If this occurs, the icp_swapped boolean
-   * will be set to true (that is, the above was performed with candidate onto object).
    *
    * \param candidate The candidate point cloud.
    * \param object The point cloud of the object in question.
-   * \param tf_icp The transform from object to candidate used after ICP (or reversed if icp_swapped was set to true).
-   * \param icp_swapped If object was used as the base instead of candidate.
+   * \param tf_icp The transform from object to candidate used after ICP.
    * \return The score representing the weighted success of the registration (a measure of error).
    */
   double scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr candidate,
-      pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, tf2::Transform &tf_icp, bool &icp_swapped) const;
+      pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr object, tf2::Transform &tf_icp) const;
 
   /*!
    * \brief Compute the grasps for the recognized object.
@@ -90,12 +87,11 @@ private:
    * Compute the grasps to the recognized object based on the grasps from the model.
    *
    * \param tf_icp The transform between the candidate model and the segmented object.
-   * \param icp_swapped If ICP was swapped during registration.
    * \param centroid The centroid of the object point cloud.
    * \param candidate_grasps The candidate grasps from the model.
    * \param grasps The transformed grasps with respect to the recognized object.
    */
-  void computeGraspList(const tf2::Transform &tf_icp, const bool icp_swapped, const geometry_msgs::Point &centroid,
+  void computeGraspList(const tf2::Transform &tf_icp, const geometry_msgs::Point &centroid,
       const std::vector<graspdb::Grasp> &candidate_grasps, std::vector<graspdb::Grasp> &grasps) const;
 };
 
