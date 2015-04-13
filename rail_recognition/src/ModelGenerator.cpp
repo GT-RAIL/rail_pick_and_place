@@ -353,9 +353,6 @@ bool ModelGenerator::registrationCheck(const PCLGraspModel &base, const PCLGrasp
 
     // set the final model parameters
     result.setObjectName(base.getObjectName());
-    result.setAvgColor(point_cloud_metrics::calculateAvgColor(result_pc));
-    result.setStdDevColor(point_cloud_metrics::calculateStdDevColor(result_pc, result.getAvgColor()));
-    result.setMaxDistance(point_cloud_metrics::calculateMaxDistance(result_pc));
     return true;
   } else
   {

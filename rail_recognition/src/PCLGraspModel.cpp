@@ -73,8 +73,6 @@ graspdb::GraspModel PCLGraspModel::toGraspModel() const
   point_cloud_metrics::pclPointCloudToROSPointCloud2(this->getPCLPointCloud(), msg);
 
   // convert the basic values
-  graspdb::GraspModel grasp_model(this->getID(), this->getObjectName(), this->getGrasps(), msg,
-                                  this->getAvgColor(), this->getStdDevColor(), this->getMaxDistance(),
-                                  this->getCreated());
+  graspdb::GraspModel grasp_model(this->getID(), this->getObjectName(), this->getGrasps(), msg, this->getCreated());
   return grasp_model;
 }

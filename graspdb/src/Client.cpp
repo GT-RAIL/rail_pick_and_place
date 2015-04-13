@@ -125,18 +125,12 @@ bool Client::connect()
 
       // grasp_models statements
       connection_->prepare("grasp_models.delete", "DELETE FROM grasp_models WHERE id=$1");
-      connection_->prepare("grasp_models.insert",
-                           "INSERT INTO grasp_models " \
-                           "(object_name, point_cloud, avg_color, std_dev_color, max_distance) " \
+      connection_->prepare("grasp_models.insert", "INSERT INTO grasp_models (object_name, point_cloud) " \
                            "VALUES (UPPER($1), $2, $3, $4, $5) RETURNING id, created");
       connection_->prepare("grasp_models.select",
-                           "SELECT id, object_name, point_cloud, avg_color, std_dev_color, max_distance, created " \
-                           "FROM grasp_models WHERE id=$1");
-      connection_->prepare("grasp_models.select_all",
-                           "SELECT id, object_name, point_cloud, avg_color, std_dev_color, max_distance, created " \
-                           "FROM grasp_models");
-      connection_->prepare("grasp_models.select_object_name",
-                           "SELECT id, object_name, point_cloud, avg_color, std_dev_color, max_distance, created " \
+                           "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
+      connection_->prepare("grasp_models.select_all", "SELECT id, object_name, point_cloud, created FROM grasp_models");
+      connection_->prepare("grasp_models.select_object_name", "SELECT id, object_name, point_cloud, created " \
                            "FROM grasp_models WHERE UPPER(object_name)=UPPER($1)");
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
 
@@ -211,9 +205,6 @@ void Client::createTables() const
                               "id SERIAL PRIMARY KEY," \
                               "object_name VARCHAR NOT NULL," \
                               "point_cloud BYTEA NOT NULL," \
-                              "avg_color NUMERIC NOT NULL," \
-                              "std_dev_color NUMERIC NOT NULL," \
-                              "max_distance NUMERIC NOT NULL," \
                               "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
                             ");";
   w.exec(grasp_models_sql);
@@ -510,15 +501,11 @@ bool Client::addGraspModel(GraspModel &gm) const
 {
   // build the SQL bits we need
   const string &object_name = gm.getObjectName();
-  const double avg_color = gm.getAvgColor();
-  const double std_dev_color = gm.getStdDevColor();
-  const double max_distance = gm.getMaxDistance();
   pqxx::binarystring pc = this->toBinaryString(gm.getPointCloud());
 
   // create and execute the query
   pqxx::work w(*connection_);
-  pqxx::result result = w.prepared("grasp_models.insert")(object_name)(pc)(avg_color)(std_dev_color)(max_distance)
-      .exec();
+  pqxx::result result = w.prepared("grasp_models.insert")(object_name)(pc).exec();
   w.commit();
 
   // check the result
@@ -683,9 +670,6 @@ GraspModel Client::extractGraspModelFromTuple(const pqxx::result::tuple &tuple) 
   gm.setID(tuple["id"].as<uint32_t>());
   gm.setObjectName(tuple["object_name"].as<string>());
   gm.setCreated(this->extractTimeFromString(tuple["created"].as<string>()));
-  gm.setAvgColor(tuple["avg_color"].as<double>());
-  gm.setStdDevColor(tuple["std_dev_color"].as<double>());
-  gm.setMaxDistance(tuple["max_distance"].as<double>());
 
   // extract the point cloud if there is one
   if (tuple["point_cloud"].size() > 0)
@@ -759,7 +743,7 @@ time_t Client::extractTimeFromString(const string &str) const
 }
 
 bool Client::getStringArrayFromPrepared(const string &prepared_name, const string &column_name,
-                                        vector<string> &strings) const
+    vector<string> &strings) const
 {
   // create and execute the query
   pqxx::work w(*connection_);
