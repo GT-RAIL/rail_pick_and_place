@@ -21,16 +21,24 @@ using namespace std;
 using namespace rail::pick_and_place::graspdb;
 
 GraspModel::GraspModel(const uint32_t id, const string &object_name, const vector<Grasp> &grasps,
-    const sensor_msgs::PointCloud2 &point_cloud, const time_t created)
+                       const sensor_msgs::PointCloud2 &point_cloud, const double avg_color, const double std_dev_color,
+                       const double max_distance, const time_t created)
     : Entity(id, created),
       object_name_(object_name), grasps_(grasps), point_cloud_(point_cloud)
 {
+  avg_color_ = avg_color;
+  std_dev_color_ = std_dev_color;
+  max_distance_ = max_distance;
 }
 
 GraspModel::GraspModel(const string &object_name, const vector<Grasp> &grasps,
-    const sensor_msgs::PointCloud2 &point_cloud)
+                       const sensor_msgs::PointCloud2 &point_cloud, const double avg_color, const double std_dev_color,
+                       const double max_distance)
     : object_name_(object_name), grasps_(grasps), point_cloud_(point_cloud)
 {
+  avg_color_ = avg_color;
+  std_dev_color_ = std_dev_color;
+  max_distance_ = max_distance;
 }
 
 GraspModel::GraspModel(const rail_pick_and_place_msgs::GraspModel &gm)
@@ -43,6 +51,9 @@ GraspModel::GraspModel(const rail_pick_and_place_msgs::GraspModel &gm)
     Grasp grasp(gm.grasps[i], gm.id);
     grasps_.push_back(grasp);
   }
+  avg_color_ = gm.avg_color;
+  std_dev_color_ = gm.std_dev_color;
+  max_distance_ = gm.max_distance;
 }
 
 const string &GraspModel::getObjectName() const
@@ -277,6 +288,36 @@ void GraspModel::setPointCloud(const sensor_msgs::PointCloud2 &point_cloud)
   point_cloud_ = point_cloud;
 }
 
+double GraspModel::getAvgColor() const
+{
+  return avg_color_;
+}
+
+void GraspModel::setAvgColor(const double avg_color)
+{
+  avg_color_ = avg_color;
+}
+
+double GraspModel::getStdDevColor() const
+{
+  return std_dev_color_;
+}
+
+void GraspModel::setStdDevColor(const double std_dev_color)
+{
+  std_dev_color_ = std_dev_color;
+}
+
+double GraspModel::getMaxDistance() const
+{
+  return max_distance_;
+}
+
+void GraspModel::setMaxDistance(const double max_distance)
+{
+  max_distance_ = max_distance;
+}
+
 rail_pick_and_place_msgs::GraspModel GraspModel::toROSGraspModelMessage() const
 {
   rail_pick_and_place_msgs::GraspModel gm;
@@ -288,6 +329,9 @@ rail_pick_and_place_msgs::GraspModel GraspModel::toROSGraspModelMessage() const
     gm.grasps.push_back(grasps_[i].toROSGraspWithSuccessRateMessage());
   }
   gm.point_cloud = point_cloud_;
+  gm.avg_color = avg_color_;
+  gm.std_dev_color = std_dev_color_;
+  gm.max_distance = max_distance_;
   gm.created.nsec = 0;
   gm.created.sec = this->getCreated();
   return gm;

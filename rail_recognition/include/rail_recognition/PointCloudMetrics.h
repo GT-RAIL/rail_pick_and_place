@@ -50,7 +50,7 @@ static const double DEFAULT_METRIC_OVERLAP_SEARCH_RADIUS = 0.005;
  * \param out The PCL point cloud to create.
  */
 void rosPointCloud2ToPCLPointCloud(const sensor_msgs::PointCloud2 in,
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out);
+                                   const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out);
 
 /*!
  * \brief Convert a PCL point cloud to a ROS point cloud message.
@@ -61,7 +61,7 @@ void rosPointCloud2ToPCLPointCloud(const sensor_msgs::PointCloud2 in,
  * \param out The ROS point cloud message to create.
  */
 void pclPointCloudToROSPointCloud2(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &in,
-    sensor_msgs::PointCloud2 &out);
+                                   sensor_msgs::PointCloud2 &out);
 
 /*!
  * \brief Filter point cloud outliers.
@@ -74,8 +74,8 @@ void pclPointCloudToROSPointCloud2(const pcl::PointCloud<pcl::PointXYZRGB>::Cons
  * \return The centroid of the point cloud.
  */
 void filterPointCloudOutliers(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    const double filter_outlier_search_radius = DEFAULT_FILTER_OUTLIER_SEARCH_RADIUS,
-    const double filter_outlier_min_num_neighbors = DEFAULT_FILTER_OUTLIER_MIN_NUM_NEIGHBORS);
+                              const double filter_outlier_search_radius = DEFAULT_FILTER_OUTLIER_SEARCH_RADIUS,
+                              const double filter_outlier_min_num_neighbors = DEFAULT_FILTER_OUTLIER_MIN_NUM_NEIGHBORS);
 
 /*!
  * \brief Filter redundant points from the point cloud.
@@ -86,7 +86,7 @@ void filterPointCloudOutliers(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
  * \param filter_redundant_search_radius The search radius to be considered as a redundant point (defaults to constant).
  */
 void filterRedundantPoints(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    const double filter_redundant_search_radius = DEFAULT_FILTER_REDUNDANT_SEARCH_RADIUS);
+                           const double filter_redundant_search_radius = DEFAULT_FILTER_REDUNDANT_SEARCH_RADIUS);
 
 /*!
  * \brief Compute the centroid of the given point cloud.
@@ -127,7 +127,7 @@ void transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc);
  * \param centroid The known centroid of the point cloud.
  */
 void transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    std::vector<graspdb::Grasp> &grasps, const geometry_msgs::Point &centroid);
+                       std::vector<graspdb::Grasp> &grasps, const geometry_msgs::Point &centroid);
 
 /*!
  * \brief Transform the point cloud and grasps to be centered about the origin.
@@ -138,7 +138,7 @@ void transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
  * \param grasps The grasps to transform.
  */
 void transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    std::vector<graspdb::Grasp> &grasps);
+                       std::vector<graspdb::Grasp> &grasps);
 
 /*!
  * \brief Point cloud distance error metric calculator.
@@ -150,7 +150,7 @@ void transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
  * \return The total distance between each point in target to the closest point in base.
  */
 double calculateRegistrationMetricDistanceError(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
+                                                const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
 
 /*!
  * \brief Point cloud overlap metric calculator.
@@ -165,8 +165,9 @@ double calculateRegistrationMetricDistanceError(const pcl::PointCloud<pcl::Point
  * \return The resulting overlap metric value.
  */
 double calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, const bool return_color_error = false,
-    const double metric_overlap_search_radius = DEFAULT_METRIC_OVERLAP_SEARCH_RADIUS);
+                                          const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
+                                          const bool return_color_error = false,
+                                          const double metric_overlap_search_radius = DEFAULT_METRIC_OVERLAP_SEARCH_RADIUS);
 
 /*!
  * \brief Calculate the average color range registration metric.
@@ -178,7 +179,7 @@ double calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB
  * \return The absolute difference between the average RGB color value for each point cloud.
  */
 double calculateRegistrationMetricColorRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
+                                             const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
 
 /*!
  * \brief Calculate the average RGB color value.
@@ -188,7 +189,7 @@ double calculateRegistrationMetricColorRange(const pcl::PointCloud<pcl::PointXYZ
  * \param pc The point cloud to compute the average RGB color value for.
  * \return The average RGB color value for the given point cloud.
  */
-double calculateAverageColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
+double calculateAvgColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
 
 /*!
  * \brief Calculate the color standard deviation registration metric.
@@ -200,7 +201,7 @@ double calculateAverageColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &
  * \return The absolute difference between the standard deviation in the average RGB color space for each point cloud.
  */
 double calculateRegistrationMetricStdDevColorRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
+                                                   const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
 
 /*!
  * \brief Calculate the color standard deviation.
@@ -213,6 +214,17 @@ double calculateRegistrationMetricStdDevColorRange(const pcl::PointCloud<pcl::Po
 double calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
 
 /*!
+ * \brief Calculate the color standard deviation.
+ *
+ * Calculate the standard deviation in the average RGB color space for the given point cloud with a known average.
+ *
+ * \param pc The point cloud to compute the color standard deviation metric for.
+ * \param avg_color The average color value.
+ * \return The standard deviation in the average RGB color space for the given point cloud.
+ */
+double calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, const double avg_color);
+
+/*!
  * \brief Calculate the distance registration metric.
  *
  * Calculate the absolute difference between the maximum distances between any two points in each point cloud.
@@ -222,7 +234,7 @@ double calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &p
  * \return The absolute difference between the maximum distances between any two points in each point cloud.
  */
 double calculateRegistrationMetricDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
+                                           const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
 
 /*!
  * \brief Calculate the max distance between points.
@@ -245,7 +257,7 @@ double calculateMaxDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &p
  * \return If the calculated metrics meet the criteria for a valid merge.
  */
 bool classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
+                   const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
 
 /*!
  * \brief Perform ICP on the given point clouds.
@@ -258,8 +270,8 @@ bool classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
  * \return The transform used to move source to target.
  */
 tf2::Transform performICP(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source,
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result);
+                          const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source,
+                          const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result);
 }
 }
 }

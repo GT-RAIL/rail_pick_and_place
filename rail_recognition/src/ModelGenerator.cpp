@@ -135,7 +135,7 @@ void ModelGenerator::generateModelsCallback(const rail_pick_and_place_msgs::Gene
 }
 
 void ModelGenerator::generateAndStoreModels(vector<PCLGraspModel> &grasp_models, const int max_model_size,
-    vector<uint32_t> &new_model_ids)
+                                            vector<uint32_t> &new_model_ids)
 {
   rail_pick_and_place_msgs::GenerateModelsFeedback feedback;
 
@@ -304,7 +304,7 @@ void ModelGenerator::generateAndStoreModels(vector<PCLGraspModel> &grasp_models,
 }
 
 bool ModelGenerator::registrationCheck(const PCLGraspModel &base, const PCLGraspModel &target,
-    PCLGraspModel &result) const
+                                       PCLGraspModel &result) const
 {
   const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &base_pc = base.getPCLPointCloud();
   const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &target_pc = target.getPCLPointCloud();
@@ -331,7 +331,7 @@ bool ModelGenerator::registrationCheck(const PCLGraspModel &base, const PCLGrasp
       // add the new grasp
       graspdb::Pose new_pose(old_grasp_pose.getRobotFixedFrameID(), tf_result);
       graspdb::Grasp new_grasp(new_pose, graspdb::GraspModel::UNSET_ID, old_grasp.getEefFrameID(),
-          old_grasp.getSuccesses(), old_grasp.getAttempts());
+                               old_grasp.getSuccesses(), old_grasp.getAttempts());
       result.addGrasp(new_grasp);
     }
 
@@ -353,6 +353,9 @@ bool ModelGenerator::registrationCheck(const PCLGraspModel &base, const PCLGrasp
 
     // set the final model parameters
     result.setObjectName(base.getObjectName());
+    result.setAvgColor(point_cloud_metrics::calculateAvgColor(result_pc));
+    result.setStdDevColor(point_cloud_metrics::calculateStdDevColor(result_pc, result.getAvgColor()));
+    result.setMaxDistance(point_cloud_metrics::calculateMaxDistance(result_pc));
     return true;
   } else
   {

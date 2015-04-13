@@ -25,7 +25,7 @@ using namespace std;
 using namespace rail::pick_and_place;
 
 void point_cloud_metrics::rosPointCloud2ToPCLPointCloud(const sensor_msgs::PointCloud2 in,
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out)
+                                                        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out)
 {
   pcl::PCLPointCloud2 converter;
   pcl_conversions::toPCL(in, converter);
@@ -33,7 +33,7 @@ void point_cloud_metrics::rosPointCloud2ToPCLPointCloud(const sensor_msgs::Point
 }
 
 void point_cloud_metrics::pclPointCloudToROSPointCloud2(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &in,
-    sensor_msgs::PointCloud2 &out)
+                                                        sensor_msgs::PointCloud2 &out)
 {
   // convert to PCL PointCloud2
   pcl::PCLPointCloud2 converter;
@@ -43,7 +43,7 @@ void point_cloud_metrics::pclPointCloudToROSPointCloud2(const pcl::PointCloud<pc
 }
 
 void point_cloud_metrics::transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    const geometry_msgs::Point &centroid)
+                                            const geometry_msgs::Point &centroid)
 {
   // transformation matrix
   Eigen::Matrix4f tf;
@@ -65,7 +65,7 @@ void point_cloud_metrics::transformToOrigin(const pcl::PointCloud<pcl::PointXYZR
 }
 
 void point_cloud_metrics::transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    vector<graspdb::Grasp> &grasps, const geometry_msgs::Point &centroid)
+                                            vector<graspdb::Grasp> &grasps, const geometry_msgs::Point &centroid)
 {
   // start with the point cloud
   point_cloud_metrics::transformToOrigin(pc, centroid);
@@ -81,7 +81,7 @@ void point_cloud_metrics::transformToOrigin(const pcl::PointCloud<pcl::PointXYZR
 }
 
 void point_cloud_metrics::transformToOrigin(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    vector<graspdb::Grasp> &grasps)
+                                            vector<graspdb::Grasp> &grasps)
 {
   // compute the centroid
   geometry_msgs::Point centroid = point_cloud_metrics::computeCentroid(pc);
@@ -90,7 +90,8 @@ void point_cloud_metrics::transformToOrigin(const pcl::PointCloud<pcl::PointXYZR
 }
 
 void point_cloud_metrics::filterPointCloudOutliers(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    const double filter_outlier_search_radius, const double filter_outlier_min_num_neighbors)
+                                                   const double filter_outlier_search_radius,
+                                                   const double filter_outlier_min_num_neighbors)
 {
   // use a KD tree to search
   pcl::KdTreeFLANN<pcl::PointXYZRGB> search_tree;
@@ -118,7 +119,7 @@ void point_cloud_metrics::filterPointCloudOutliers(const pcl::PointCloud<pcl::Po
 }
 
 void point_cloud_metrics::filterRedundantPoints(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pc,
-    const double filter_redundant_search_radius)
+                                                const double filter_redundant_search_radius)
 {
   // non-empty clouds only
   if (pc->size() > 0)
@@ -177,8 +178,9 @@ double point_cloud_metrics::calculateRegistrationMetricDistanceError(
 }
 
 double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, const bool return_color_error,
-    const double metric_overlap_search_radius)
+                                                               const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
+                                                               const bool return_color_error,
+                                                               const double metric_overlap_search_radius)
 {
   // search with a KD tree
   pcl::KdTreeFLANN<pcl::PointXYZRGB> search_tree;
@@ -207,7 +209,7 @@ double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointC
         {
           const pcl::PointXYZRGB &point = base->at(indices[j]);
           rgb_distance += sqrt(pow(search_point.r - point.r, 2) + pow(search_point.g - point.g, 2) +
-              pow(search_point.b - point.b, 2));
+                               pow(search_point.b - point.b, 2));
         }
         // normalize the distance
         rgb_distance /= neighbors;
@@ -220,7 +222,7 @@ double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointC
   return (return_color_error) ? (error / score) : (score /= ((double) target->size()));
 }
 
-double point_cloud_metrics::calculateAverageColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
+double point_cloud_metrics::calculateAvgColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
 {
   // averages
   double avg_r = 0, avg_g = 0, avg_b = 0;
@@ -239,8 +241,8 @@ double point_cloud_metrics::calculateRegistrationMetricColorRange(
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base, const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
   // calculate the average for each
-  double avg_base = point_cloud_metrics::calculateAverageColor(base);
-  double avg_target = point_cloud_metrics::calculateAverageColor(target);
+  double avg_base = point_cloud_metrics::calculateAvgColor(base);
+  double avg_target = point_cloud_metrics::calculateAvgColor(target);
   // return the absolute difference
   return fabs(avg_base - avg_target);
 }
@@ -257,12 +259,18 @@ double point_cloud_metrics::calculateRegistrationMetricStdDevColorRange(
 
 double point_cloud_metrics::calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
 {
+  double avg_color = point_cloud_metrics::calculateAvgColor(pc);
+  return point_cloud_metrics::calculateStdDevColor(pc, avg_color);
+}
+
+double point_cloud_metrics::calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc,
+                                                 const double avg_color)
+{
   double variance = 0;
-  double avg = point_cloud_metrics::calculateAverageColor(pc);
   for (size_t i = 0; i < pc->size(); i++)
   {
     const pcl::PointXYZRGB &point = pc->at(i);
-    variance += pow((point.r + point.g + point.b) - avg, 2);
+    variance += pow((point.r + point.g + point.b) - avg_color, 2);
   }
   variance /= pc->size();
   return sqrt(variance);
@@ -290,7 +298,7 @@ double point_cloud_metrics::calculateMaxDistance(const pcl::PointCloud<pcl::Poin
 }
 
 double point_cloud_metrics::calculateRegistrationMetricDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
+                                                                const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
   // calculate the max for each
   double max_dist_base = point_cloud_metrics::calculateMaxDistance(base);
@@ -300,39 +308,19 @@ double point_cloud_metrics::calculateRegistrationMetricDistance(const pcl::Point
 }
 
 bool point_cloud_metrics::classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
+                                        const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
-  // calculate the metrics
-  //double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(base, target);
+  // calculate the metrics we need
   double overlap_score = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target);
   double color_error = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target, true);
-  //double avg_color_diff = point_cloud_metrics::calculateRegistrationMetricColorRange(base, target);
-  //double max_dist_diff = point_cloud_metrics::calculateRegistrationMetricDistance(base, target);
 
-  // New decision tree
   // values found via decision tree training
-  if (overlap_score <= 0.471303)
-    return false;
-  else
-    return (color_error <= 97.0674);
-
-  /*
-  // Old decision tree
-  // values found via decision tree training
-  if (overlap_score <= 0.795576)
-  {
-    return (max_dist_diff <= 0.002273) && (distance_error > 0.053681);
-  }
-  else
-  {
-    return (avg_color_diff <= 91.010641) && (max_dist_diff > 0.000304);
-  }
-  */
+  return (overlap_score > 0.471303) && (color_error <= 97.0674);
 }
 
 tf2::Transform point_cloud_metrics::performICP(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source,
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result)
+                                               const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source,
+                                               const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result)
 {
   // set the ICP point clouds
   pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
@@ -346,8 +334,8 @@ tf2::Transform point_cloud_metrics::performICP(const pcl::PointCloud<pcl::PointX
 
   // tanslate to a TF2 transform
   tf2::Matrix3x3 rotation(transform(0, 0), transform(0, 1), transform(0, 2),
-      transform(1, 0), transform(1, 1), transform(1, 2),
-      transform(2, 0), transform(2, 1), transform(2, 2));
+                          transform(1, 0), transform(1, 1), transform(1, 2),
+                          transform(2, 0), transform(2, 1), transform(2, 2));
   tf2::Vector3 translation(transform(0, 3), transform(1, 3), transform(2, 3));
   tf2::Transform tf_icp(rotation, translation);
   return tf_icp;

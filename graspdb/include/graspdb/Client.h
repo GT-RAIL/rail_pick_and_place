@@ -465,6 +465,15 @@ private:
    */
   pqxx::binarystring toBinaryString(const sensor_msgs::PointCloud2 &pc) const;
 
+  /*!
+   * \brief Convert a ROS Image to a PostgreSQL binary string.
+   *
+   * Converts the given ROS Image message to a PostgreSQL binary string for use in SQL queries.
+   *
+   * \param pc The ROS Image message to convert to a PostgreSQL binary string.
+   */
+  pqxx::binarystring toBinaryString(const sensor_msgs::Image &image) const;
+
 #endif
 
   /*! Database connection information. */

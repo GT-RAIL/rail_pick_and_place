@@ -53,12 +53,15 @@ public:
    * \param object_name The name of the object grasped (defaults to the empty string).
    * \param grasps The pose of the grasp (defaults to an empty vector).
    * \param point_cloud The ROS sensor_msgs/PointCloud2 message of the segmented object (defaults to empty values).
+   * \param avg_color The average color of the point cloud (defaults to 0).
+   * \param std_dev_color The standard deviation in the color of the point cloud (defaults to 0).
+   * \param max_distance The maximum distance between two points in the point cloud (defaults to 0).
    * \param created The created timestamp (defaults to 0).
    */
   GraspModel(const uint32_t id = Entity::UNSET_ID, const std::string &object_name = "",
-      const std::vector<Grasp> &grasps = std::vector<Grasp>(),
-      const sensor_msgs::PointCloud2 &point_cloud = sensor_msgs::PointCloud2(),
-      const time_t created = Entity::UNSET_TIME);
+             const std::vector<Grasp> &grasps = std::vector<Grasp>(),
+             const sensor_msgs::PointCloud2 &point_cloud = sensor_msgs::PointCloud2(), const double avg_color = 0,
+             const double std_dev_color = 0, const double max_distance = 0, const time_t created = Entity::UNSET_TIME);
 
   /*!
    * \brief Create a new GraspModel.
@@ -69,9 +72,13 @@ public:
    * \param object_name The name of the object grasped.
    * \param grasps The pose of the grasp.
    * \param point_cloud The ROS sensor_msgs/PointCloud2 message of the segmented object.
+   * \param avg_color The average color of the point cloud.
+   * \param std_dev_color The standard deviation in the color of the point cloud.
+   * \param max_distance The maximum distance between two points in the point cloud.
    */
   GraspModel(const std::string &object_name, const std::vector<Grasp> &grasps,
-      const sensor_msgs::PointCloud2 &point_cloud);
+             const sensor_msgs::PointCloud2 &point_cloud, const double avg_color, const double std_dev_color,
+             const double max_distance);
 
   /*!
    * \brief Create a new GraspModel.
@@ -276,6 +283,60 @@ public:
   void setPointCloud(const sensor_msgs::PointCloud2 &point_cloud);
 
   /*!
+   * \brief Average color accessor.
+   *
+   * Get the average color of the point cloud.
+   *
+   * \return The average color of the point cloud.
+   */
+  double getAvgColor() const;
+
+  /*!
+   * \brief Average color mutator.
+   *
+   * Set the average color value of the point cloud.
+   *
+   * \param avg_color The average color value of the point cloud to set.
+   */
+  void setAvgColor(const double avg_color);
+
+  /*!
+   * \brief Standard deviation of the color accessor.
+   *
+   * Get standard deviation of the color of the point cloud.
+   *
+   * \return The standard deviation of the color of the point cloud.
+   */
+  double getStdDevColor() const;
+
+  /*!
+   * \brief Standard deviation of the color mutator.
+   *
+   * Set the standard deviation of the color value of the point cloud.
+   *
+   * \param std_dev_color The standard deviation of the color value of the point cloud to set.
+   */
+  void setStdDevColor(const double std_dev_color);
+
+  /*!
+   * \brief Maximum distance between points accessor.
+   *
+   * Get the maximum distance between points of the point cloud.
+   *
+   * \return The maximum distance between points of the point cloud.
+   */
+  double getMaxDistance() const;
+
+  /*!
+   * \brief Maximum distance between points mutator.
+   *
+   * Set the maximum distance between points of the point cloud.
+   *
+   * \param max_distance The maximum distance between points of the point cloud to set.
+   */
+  void setMaxDistance(const double max_distance);
+
+  /*!
    * Converts this GraspModel object into a ROS GraspModel message.
    *
    * \return The ROS GraspModel message with this grasp model data.
@@ -289,6 +350,8 @@ private:
   std::vector<Grasp> grasps_;
   /*! The point cloud data. */
   sensor_msgs::PointCloud2 point_cloud_;
+  /*! The pre-computed metric values. */
+  double avg_color_, std_dev_color_, max_distance_;
 };
 
 }
