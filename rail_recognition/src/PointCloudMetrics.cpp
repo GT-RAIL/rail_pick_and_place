@@ -176,6 +176,58 @@ double point_cloud_metrics::calculateRegistrationMetricDistanceError(
   return score;
 }
 
+void point_cloud_metrics::calculateAvgColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &avg_r,
+    double &avg_g, double &avg_b)
+{
+  // simply go through each point
+  avg_r = 0;
+  avg_g = 0;
+  avg_b = 0;
+  for (size_t i = 0; i < pc->size(); i++)
+  {
+    const pcl::PointXYZRGB &point = pc->at(i);
+    avg_r += point.r;
+    avg_g += point.g;
+    avg_b += point.b;
+  }
+
+  // average the values
+  avg_r /= (double) pc->size();
+  avg_g /= (double) pc->size();
+  avg_b /= (double) pc->size();
+}
+
+double point_cloud_metrics::calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc,
+    double &std_dev_r, double &std_dev_g, double &std_dev_b)
+{
+  // calculate the averages first
+  double avg_r, avg_g, avg_b;
+  point_cloud_metrics::calculateAvgColors(pc, avg_r, avg_g, avg_b);
+  point_cloud_metrics::calculateStdDevColors(pc, std_dev_r, std_dev_g, std_dev_b, avg_r, avg_g, avg_b);
+}
+
+double point_cloud_metrics::calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc,
+    double &std_dev_r, double &std_dev_g, double &std_dev_b, const double avg_r, const double avg_g, const double avg_b)
+{
+  double variance_r = 0;
+  double variance_g = 0;
+  double variance_b = 0;
+  for (size_t i = 0; i < pc->size(); i++)
+  {
+    const pcl::PointXYZRGB &point = pc->at(i);
+    variance_r += pow(point.r - avg_r, 2);
+    variance_g += pow(point.g - avg_r, 2);
+    variance_b += pow(point.b - avg_r, 2);
+  }
+  variance_r /= (double) pc->size();
+  variance_g /= (double) pc->size();
+  variance_b /= (double) pc->size();
+
+  std_dev_r = sqrt(variance_r);
+  std_dev_g = sqrt(variance_g);
+  std_dev_b = sqrt(variance_b);
+}
+
 double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, const bool return_color_error,
     const double metric_overlap_search_radius)
@@ -207,7 +259,7 @@ double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointC
         {
           const pcl::PointXYZRGB &point = base->at(indices[j]);
           rgb_distance += sqrt(pow(search_point.r - point.r, 2) + pow(search_point.g - point.g, 2) +
-              pow(search_point.b - point.b, 2));
+                               pow(search_point.b - point.b, 2));
         }
         // normalize the distance
         rgb_distance /= neighbors;
@@ -220,119 +272,19 @@ double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointC
   return (return_color_error) ? (error / score) : (score /= ((double) target->size()));
 }
 
-double point_cloud_metrics::calculateAverageColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
-{
-  // averages
-  double avg_r = 0, avg_g = 0, avg_b = 0;
-  for (size_t i = 0; i < pc->size(); i++)
-  {
-    const pcl::PointXYZRGB &point = pc->at(i);
-    avg_r += point.r;
-    avg_g += point.g;
-    avg_b += point.b;
-  }
-
-  return (avg_r + avg_g + avg_b) / ((double) pc->size());
-}
-
-double point_cloud_metrics::calculateRegistrationMetricColorRange(
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base, const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
-{
-  // calculate the average for each
-  double avg_base = point_cloud_metrics::calculateAverageColor(base);
-  double avg_target = point_cloud_metrics::calculateAverageColor(target);
-  // return the absolute difference
-  return fabs(avg_base - avg_target);
-}
-
-double point_cloud_metrics::calculateRegistrationMetricStdDevColorRange(
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base, const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
-{
-  // calculate the standard deviation for each
-  double std_dev_base = point_cloud_metrics::calculateStdDevColor(base);
-  double std_dev_target = point_cloud_metrics::calculateStdDevColor(target);
-  // return the absolute difference
-  return fabs(std_dev_base - std_dev_target);
-}
-
-double point_cloud_metrics::calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
-{
-  double variance = 0;
-  double avg = point_cloud_metrics::calculateAverageColor(pc);
-  for (size_t i = 0; i < pc->size(); i++)
-  {
-    const pcl::PointXYZRGB &point = pc->at(i);
-    variance += pow((point.r + point.g + point.b) - avg, 2);
-  }
-  variance /= pc->size();
-  return sqrt(variance);
-}
-
-double point_cloud_metrics::calculateMaxDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc)
-{
-  double max = 0;
-  // compare each pair of points
-  for (size_t i = 0; i < pc->size() - 1; i++)
-  {
-    for (size_t j = i + 1; j < pc->size(); j++)
-    {
-      const pcl::PointXYZRGB &p1 = pc->at(i);
-      const pcl::PointXYZRGB &p2 = pc->at(j);
-      // compute the distance
-      double distance = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2) + pow(p1.z - p2.z, 2));
-      if (distance > max)
-      {
-        max = distance;
-      }
-    }
-  }
-  return max;
-}
-
-double point_cloud_metrics::calculateRegistrationMetricDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
-{
-  // calculate the max for each
-  double max_dist_base = point_cloud_metrics::calculateMaxDistance(base);
-  double max_dist_target = point_cloud_metrics::calculateMaxDistance(target);
-  // return the absolute difference
-  return fabs(max_dist_base - max_dist_target);
-}
-
 bool point_cloud_metrics::classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
-  // calculate the metrics
-  //double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(base, target);
+  // calculate the metrics we need
   double overlap_score = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target);
   double color_error = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target, true);
-  //double avg_color_diff = point_cloud_metrics::calculateRegistrationMetricColorRange(base, target);
-  //double max_dist_diff = point_cloud_metrics::calculateRegistrationMetricDistance(base, target);
 
-  // New decision tree
   // values found via decision tree training
-  if (overlap_score <= 0.471303)
-    return false;
-  else
-    return (color_error <= 97.0674);
-
-  /*
-  // Old decision tree
-  // values found via decision tree training
-  if (overlap_score <= 0.795576)
-  {
-    return (max_dist_diff <= 0.002273) && (distance_error > 0.053681);
-  }
-  else
-  {
-    return (avg_color_diff <= 91.010641) && (max_dist_diff > 0.000304);
-  }
-  */
+  return (overlap_score > 0.471303) && (color_error <= 97.0674);
 }
 
 tf2::Transform point_cloud_metrics::performICP(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source,
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result)
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source, const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result)
 {
   // set the ICP point clouds
   pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
@@ -346,8 +298,8 @@ tf2::Transform point_cloud_metrics::performICP(const pcl::PointCloud<pcl::PointX
 
   // tanslate to a TF2 transform
   tf2::Matrix3x3 rotation(transform(0, 0), transform(0, 1), transform(0, 2),
-      transform(1, 0), transform(1, 1), transform(1, 2),
-      transform(2, 0), transform(2, 1), transform(2, 2));
+                          transform(1, 0), transform(1, 1), transform(1, 2),
+                          transform(2, 0), transform(2, 1), transform(2, 2));
   tf2::Vector3 translation(transform(0, 3), transform(1, 3), transform(2, 3));
   tf2::Transform tf_icp(rotation, translation);
   return tf_icp;

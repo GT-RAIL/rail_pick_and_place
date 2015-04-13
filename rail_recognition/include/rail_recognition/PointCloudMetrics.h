@@ -165,74 +165,51 @@ double calculateRegistrationMetricDistanceError(const pcl::PointCloud<pcl::Point
  * \return The resulting overlap metric value.
  */
 double calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, const bool return_color_error = false,
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
+    const bool return_color_error = false,
     const double metric_overlap_search_radius = DEFAULT_METRIC_OVERLAP_SEARCH_RADIUS);
 
 /*!
- * \brief Calculate the average color range registration metric.
+ * \brief Average color value calculator.
  *
- * Calculate the absolute difference between the average RGB color value for each point cloud.
+ * Calculate the average red, green, and blue values of the point cloud.
  *
- * \param base The base point cloud.
- * \param target The target point cloud.
- * \return The absolute difference between the average RGB color value for each point cloud.
+ * \param pc The point cloud.
+ * \param avg_r A reference to the average red value to store.
+ * \param avg_g A reference to the average green value to store.
+ * \param avg_b A reference to the average blue value to store.
  */
-double calculateRegistrationMetricColorRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
+void calculateAvgColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &avg_r, double &avg_g,
+    double &avg_b);
 
 /*!
- * \brief Calculate the average RGB color value.
+ * \brief Color value standard deviation calculator.
  *
- * Calculate the average RGB color value for the given point cloud.
+ * Calculate the red, green, and blue value standard deviations of the point cloud.
  *
- * \param pc The point cloud to compute the average RGB color value for.
- * \return The average RGB color value for the given point cloud.
+ * \param pc The point cloud.
+ * \param std_dev_r A reference to the standard deviation in the red value to store.
+ * \param std_dev_g A reference to the standard deviation in the green value to store.
+ * \param std_dev_b A reference to the standard deviation in the blue value to store.
  */
-double calculateAverageColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
+double calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &std_dev_r,
+    double &std_dev_g, double &std_dev_b);
 
 /*!
- * \brief Calculate the color standard deviation registration metric.
+ * \brief Color value standard deviation calculator.
  *
- * Calculate the absolute difference between the standard deviation in the average RGB color space for each point cloud.
+ * Calculate the red, green, and blue value standard deviations of the point cloud with the known averages.
  *
- * \param base The base point cloud.
- * \param target The target point cloud.
- * \return The absolute difference between the standard deviation in the average RGB color space for each point cloud.
+ * \param pc The point cloud.
+ * \param std_dev_r A reference to the standard deviation in the red value to store.
+ * \param std_dev_g A reference to the standard deviation in the green value to store.
+ * \param std_dev_b A reference to the standard deviation in the blue value to store.
+ * \param avg_r The average red color.
+ * \param avg_g The average green color.
+ * \param avg_b The average blue color.
  */
-double calculateRegistrationMetricStdDevColorRange(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
-
-/*!
- * \brief Calculate the color standard deviation.
- *
- * Calculate the standard deviation in the average RGB color space for the given point cloud.
- *
- * \param pc The point cloud to compute the color standard deviation metric for.
- * \return The standard deviation in the average RGB color space for the given point cloud.
- */
-double calculateStdDevColor(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
-
-/*!
- * \brief Calculate the distance registration metric.
- *
- * Calculate the absolute difference between the maximum distances between any two points in each point cloud.
- *
- * \param base The base point cloud.
- * \param target The target point cloud.
- * \return The absolute difference between the maximum distances between any two points in each point cloud.
- */
-double calculateRegistrationMetricDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target);
-
-/*!
- * \brief Calculate the max distance between points.
- *
- * Calculate the maximum distance between any two points in the point cloud.
- *
- * \param pc The point cloud to compute the distance metric for.
- * \return The maximum distance between any two points in the point cloud.
- */
-double calculateMaxDistance(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc);
+double calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &std_dev_r,
+    double &std_dev_g, double &std_dev_b, const double avg_r, const double avg_g, const double avg_b);
 
 /*!
  * \brief Classify the point cloud merge.
@@ -258,8 +235,7 @@ bool classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
  * \return The transform used to move source to target.
  */
 tf2::Transform performICP(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source,
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result);
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &source, const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &result);
 }
 }
 }

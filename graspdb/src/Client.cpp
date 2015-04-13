@@ -108,41 +108,42 @@ bool Client::connect()
       // grasp_demonstrations statements
       connection_->prepare("grasp_demonstrations.delete", "DELETE FROM grasp_demonstrations WHERE id=$1");
       connection_->prepare("grasp_demonstrations.insert",
-          "INSERT INTO grasp_demonstrations (object_name, grasp_pose, eef_frame_id, point_cloud) " \
-          "VALUES (UPPER($1), $2, $3, $4) RETURNING id, created");
+                           "INSERT INTO grasp_demonstrations " \
+                           "(object_name, grasp_pose, eef_frame_id, point_cloud, image) " \
+                           "VALUES (UPPER($1), $2, $3, $4, $5) RETURNING id, created");
       connection_->prepare("grasp_demonstrations.select",
-          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
-          "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations WHERE id=$1");
+                           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, point_cloud, image, created FROM grasp_demonstrations WHERE id=$1");
       connection_->prepare("grasp_demonstrations.select_all",
-          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
-          "(grasp_pose).orientation, eef_frame_id, point_cloud, created FROM grasp_demonstrations");
+                           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, point_cloud, image, created FROM grasp_demonstrations");
       connection_->prepare("grasp_demonstrations.select_object_name",
-          "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
-          "(grasp_pose).orientation, eef_frame_id, point_cloud, created " \
+                           "SELECT id, object_name, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+          "(grasp_pose).orientation, eef_frame_id, point_cloud, image, created " \
           "FROM grasp_demonstrations WHERE UPPER(object_name)=UPPER($1)");
       connection_->prepare("grasp_demonstrations.unique", "SELECT DISTINCT object_name FROM grasp_demonstrations");
 
       // grasp_models statements
       connection_->prepare("grasp_models.delete", "DELETE FROM grasp_models WHERE id=$1");
-      connection_->prepare("grasp_models.insert",
-          "INSERT INTO grasp_models (object_name, point_cloud) VALUES (UPPER($1), $2) RETURNING id, created");
+      connection_->prepare("grasp_models.insert", "INSERT INTO grasp_models (object_name, point_cloud) " \
+                           "VALUES (UPPER($1), $2, $3, $4, $5) RETURNING id, created");
       connection_->prepare("grasp_models.select",
-          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
+                           "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
       connection_->prepare("grasp_models.select_all", "SELECT id, object_name, point_cloud, created FROM grasp_models");
-      connection_->prepare("grasp_models.select_object_name",
-          "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE UPPER(object_name)=UPPER($1)");
+      connection_->prepare("grasp_models.select_object_name", "SELECT id, object_name, point_cloud, created " \
+                           "FROM grasp_models WHERE UPPER(object_name)=UPPER($1)");
       connection_->prepare("grasp_models.unique", "SELECT DISTINCT object_name FROM grasp_models");
 
       // grasps statements
       connection_->prepare("grasps.delete", "DELETE FROM grasps WHERE id=$1");
       connection_->prepare("grasps.insert",
-          "INSERT INTO grasps (grasp_model_id, grasp_pose, eef_frame_id, successes, attempts) " \
+                           "INSERT INTO grasps (grasp_model_id, grasp_pose, eef_frame_id, successes, attempts) " \
           "VALUES ($1, $2, $3, $4, $5) RETURNING id, created");
       connection_->prepare("grasps.select",
-          "SELECT id, grasp_model_id, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+                           "SELECT id, grasp_model_id, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, successes, attempts, created FROM grasps WHERE id=$1");
       connection_->prepare("grasps.select_grasp_model_id",
-          "SELECT id, grasp_model_id, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
+                           "SELECT id, grasp_model_id, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, successes, attempts, created FROM grasps  WHERE grasp_model_id=$1");
 
       // create the tables in the DB if they do not exist
@@ -187,16 +188,17 @@ void Client::createTables() const
 
   // shared worker
   pqxx::work w(*connection_);
-  // create the grasp_collections table if it doesn't exist
-  string grasp_collections_sql = "CREATE TABLE IF NOT EXISTS grasp_demonstrations (" \
+  // create the grasp_demonstrations table if it doesn't exist
+  string grasp_demonstrations_sql = "CREATE TABLE IF NOT EXISTS grasp_demonstrations (" \
                                    "id SERIAL PRIMARY KEY," \
                                    "object_name VARCHAR NOT NULL," \
                                    "grasp_pose pose NOT NULL," \
                                    "eef_frame_id VARCHAR NOT NULL," \
                                    "point_cloud BYTEA NOT NULL," \
+                                   "image BYTEA NOT NULL," \
                                    "created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()" \
                                  ");";
-  w.exec(grasp_collections_sql);
+  w.exec(grasp_demonstrations_sql);
 
   // create the grasp models table if it doesn't exist
   string grasp_models_sql = "CREATE TABLE IF NOT EXISTS grasp_models (" \
@@ -474,11 +476,12 @@ bool Client::addGraspDemonstration(GraspDemonstration &gd) const
   const string &object_name = gd.getObjectName();
   string grasp_pose = this->toSQL(gd.getGraspPose());
   const string &eef_frame_id = gd.getEefFrameID();
-  pqxx::binarystring point_cloud = this->toBinaryString(gd.getPointCloud());
+  pqxx::binarystring pc = this->toBinaryString(gd.getPointCloud());
+  pqxx::binarystring image = this->toBinaryString(gd.getImage());
 
   // create and execute the query
   pqxx::work w(*connection_);
-  pqxx::result result = w.prepared("grasp_demonstrations.insert")(object_name)(grasp_pose)(eef_frame_id)(point_cloud)
+  pqxx::result result = w.prepared("grasp_demonstrations.insert")(object_name)(grasp_pose)(eef_frame_id)(pc)(image)
       .exec();
   w.commit();
 
@@ -498,11 +501,11 @@ bool Client::addGraspModel(GraspModel &gm) const
 {
   // build the SQL bits we need
   const string &object_name = gm.getObjectName();
-  pqxx::binarystring point_cloud = this->toBinaryString(gm.getPointCloud());
+  pqxx::binarystring pc = this->toBinaryString(gm.getPointCloud());
 
   // create and execute the query
   pqxx::work w(*connection_);
-  pqxx::result result = w.prepared("grasp_models.insert")(object_name)(point_cloud).exec();
+  pqxx::result result = w.prepared("grasp_models.insert")(object_name)(pc).exec();
   w.commit();
 
   // check the result
@@ -611,9 +614,19 @@ GraspDemonstration Client::extractGraspDemonstrationFromTuple(const pqxx::result
   gd.setEefFrameID(tuple["eef_frame_id"].as<string>());
   gd.setCreated(this->extractTimeFromString(tuple["created"].as<string>()));
 
-  // extract the point cloud
-  pqxx::binarystring blob(tuple["point_cloud"]);
-  gd.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
+  // extract the point cloud if there is one
+  if (tuple["point_cloud"].size() > 0)
+  {
+    pqxx::binarystring blob(tuple["point_cloud"]);
+    gd.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
+  }
+
+  // extract the image if there is one
+  if (tuple["image"].size() > 0)
+  {
+    pqxx::binarystring blob(tuple["image"]);
+    gd.setImage(this->extractImageFromBinaryString(blob));
+  }
 
   return gd;
 }
@@ -658,9 +671,12 @@ GraspModel Client::extractGraspModelFromTuple(const pqxx::result::tuple &tuple) 
   gm.setObjectName(tuple["object_name"].as<string>());
   gm.setCreated(this->extractTimeFromString(tuple["created"].as<string>()));
 
-  // extract the point cloud
-  pqxx::binarystring blob(tuple["point_cloud"]);
-  gm.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
+  // extract the point cloud if there is one
+  if (tuple["point_cloud"].size() > 0)
+  {
+    pqxx::binarystring blob(tuple["point_cloud"]);
+    gm.setPointCloud(this->extractPointCloud2FromBinaryString(blob));
+  }
 
   return gm;
 }
@@ -672,6 +688,15 @@ sensor_msgs::PointCloud2 Client::extractPointCloud2FromBinaryString(const pqxx::
   ros::serialization::IStream stream((uint8_t *) bs.data(), bs.size());
   ros::serialization::Serializer<sensor_msgs::PointCloud2>::read(stream, pc);
   return pc;
+}
+
+sensor_msgs::Image Client::extractImageFromBinaryString(const pqxx::binarystring &bs) const
+{
+  sensor_msgs::Image image;
+  // deserialize from memory
+  ros::serialization::IStream stream((uint8_t *) bs.data(), bs.size());
+  ros::serialization::Serializer<sensor_msgs::Image>::read(stream, image);
+  return image;
 }
 
 vector<double> Client::extractArrayFromString(string &array) const
@@ -707,7 +732,7 @@ time_t Client::extractTimeFromString(const string &str) const
   // extract values in a datetime object and the timezone offset into an int (ignore nsec)
   int nsec, tz;
   sscanf(str.c_str(), "%d-%d-%d %d:%d:%d.%d%d", &t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec,
-      &nsec, &tz);
+         &nsec, &tz);
   // correct the information for C time
   t.tm_year -= 1900;
   t.tm_mon -= 1;
@@ -744,7 +769,7 @@ string Client::toSQL(const Pose &p) const
 {
   // build the SQL
   string sql = "(\"" + p.getRobotFixedFrameID() + "\",\"" + this->toSQL(p.getPosition()) + "\",\""
-      + this->toSQL(p.getOrientation()) + "\")";
+               + this->toSQL(p.getOrientation()) + "\")";
   return sql;
 }
 
@@ -778,6 +803,21 @@ pqxx::binarystring Client::toBinaryString(const sensor_msgs::PointCloud2 &pc) co
   // serilize the message
   ros::serialization::OStream stream(buffer, size);
   ros::serialization::serialize(stream, pc);
+
+  // construct a binary string
+  pqxx::binarystring binary(buffer, size);
+  return binary;
+}
+
+pqxx::binarystring Client::toBinaryString(const sensor_msgs::Image &image) const
+{
+  // determine the size for the buffer
+  uint32_t size = ros::serialization::serializationLength(image);
+  uint8_t buffer[size];
+
+  // serilize the message
+  ros::serialization::OStream stream(buffer, size);
+  ros::serialization::serialize(stream, image);
 
   // construct a binary string
   pqxx::binarystring binary(buffer, size);
