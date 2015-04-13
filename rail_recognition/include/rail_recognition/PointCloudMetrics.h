@@ -170,6 +170,48 @@ double calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB
     const double metric_overlap_search_radius = DEFAULT_METRIC_OVERLAP_SEARCH_RADIUS);
 
 /*!
+ * \brief Average color value calculator.
+ *
+ * Calculate the average red, green, and blue values of the point cloud.
+ *
+ * \param pc The point cloud.
+ * \param avg_r A reference to the average red value to store.
+ * \param avg_g A reference to the average green value to store.
+ * \param avg_b A reference to the average blue value to store.
+ */
+void calculateAvgColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &avg_r, double &avg_g,
+    double &avg_b);
+
+/*!
+ * \brief Color value standard deviation calculator.
+ *
+ * Calculate the red, green, and blue value standard deviations of the point cloud.
+ *
+ * \param pc The point cloud.
+ * \param std_dev_r A reference to the standard deviation in the red value to store.
+ * \param std_dev_g A reference to the standard deviation in the green value to store.
+ * \param std_dev_b A reference to the standard deviation in the blue value to store.
+ */
+double calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &std_dev_r,
+    double &std_dev_g, double &std_dev_b);
+
+/*!
+ * \brief Color value standard deviation calculator.
+ *
+ * Calculate the red, green, and blue value standard deviations of the point cloud with the known averages.
+ *
+ * \param pc The point cloud.
+ * \param std_dev_r A reference to the standard deviation in the red value to store.
+ * \param std_dev_g A reference to the standard deviation in the green value to store.
+ * \param std_dev_b A reference to the standard deviation in the blue value to store.
+ * \param avg_r The average red color.
+ * \param avg_g The average green color.
+ * \param avg_b The average blue color.
+ */
+double calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &std_dev_r,
+    double &std_dev_g, double &std_dev_b, const double avg_r, const double avg_g, const double avg_b);
+
+/*!
  * \brief Classify the point cloud merge.
  *
  * Classify the merge between base and target. These point clouds should already be transformed accordingly. The

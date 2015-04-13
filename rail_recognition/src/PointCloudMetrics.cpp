@@ -176,6 +176,58 @@ double point_cloud_metrics::calculateRegistrationMetricDistanceError(
   return score;
 }
 
+void point_cloud_metrics::calculateAvgColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc, double &avg_r,
+    double &avg_g, double &avg_b)
+{
+  // simply go through each point
+  avg_r = 0;
+  avg_g = 0;
+  avg_b = 0;
+  for (size_t i = 0; i < pc->size(); i++)
+  {
+    const pcl::PointXYZRGB &point = pc->at(i);
+    avg_r += point.r;
+    avg_g += point.g;
+    avg_b += point.b;
+  }
+
+  // average the values
+  avg_r /= (double) pc->size();
+  avg_g /= (double) pc->size();
+  avg_b /= (double) pc->size();
+}
+
+double point_cloud_metrics::calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc,
+    double &std_dev_r, double &std_dev_g, double &std_dev_b)
+{
+  // calculate the averages first
+  double avg_r, avg_g, avg_b;
+  point_cloud_metrics::calculateAvgColors(pc, avg_r, avg_g, avg_b);
+  point_cloud_metrics::calculateStdDevColors(pc, std_dev_r, std_dev_g, std_dev_b, avg_r, avg_g, avg_b);
+}
+
+double point_cloud_metrics::calculateStdDevColors(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pc,
+    double &std_dev_r, double &std_dev_g, double &std_dev_b, const double avg_r, const double avg_g, const double avg_b)
+{
+  double variance_r = 0;
+  double variance_g = 0;
+  double variance_b = 0;
+  for (size_t i = 0; i < pc->size(); i++)
+  {
+    const pcl::PointXYZRGB &point = pc->at(i);
+    variance_r += pow(point.r - avg_r, 2);
+    variance_g += pow(point.g - avg_r, 2);
+    variance_b += pow(point.b - avg_r, 2);
+  }
+  variance_r /= (double) pc->size();
+  variance_g /= (double) pc->size();
+  variance_b /= (double) pc->size();
+
+  std_dev_r = sqrt(variance_r);
+  std_dev_g = sqrt(variance_g);
+  std_dev_b = sqrt(variance_b);
+}
+
 double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, const bool return_color_error,
     const double metric_overlap_search_radius)
