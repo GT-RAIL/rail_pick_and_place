@@ -47,6 +47,8 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
   // pre-process input cloud
   point_cloud_metrics::filterPointCloudOutliers(object_point_cloud);
   point_cloud_metrics::transformToOrigin(object_point_cloud, object.centroid);
+  double object_r, object_g, object_b;
+  point_cloud_metrics::calculateAvgColors(object_point_cloud, object_r, object_g, object_b);
 
   // perform recognition
   double min_score = numeric_limits<double>::infinity();
@@ -60,6 +62,14 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
       // convert the candidate point cloud to a PCL point cloud
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr candidate_point_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
       point_cloud_metrics::rosPointCloud2ToPCLPointCloud(candidates[i].getPointCloud(), candidate_point_cloud);
+
+      // do an average color check
+      double candidate_r, candidate_g, candidate_b;
+      point_cloud_metrics::calculateAvgColors(candidate_point_cloud, candidate_r, candidate_g, candidate_b);
+      if (fabs(object_r - candidate_r) > COLOR_THRESHOLD || fabs(object_g - candidate_g) > COLOR_THRESHOLD || fabs(object_b - candidate_b) > COLOR_THRESHOLD)
+      {
+        continue;   // skip this model if the color is too far off
+      }
 
       tf2::Transform cur_icp_tf;
       double score = this->scoreRegistration(candidate_point_cloud, object_point_cloud, cur_icp_tf);

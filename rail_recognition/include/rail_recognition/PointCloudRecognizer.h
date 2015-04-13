@@ -24,6 +24,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+#define COLOR_THRESHOLD 50
+
 namespace rail
 {
 namespace pick_and_place
