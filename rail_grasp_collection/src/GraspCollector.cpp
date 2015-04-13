@@ -62,7 +62,7 @@ GraspCollector::GraspCollector()
 
   // subscribe to the list of segmented objects
   segmented_objects_sub_ = node_.subscribe(segmented_objects_topic, 1, &GraspCollector::segmentedObjectsCallback,
-      this);
+                                           this);
 
   // setup action clients
   gripper_ac_ = new actionlib::SimpleActionClient<rail_manipulation_msgs::GripperAction>(gripper_action_server, true);
@@ -229,7 +229,8 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
       try
       {
         sensor_msgs::PointCloud2 transformed_cloud = tf_buffer_.transform(object.point_cloud, robot_fixed_frame_id_,
-            ros::Time(0), object.point_cloud.header.frame_id);
+                                                                          ros::Time(0),
+                                                                          object.point_cloud.header.frame_id);
         object.point_cloud = transformed_cloud;
         object.point_cloud.header.frame_id = robot_fixed_frame_id_;
       } catch (tf2::TransformException &ex)
@@ -248,7 +249,8 @@ void GraspCollector::graspAndStore(const rail_pick_and_place_msgs::GraspAndStore
     // store the data
     feedback.message = "Storing grasp data...";
     as_.publishFeedback(feedback);
-    graspdb::GraspDemonstration gd(goal->object_name, graspdb::Pose(grasp), eef_frame_id_, object.point_cloud);
+    graspdb::GraspDemonstration gd(goal->object_name, graspdb::Pose(grasp), eef_frame_id_, object.point_cloud,
+                                   object.image);
     if (graspdb_->addGraspDemonstration(gd))
     {
       // store the ID

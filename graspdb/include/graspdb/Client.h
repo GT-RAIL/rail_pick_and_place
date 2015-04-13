@@ -64,7 +64,7 @@ public:
    * \param db The database name.
    */
   Client(const std::string &host, const uint16_t port, const std::string &user, const std::string &password,
-      const std::string &db);
+         const std::string &db);
 
   /*!
    * \brief Cleans up a Client.
@@ -349,7 +349,7 @@ private:
    * \return bool Returns true if a successful load was completed and the data was set correctly.
    */
   bool getStringArrayFromPrepared(const std::string &prepared_name, const std::string &column_name,
-      std::vector<std::string> &strings) const;
+                                  std::vector<std::string> &strings) const;
 
   /*!
    * \brief Convert a Pose to a PostgreSQL object string.
@@ -391,6 +391,16 @@ private:
    * \return The PointCloud2 with values from the binary string.
    */
   sensor_msgs::PointCloud2 extractPointCloud2FromBinaryString(const pqxx::binarystring &bs) const;
+
+  /*!
+   * \brief Extract Image values from a binary string.
+   *
+   * Extracts Image values from the given PostgreSQL binary string and places them in a new ROS Image message.
+   *
+   * \param bs The binary string representation of the serialized Image.
+   * \return The Image with values from the binary string.
+   */
+  sensor_msgs::Image extractImageFromBinaryString(const pqxx::binarystring &bs) const;
 
   /*!
    * \brief Extract array values from a string array with vector creation.
