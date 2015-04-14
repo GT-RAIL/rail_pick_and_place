@@ -7,6 +7,12 @@ Changelog for package rail_grasp_collection
 * added segmented images to the database
 * Contributors: Russell Toris
 
+Forthcoming
+-----------
+* changelog updated
+* added segmented images to the database
+* Contributors: Russell Toris
+
 1.1.2 (2015-04-10)
 ------------------
 * graph search used

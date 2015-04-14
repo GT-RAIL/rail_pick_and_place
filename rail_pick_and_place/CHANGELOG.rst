@@ -5,6 +5,11 @@ Changelog for package rail_pick_and_place
 1.1.3 (2015-04-14)
 ------------------
 
+Forthcoming
+-----------
+* changelog updated
+* Contributors: Russell Toris
+
 1.1.2 (2015-04-10)
 ------------------
 
