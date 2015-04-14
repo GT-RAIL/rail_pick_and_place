@@ -146,9 +146,9 @@ void MetricTrainer::trainMetricsCallback(const rail_pick_and_place_msgs::TrainMe
         get_yes_and_no_feedback_ac_.sendGoal(goal);
 
         // calculate all metrics
-        double m_o = point_cloud_metrics::calculateRegistrationMetricOverlap(base_pc, aligned_pc, false);
+        double m_o, m_c_err;
+        point_cloud_metrics::calculateRegistrationMetricOverlap(base_pc, aligned_pc, m_o, m_c_err);
         double m_d_err = point_cloud_metrics::calculateRegistrationMetricDistanceError(base_pc, aligned_pc);
-        double m_c_err = point_cloud_metrics::calculateRegistrationMetricOverlap(base_pc, aligned_pc, true);
 
         // wait for a response
         feedback.message = "Waiting for feedback on point clouds " + i_j_str + "...";

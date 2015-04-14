@@ -156,17 +156,17 @@ double calculateRegistrationMetricDistanceError(const pcl::PointCloud<pcl::Point
  * \brief Point cloud overlap metric calculator.
  *
  * Calculate the overlap metric for the given point clouds. This can either be the number of points that meet the
- * overlap criteria normalized over the number of points, or the average error in the RGB color for the overlap points.
+ * overlap criteria normalized over the number of points, or the average error in the RGB color for the overlap
+ * points. References to each double to be filled must be provided.
  *
  * \param base The base point cloud.
  * \param target The target point cloud.
- * \param return_color_error Set to true to return the average RGB error for the overlap points (defaults to false).
+ * \param overlap The overlap metric score.
+ * \param color_error The color error metric score.
  * \param metric_overlap_search_radius The search radius to consider a point to be overlapping (defaults to constant).
- * \return The resulting overlap metric value.
  */
-double calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,
-    const bool return_color_error = false,
+void calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, double &overlap, double &color_error,
     const double metric_overlap_search_radius = DEFAULT_METRIC_OVERLAP_SEARCH_RADIUS);
 
 /*!

@@ -228,8 +228,8 @@ double point_cloud_metrics::calculateStdDevColors(const pcl::PointCloud<pcl::Poi
   std_dev_b = sqrt(variance_b);
 }
 
-double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
-    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, const bool return_color_error,
+void point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
+    const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target, double &overlap, double &color_error,
     const double metric_overlap_search_radius)
 {
   // search with a KD tree
@@ -251,36 +251,34 @@ double point_cloud_metrics::calculateRegistrationMetricOverlap(const pcl::PointC
     if (neighbors > 0)
     {
       score++;
-      // check the average RGB color distance if we are to report color data back
-      if (return_color_error)
+      // check the average RGB color distance
+      double rgb_distance = 0;
+      for (size_t j = 0; j < indices.size(); j++)
       {
-        double rgb_distance = 0;
-        for (size_t j = 0; j < indices.size(); j++)
-        {
-          const pcl::PointXYZRGB &point = base->at(indices[j]);
-          rgb_distance += sqrt(pow(search_point.r - point.r, 2) + pow(search_point.g - point.g, 2) +
-                               pow(search_point.b - point.b, 2));
-        }
-        // normalize the distance
-        rgb_distance /= neighbors;
-        error += rgb_distance;
+        const pcl::PointXYZRGB &point = base->at(indices[j]);
+        rgb_distance += sqrt(pow(search_point.r - point.r, 2) + pow(search_point.g - point.g, 2) +
+                             pow(search_point.b - point.b, 2));
       }
+      // normalize the distance
+      rgb_distance /= neighbors;
+      error += rgb_distance;
     }
   }
 
-  // normalize the error
-  return (return_color_error) ? (error / score) : (score /= ((double) target->size()));
+  // normalize the errors
+  color_error = error / score;
+  overlap = score / (double) target->size();
 }
 
 bool point_cloud_metrics::classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &base,
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target)
 {
   // calculate the metrics we need
-  double overlap_score = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target);
-  double color_error = point_cloud_metrics::calculateRegistrationMetricOverlap(base, target, true);
+  double overlap, color_error;
+  point_cloud_metrics::calculateRegistrationMetricOverlap(base, target, overlap, color_error);
 
   // values found via decision tree training
-  return (overlap_score > 0.471303) && (color_error <= 97.0674);
+  return (overlap > 0.471303) && (color_error <= 97.0674);
 }
 
 tf2::Transform point_cloud_metrics::performICP(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,

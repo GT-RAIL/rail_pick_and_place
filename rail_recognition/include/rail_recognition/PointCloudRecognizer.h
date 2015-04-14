@@ -45,6 +45,8 @@ public:
   static const double ALPHA = 0.5;
   /*! The confidence threshold for a recognition score. */
   static const double SCORE_CONFIDENCE_THRESHOLD = 0.8;
+  /*! The threshold for the overlap metric to be considered a valid match. */
+  static const double OVERLAP_THRESHOLD = 0.75;
 
   /*!
    * \brief Creates a new PointCloudRecognizer.
@@ -74,6 +76,7 @@ private:
    *
    * Perform registration from the object to the candidate and return the resulting weighted registration score (a
    * measure of error). The tf_icp transform is filled with the transform used to shift the object to the candidate.
+   * A score of infinity (meaning a very poor match) is possible.
    *
    * \param candidate The candidate point cloud.
    * \param object The point cloud of the object in question.

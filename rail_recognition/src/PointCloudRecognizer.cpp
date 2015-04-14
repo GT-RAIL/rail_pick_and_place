@@ -73,7 +73,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
 
       tf2::Transform cur_icp_tf;
       double score = this->scoreRegistration(candidate_point_cloud, object_point_cloud, cur_icp_tf);
-      if (score >= 0 && score < min_score)
+      if (score < min_score)
       {
         min_score = score;
         min_index = i;
@@ -145,15 +145,15 @@ double PointCloudRecognizer::scoreRegistration(pcl::PointCloud<pcl::PointXYZRGB>
   tf_icp = point_cloud_metrics::performICP(candidate, object, aligned);
 
   // check overlap first to determine if a the registration should be scored further
-  double overlap = point_cloud_metrics::calculateRegistrationMetricOverlap(candidate, aligned);
-  if (overlap < .75)
+  double overlap, color_error;
+  point_cloud_metrics::calculateRegistrationMetricOverlap(candidate, aligned, overlap, color_error);
+  if (overlap < OVERLAP_THRESHOLD)
   {
-    return -1;
+    return numeric_limits<double>::infinity();
   }
 
   // calculate the distance and color error
   double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(candidate, aligned);
-  double color_error = point_cloud_metrics::calculateRegistrationMetricOverlap(candidate, aligned, true);
 
   // calculate the final weighted result
   double result = ALPHA * (3.0 * distance_error) + (1.0 - ALPHA) * (color_error / 100.0);
