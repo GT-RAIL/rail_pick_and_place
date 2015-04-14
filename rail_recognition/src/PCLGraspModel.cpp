@@ -32,6 +32,9 @@ PCLGraspModel::PCLGraspModel(const graspdb::GraspModel &grasp_model)
   {
     // simply store the header information
     pc_->header.frame_id = grasp_model.getPointCloud().header.frame_id;
+    avg_r_ = 0;
+    avg_g_ = 0;
+    avg_b_ = 0;
   }
 }
 
@@ -64,6 +67,23 @@ void PCLGraspModel::setPointCloud(const sensor_msgs::PointCloud2 &point_cloud)
 {
   // copy the point cloud
   point_cloud_metrics::rosPointCloud2ToPCLPointCloud(point_cloud, pc_);
+  // compute RGB information
+  point_cloud_metrics::calculateAvgColors(pc_, avg_r_, avg_g_, avg_b_);
+}
+
+double PCLGraspModel::getAverageRed() const
+{
+  return avg_r_;
+}
+
+double PCLGraspModel::getAverageGreen() const
+{
+  return avg_g_;
+}
+
+double PCLGraspModel::getAverageBlue() const
+{
+  return avg_b_;
 }
 
 graspdb::GraspModel PCLGraspModel::toGraspModel() const

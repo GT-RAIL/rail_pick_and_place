@@ -13,6 +13,9 @@
 #ifndef RAIL_PICK_AND_PLACE_POINT_CLOUD_RECOGNIZER_H_
 #define RAIL_PICK_AND_PLACE_POINT_CLOUD_RECOGNIZER_H_
 
+// RAIL Recognition
+#include "PCLGraspModel.h"
+
 // ROS
 #include <graspdb/graspdb.h>
 #include <sensor_msgs/PointCloud.h>
@@ -23,8 +26,6 @@
 // PCL
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-
-#define COLOR_THRESHOLD 50
 
 namespace rail
 {
@@ -68,7 +69,7 @@ public:
    * \return True if the segmented object was recognized and updated accordingly.
    */
   bool recognizeObject(rail_manipulation_msgs::SegmentedObject &object,
-      const std::vector<graspdb::GraspModel> &candidates) const;
+      const std::vector<PCLGraspModel> &candidates) const;
 
 private:
   /*!

@@ -50,12 +50,14 @@ add_executable(model_generator
 add_executable(object_recognizer
   nodes/object_recognizer.cpp
   src/ObjectRecognizer.cpp
+  src/PCLGraspModel.cpp
   src/PointCloudMetrics.cpp
   src/PointCloudRecognizer.cpp
 )
 add_executable(object_recognition_listener
   nodes/object_recognition_listener.cpp
   src/ObjectRecognitionListener.cpp
+  src/PCLGraspModel.cpp
   src/PointCloudMetrics.cpp
   src/PointCloudRecognizer.cpp
 )

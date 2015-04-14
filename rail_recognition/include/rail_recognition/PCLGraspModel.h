@@ -103,6 +103,33 @@ public:
   void setPointCloud(const sensor_msgs::PointCloud2 &point_cloud);
 
   /*!
+   * \brief Average point cloud red value accessor.
+   *
+   * Get average point cloud red value.
+   *
+   * \return The average point cloud red value.
+   */
+  double getAverageRed() const;
+
+  /*!
+   * \brief Average point cloud green value accessor.
+   *
+   * Get average point cloud green value.
+   *
+   * \return The average point cloud green value.
+   */
+  double getAverageGreen() const;
+
+  /*!
+   * \brief Average point cloud blue value accessor.
+   *
+   * Get average point cloud blue value.
+   *
+   * \return The average point cloud blue value.
+   */
+  double getAverageBlue() const;
+
+  /*!
    * \brief Creates a graspdb GraspModel from this PCL grasp model.
    *
    * Creates and returns a new graspdb GraspModel from this PCL grasp model.
@@ -116,6 +143,8 @@ private:
   bool original_;
   /*! The internal shared pointer to the PCL point cloud. */
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc_;
+  /*! Color information for the point cloud */
+  double avg_r_, avg_g_, avg_b_;
 };
 
 }

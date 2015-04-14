@@ -79,6 +79,13 @@ void ObjectRecognizer::recognizeObjectCallback(const rail_manipulation_msgs::Rec
     graspdb_->loadGraspModels(candidates);
   }
 
+  // convert to PCL grasp models
+  vector<PCLGraspModel> pcl_candidates;
+  for (size_t i = 0; i < candidates.size(); i++)
+  {
+    pcl_candidates.push_back(PCLGraspModel(candidates[i]));
+  }
+
   // copy the information to the result
   rail_manipulation_msgs::RecognizeObjectResult result;
   result.object = goal->object;
@@ -87,7 +94,7 @@ void ObjectRecognizer::recognizeObjectCallback(const rail_manipulation_msgs::Rec
   feedback.message = "Running recognition...";
   as_.publishFeedback(feedback);
   PointCloudRecognizer recognizer;
-  if (!recognizer.recognizeObject(result.object, candidates))
+  if (!recognizer.recognizeObject(result.object, pcl_candidates))
   {
     as_.setSucceeded(result, "Object could not be recognized.");
   }

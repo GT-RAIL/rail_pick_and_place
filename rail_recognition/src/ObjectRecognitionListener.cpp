@@ -112,6 +112,13 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
   // populate candidates
   vector<graspdb::GraspModel> candidates;
   graspdb_->loadGraspModels(candidates);
+  // convert to PCL grasp models
+  vector<PCLGraspModel> pcl_candidates;
+  for (size_t i = 0; i < candidates.size(); i++)
+  {
+    pcl_candidates.push_back(PCLGraspModel(candidates[i]));
+  }
+
   // go through the current list
   PointCloudRecognizer recognizer;
   for (size_t i = 0; i < object_list_.objects.size(); i++)
@@ -121,7 +128,7 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
     if (!object.recognized)
     {
       // perform recognition
-      recognizer.recognizeObject(object, candidates);
+      recognizer.recognizeObject(object, pcl_candidates);
     }
   }
 
