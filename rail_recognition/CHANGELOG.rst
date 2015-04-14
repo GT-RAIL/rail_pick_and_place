@@ -2,6 +2,17 @@
 Changelog for package rail_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.3 (2015-04-14)
+------------------
+* uses PCL models for generation
+* cleanup of new stuff
+* Recognition first performs a color check
+* Recognition tuning
+* added avg functions for color
+* removed metric pre-compute
+* stores metrics
+* Contributors: David Kent, Russell Toris
+
 1.1.2 (2015-04-10)
 ------------------
 * removed the swap check from recognition

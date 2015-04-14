@@ -2,6 +2,13 @@
 Changelog for package rail_pick_and_place_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.3 (2015-04-14)
+------------------
+* removed metric pre-compute
+* stores metrics
+* added segmented images to the database
+* Contributors: Russell Toris
+
 1.1.2 (2015-04-10)
 ------------------
 * new metric trainier
