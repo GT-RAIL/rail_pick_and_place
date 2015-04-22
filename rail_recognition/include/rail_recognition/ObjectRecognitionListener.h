@@ -16,7 +16,14 @@
 // ROS
 #include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
+#include <rail_recognition/PointCloudMetrics.h>
 #include <ros/ros.h>
+#include <sensor_msgs/point_cloud_conversion.h>
+
+// PCL
+#include <pcl/filters/voxel_grid.h>
+
+#define SAME_OBJECT_DST_THRESHOLD .2
 
 namespace rail
 {
@@ -35,6 +42,8 @@ class ObjectRecognitionListener
 public:
   /*! If a topic should be created to display debug information such as pose arrays. */
   static const bool DEFAULT_DEBUG = false;
+  /*! Leaf size of the voxel grid for downsampling. */
+  static const float DOWNSAMPLE_LEAF_SIZE = 0.01;
 
   /*!
    * \brief Creates a new ObjectRecognitionListener.
@@ -80,6 +89,16 @@ private:
    * \return Returns true if the data in pc1 is equal to the data in pc2.
    */
   bool comparePointClouds(const sensor_msgs::PointCloud2 &pc1, const sensor_msgs::PointCloud2 &pc2) const;
+
+  /*!
+   * \brief Combine two models of the same type into a single model
+   *
+   * \param model1 The first object model
+   * \param model2 The second object model
+   * \return The combined model
+   */
+  rail_manipulation_msgs::SegmentedObject combineModels(const rail_manipulation_msgs::SegmentedObject model1,
+                                                        const rail_manipulation_msgs::SegmentedObject model2);
 
   /*! The debug and okay check flags. */
   bool debug_, okay_;

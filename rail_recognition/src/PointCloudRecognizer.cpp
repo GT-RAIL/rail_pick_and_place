@@ -113,11 +113,16 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
     {
       // place it in order
       bool inserted = false;
+      rail_manipulation_msgs::Grasp grasp;
+      grasp.grasp_pose = pose;
+      grasp.attempts = possible_grasps[i].getAttempts();
+      grasp.successes = possible_grasps[i].getSuccesses();
+      grasp.eef_frame_id = possible_grasps[i].getEefFrameID();
       for (size_t j = 0; j < success_rates.size(); j++)
       {
         if (rate <= success_rates[j])
         {
-          object.grasps.insert(object.grasps.begin() + j, pose);
+          object.grasps.insert(object.grasps.begin() + j, grasp);
           success_rates.insert(success_rates.begin() + j, rate);
           inserted = true;
           break;
@@ -126,7 +131,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
 
       if (!inserted)
       {
-        object.grasps.push_back(pose);
+        object.grasps.push_back(grasp);
         success_rates.push_back(rate);
       }
     }
