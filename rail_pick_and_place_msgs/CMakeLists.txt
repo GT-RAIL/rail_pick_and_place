@@ -33,6 +33,11 @@ add_message_files(FILES
   GraspWithSuccessRate.msg
 )
 
+## Generate services in the 'srv' folder
+add_service_files(FILES
+  RemoveObject.srv
+)
+
 generate_messages(DEPENDENCIES
   actionlib_msgs
   geometry_msgs

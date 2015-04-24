@@ -58,6 +58,8 @@ ObjectRecognitionListener::ObjectRecognitionListener() : private_node_("~")
   recognized_objects_pub_ = private_node_.advertise<rail_manipulation_msgs::SegmentedObjectList>(
       "recognized_objects", 1);
 
+  remove_object_server_ = private_node_.advertiseService("remove_object", &ObjectRecognitionListener::removeObjectCallback, this);
+
   if (okay_)
   {
     ROS_INFO("Object Recognition Listener Successfully Initialized");
@@ -79,6 +81,8 @@ bool ObjectRecognitionListener::okay() const
 void ObjectRecognitionListener::segmentedObjectsCallback(
     const rail_manipulation_msgs::SegmentedObjectList::ConstPtr &objects)
 {
+  boost::recursive_mutex::scoped_lock lock(api_mutex_); //lock for the object list
+
   ROS_INFO("Received %li segmented objects.", objects->objects.size());
 
   // check against the old list to prevent throwing out data
@@ -190,6 +194,29 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
   }
 
   ROS_INFO("New recognized objects published.");
+}
+
+bool ObjectRecognitionListener::removeObjectCallback(rail_pick_and_place_msgs::RemoveObject::Request &req,
+                                                     rail_pick_and_place_msgs::RemoveObject::Response &res)
+{
+  boost::recursive_mutex::scoped_lock lock(api_mutex_); //lock for the object list
+
+  if (req.index < object_list_.objects.size())
+  {
+    // remove
+    object_list_.objects.erase(object_list_.objects.begin() + req.index);
+    // set header information
+    object_list_.header.seq++;
+    object_list_.header.stamp = ros::Time::now();
+    object_list_.cleared = false;
+    // republish
+    recognized_objects_pub_.publish(object_list_);
+    return true;
+  } else
+  {
+    ROS_ERROR("Attempted to remove index %d from list of size %ld.", req.index, object_list_.objects.size());
+    return false;
+  }
 }
 
 bool ObjectRecognitionListener::comparePointClouds(const sensor_msgs::PointCloud2 &pc1,

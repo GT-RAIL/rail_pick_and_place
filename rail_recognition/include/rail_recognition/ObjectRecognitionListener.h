@@ -16,9 +16,14 @@
 // ROS
 #include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
+#include <rail_pick_and_place_msgs/RemoveObject.h>
 #include <rail_recognition/PointCloudMetrics.h>
 #include <ros/ros.h>
 #include <sensor_msgs/point_cloud_conversion.h>
+#include <std_srvs/Empty.h>
+
+// CPP
+#include <boost/thread/recursive_mutex.hpp>
 
 // PCL
 #include <pcl/filters/voxel_grid.h>
@@ -100,10 +105,15 @@ private:
   rail_manipulation_msgs::SegmentedObject combineModels(const rail_manipulation_msgs::SegmentedObject model1,
                                                         const rail_manipulation_msgs::SegmentedObject model2);
 
+  bool removeObjectCallback(rail_pick_and_place_msgs::RemoveObject::Request &req,
+                                                       rail_pick_and_place_msgs::RemoveObject::Response &res);
+
   /*! The debug and okay check flags. */
   bool debug_, okay_;
   /*! The grasp database connection. */
   graspdb::Client *graspdb_;
+
+  boost::recursive_mutex api_mutex_;
 
   /*! The public and private ROS node handles. */
   ros::NodeHandle node_, private_node_;
@@ -111,6 +121,7 @@ private:
   ros::Subscriber segmented_objects_sub_;
   /*! The recognized objects and debug publishers. */
   ros::Publisher recognized_objects_pub_, debug_pub_;
+  ros::ServiceServer remove_object_server_;
   /*! The most recent segmented objects. */
   rail_manipulation_msgs::SegmentedObjectList object_list_;
 };
