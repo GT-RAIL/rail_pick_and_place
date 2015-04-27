@@ -57,9 +57,8 @@ ObjectRecognitionListener::ObjectRecognitionListener() : private_node_("~")
                                            &ObjectRecognitionListener::segmentedObjectsCallback, this);
   recognized_objects_pub_ = private_node_.advertise<rail_manipulation_msgs::SegmentedObjectList>(
       "recognized_objects", 1);
-
-  remove_object_server_ = private_node_.advertiseService("remove_object",
-                                                         &ObjectRecognitionListener::removeObjectCallback, this);
+  remove_object_srv_ = private_node_.advertiseService("remove_object",
+                                                      &ObjectRecognitionListener::removeObjectCallback, this);
 
   if (okay_)
   {
@@ -82,7 +81,8 @@ bool ObjectRecognitionListener::okay() const
 void ObjectRecognitionListener::segmentedObjectsCallback(
     const rail_manipulation_msgs::SegmentedObjectList::ConstPtr &objects)
 {
-  boost::recursive_mutex::scoped_lock lock(api_mutex_); //lock for the object list
+  //lock for the object list
+  boost::mutex::scoped_lock lock(mutex_);
 
   ROS_INFO("Received %li segmented objects.", objects->objects.size());
 
@@ -198,7 +198,8 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
 bool ObjectRecognitionListener::removeObjectCallback(rail_pick_and_place_msgs::RemoveObject::Request &req,
     rail_pick_and_place_msgs::RemoveObject::Response &res)
 {
-  boost::recursive_mutex::scoped_lock lock(api_mutex_); //lock for the object list
+  //lock for the object list
+  boost::mutex::scoped_lock lock(mutex_);
 
   if (req.index < object_list_.objects.size())
   {

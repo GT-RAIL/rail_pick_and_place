@@ -18,14 +18,12 @@
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
 #include <rail_pick_and_place_msgs/RemoveObject.h>
 #include <ros/ros.h>
-#include <std_srvs/Empty.h>
-
-// CPP
-#include <boost/thread/recursive_mutex.hpp>
 
 // PCL
 #include <pcl/filters/voxel_grid.h>
 
+// Boost
+#include <boost/thread/mutex.hpp>
 
 namespace rail
 {
@@ -107,6 +105,16 @@ private:
   void combineModels(const rail_manipulation_msgs::SegmentedObject &model1,
       const rail_manipulation_msgs::SegmentedObject &model2, rail_manipulation_msgs::SegmentedObject &combined) const;
 
+  /*!
+   * \brief Callback for the remove object request.
+   *
+   * Remote the object from the segmented object list with a given ID. This will publish both an updated segmented
+   * object list.
+   *
+   * \param req The request with the index to use.
+   * \param res The empty response (unused).
+   * \return Returns true if a valid index was provided.
+   */
   bool removeObjectCallback(rail_pick_and_place_msgs::RemoveObject::Request &req,
       rail_pick_and_place_msgs::RemoveObject::Response &res);
 
@@ -115,7 +123,8 @@ private:
   /*! The grasp database connection. */
   graspdb::Client *graspdb_;
 
-  boost::recursive_mutex api_mutex_;
+  /*! The main mutex for list modifications. */
+  boost::mutex mutex_;
 
   /*! The public and private ROS node handles. */
   ros::NodeHandle node_, private_node_;
@@ -123,7 +132,8 @@ private:
   ros::Subscriber segmented_objects_sub_;
   /*! The recognized objects and debug publishers. */
   ros::Publisher recognized_objects_pub_, debug_pub_;
-  ros::ServiceServer remove_object_server_;
+  /*! The remove object server. */
+  ros::ServiceServer remove_object_srv_;
   /*! The most recent segmented objects. */
   rail_manipulation_msgs::SegmentedObjectList object_list_;
 };
