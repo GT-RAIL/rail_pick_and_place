@@ -277,9 +277,15 @@ void ObjectRecognitionListener::combineModels(const rail_manipulation_msgs::Segm
   combined.marker.points.insert(combined.marker.points.end(), model2.marker.points.begin(), model2.marker.points.end());
 
   // set average RGB
-  combined.marker.color.r = (model1.marker.color.r + model2.marker.color.r) / 2.0;
-  combined.marker.color.g = (model1.marker.color.g + model2.marker.color.g) / 2.0;
-  combined.marker.color.b = (model1.marker.color.b + model2.marker.color.b) / 2.0;
+  combined.marker.color.r = ((model1.marker.color.r * model1.marker.points.size()) +
+                             (model2.marker.color.r * model2.marker.points.size())) /
+                            (model1.marker.points.size() + model2.marker.points.size());
+  combined.marker.color.g = ((model1.marker.color.g * model1.marker.points.size()) +
+                             (model2.marker.color.g * model2.marker.points.size())) /
+                            (model1.marker.points.size() + model2.marker.points.size());
+  combined.marker.color.b = ((model1.marker.color.b * model1.marker.points.size()) +
+                             (model2.marker.color.b * model2.marker.points.size())) /
+                            (model1.marker.points.size() + model2.marker.points.size());
 
   // combine grasp lists and maintain order
   combined.grasps = model1.grasps;

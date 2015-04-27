@@ -126,7 +126,7 @@ bool Client::connect()
       // grasp_models statements
       connection_->prepare("grasp_models.delete", "DELETE FROM grasp_models WHERE id=$1");
       connection_->prepare("grasp_models.insert", "INSERT INTO grasp_models (object_name, point_cloud) " \
-                           "VALUES (UPPER($1), $2, $3, $4, $5) RETURNING id, created");
+                           "VALUES (UPPER($1), $2) RETURNING id, created");
       connection_->prepare("grasp_models.select",
                            "SELECT id, object_name, point_cloud, created FROM grasp_models WHERE id=$1");
       connection_->prepare("grasp_models.select_all", "SELECT id, object_name, point_cloud, created FROM grasp_models");
