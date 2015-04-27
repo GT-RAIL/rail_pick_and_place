@@ -38,7 +38,7 @@ Grasp::Grasp(const Pose &grasp_pose, const uint32_t grasp_model_id, const string
 
 Grasp::Grasp(const rail_pick_and_place_msgs::GraspWithSuccessRate &g, const uint32_t grasp_model_id)
     : Entity(g.id, g.created.sec),
-      grasp_pose_(g.grasp_pose), eef_frame_id_(g.eef_frame_id)
+      grasp_pose_(g.grasp.grasp_pose), eef_frame_id_(g.grasp.eef_frame_id)
 {
   grasp_model_id_ = grasp_model_id;
   successes_ = 0;
@@ -111,10 +111,10 @@ rail_pick_and_place_msgs::GraspWithSuccessRate Grasp::toROSGraspWithSuccessRateM
 {
   rail_pick_and_place_msgs::GraspWithSuccessRate g;
   g.id = this->getID();
-  g.grasp_pose = grasp_pose_.toROSPoseStampedMessage();
-  g.eef_frame_id = eef_frame_id_;
-  g.successes = successes_;
-  g.attempts = attempts_;
+  g.grasp.grasp_pose = grasp_pose_.toROSPoseStampedMessage();
+  g.grasp.eef_frame_id = eef_frame_id_;
+  g.grasp.successes = successes_;
+  g.grasp.attempts = attempts_;
   g.created.nsec = 0;
   g.created.sec = this->getCreated();
   return g;
