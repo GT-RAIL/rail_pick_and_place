@@ -141,37 +141,40 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
   }
 
   // check if any recognized models should be combined
-  bool something_combined = false;
-  for (size_t i = 0; i < object_list_.objects.size() - 1; i++)
+  if (object_list_.objects.size() > 1)
   {
-    for (size_t j = i + 1; j < object_list_.objects.size(); j++)
+    bool something_combined = false;
+    for (size_t i = 0; i < object_list_.objects.size() - 1; i++)
     {
-      // two models can potentially be combined if they are the same object type
-      if (object_list_.objects[i].recognized && object_list_.objects[j].recognized
-          && object_list_.objects[i].name == object_list_.objects[j].name)
+      for (size_t j = i + 1; j < object_list_.objects.size(); j++)
       {
-        double distance = sqrt(pow(object_list_.objects[i].center.x - object_list_.objects[j].center.x, 2)
-                               + pow(object_list_.objects[i].center.y - object_list_.objects[j].center.y, 2)
-                               + pow(object_list_.objects[i].center.z - object_list_.objects[j].center.z, 2));
-        if (distance <= SAME_OBJECT_DIST_THRESHOLD)
+        // two models can potentially be combined if they are the same object type
+        if (object_list_.objects[i].recognized && object_list_.objects[j].recognized
+            && object_list_.objects[i].name == object_list_.objects[j].name)
         {
-          rail_manipulation_msgs::SegmentedObject combined;
-          this->combineModels(object_list_.objects[i], object_list_.objects[j], combined);
-          object_list_.objects[i] = combined;
-          object_list_.objects.erase(object_list_.objects.begin() + j);
-          j--;
-          something_combined = true;
+          double distance = sqrt(pow(object_list_.objects[i].center.x - object_list_.objects[j].center.x, 2)
+                                 + pow(object_list_.objects[i].center.y - object_list_.objects[j].center.y, 2)
+                                 + pow(object_list_.objects[i].center.z - object_list_.objects[j].center.z, 2));
+          if (distance <= SAME_OBJECT_DIST_THRESHOLD)
+          {
+            rail_manipulation_msgs::SegmentedObject combined;
+            this->combineModels(object_list_.objects[i], object_list_.objects[j], combined);
+            object_list_.objects[i] = combined;
+            object_list_.objects.erase(object_list_.objects.begin() + j);
+            j--;
+            something_combined = true;
+          }
         }
       }
     }
-  }
 
-  if (something_combined)
-  {
-    // re-index marker ids since the object_list_.objects indexing has changed
-    for (size_t i = 0; i < object_list_.objects.size(); i++)
+    if (something_combined)
     {
-      object_list_.objects[i].marker.id = i;
+      // re-index marker ids since the object_list_.objects indexing has changed
+      for (size_t i = 0; i < object_list_.objects.size(); i++)
+      {
+        object_list_.objects[i].marker.id = i;
+      }
     }
   }
 
