@@ -95,8 +95,8 @@ void GraspModelRetriever::retrieveGraspModel(const rail_pick_and_place_msgs::Ret
     geometry_msgs::PoseArray poses;
     for (size_t i = 0; i < result.grasp_model.grasps.size(); i++)
     {
-      poses.header.frame_id = result.grasp_model.grasps[i].grasp_pose.header.frame_id;
-      poses.poses.push_back(result.grasp_model.grasps[i].grasp_pose.pose);
+      poses.header.frame_id = result.grasp_model.grasps[i].grasp.grasp_pose.header.frame_id;
+      poses.poses.push_back(result.grasp_model.grasps[i].grasp.grasp_pose.pose);
     }
     poses_pub_.publish(poses);
 

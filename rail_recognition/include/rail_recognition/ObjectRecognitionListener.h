@@ -17,9 +17,7 @@
 #include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
 #include <rail_pick_and_place_msgs/RemoveObject.h>
-#include <rail_recognition/PointCloudMetrics.h>
 #include <ros/ros.h>
-#include <sensor_msgs/point_cloud_conversion.h>
 #include <std_srvs/Empty.h>
 
 // CPP
@@ -28,7 +26,6 @@
 // PCL
 #include <pcl/filters/voxel_grid.h>
 
-#define SAME_OBJECT_DST_THRESHOLD .2
 
 namespace rail
 {
@@ -49,6 +46,8 @@ public:
   static const bool DEFAULT_DEBUG = false;
   /*! Leaf size of the voxel grid for downsampling. */
   static const float DOWNSAMPLE_LEAF_SIZE = 0.01;
+  /*! The distance threshold for two point clouds being the same item. */
+  static const double SAME_OBJECT_DIST_THRESHOLD = 0.2;
 
   /*!
    * \brief Creates a new ObjectRecognitionListener.
@@ -96,17 +95,20 @@ private:
   bool comparePointClouds(const sensor_msgs::PointCloud2 &pc1, const sensor_msgs::PointCloud2 &pc2) const;
 
   /*!
-   * \brief Combine two models of the same type into a single model
+   * \brief Combine two models of the same type into a single model.
    *
-   * \param model1 The first object model
-   * \param model2 The second object model
-   * \return The combined model
+   * Take the two segmented object models and combine them into a single model. This is useful for when a single
+   * object has mistakenly been split into two models.
+   *
+   * \param model1 The first object model.
+   * \param model2 The second object model.
+   * \param out The combined model to set.
    */
-  rail_manipulation_msgs::SegmentedObject combineModels(const rail_manipulation_msgs::SegmentedObject model1,
-                                                        const rail_manipulation_msgs::SegmentedObject model2);
+  void combineModels(const rail_manipulation_msgs::SegmentedObject &model1,
+      const rail_manipulation_msgs::SegmentedObject &model2, rail_manipulation_msgs::SegmentedObject &combined) const;
 
   bool removeObjectCallback(rail_pick_and_place_msgs::RemoveObject::Request &req,
-                                                       rail_pick_and_place_msgs::RemoveObject::Response &res);
+      rail_pick_and_place_msgs::RemoveObject::Response &res);
 
   /*! The debug and okay check flags. */
   bool debug_, okay_;
