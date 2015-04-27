@@ -13,8 +13,15 @@ Changelog for package rail_recognition
 * stores metrics
 * Contributors: David Kent, Russell Toris
 
-Forthcoming
------------
+1.1.4 (2015-04-27)
+------------------
+* weighted average of colors
+* added doxygen
+* bug fixes in point cloud merging
+* Added remove object functionality for the recognized object list
+* Combined close together objects of the same type into single objects
+* Contributors: David Kent, Russell Toris
+
 * changelog updated
 * uses PCL models for generation
 * cleanup of new stuff

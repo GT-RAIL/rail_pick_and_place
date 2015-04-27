@@ -7,8 +7,9 @@ Changelog for package rail_grasp_collection
 * added segmented images to the database
 * Contributors: Russell Toris
 
-Forthcoming
------------
+1.1.4 (2015-04-27)
+------------------
+
 * changelog updated
 * added segmented images to the database
 * Contributors: Russell Toris

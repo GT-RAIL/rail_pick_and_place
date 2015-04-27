@@ -9,8 +9,12 @@ Changelog for package graspdb
 * added segmented images to the database
 * Contributors: Russell Toris
 
-Forthcoming
------------
+1.1.4 (2015-04-27)
+------------------
+* weighted average of colors
+* reuse of grasp message
+* Contributors: Russell Toris
+
 * changelog updated
 * removed metric pre-compute
 * stores metrics
