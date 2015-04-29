@@ -9,6 +9,9 @@ Changelog for package rail_pick_and_place_msgs
 * added segmented images to the database
 * Contributors: Russell Toris
 
+1.1.5 (2015-04-29)
+------------------
+
 1.1.4 (2015-04-27)
 ------------------
 * reuse of grasp message

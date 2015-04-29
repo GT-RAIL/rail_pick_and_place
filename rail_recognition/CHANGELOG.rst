@@ -13,6 +13,11 @@ Changelog for package rail_recognition
 * stores metrics
 * Contributors: David Kent, Russell Toris
 
+1.1.5 (2015-04-29)
+------------------
+* Bugfix for running recognition on empty object lists
+* Contributors: David Kent
+
 1.1.4 (2015-04-27)
 ------------------
 * weighted average of colors
