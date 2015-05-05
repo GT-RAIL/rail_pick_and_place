@@ -114,6 +114,7 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
 
   // store the list
   object_list_.objects = new_list;
+  object_list_.cleared = objects->cleared;
 
   // run recognition
   ROS_INFO("Running recognition...");
