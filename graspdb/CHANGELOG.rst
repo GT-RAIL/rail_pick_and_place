@@ -9,6 +9,9 @@ Changelog for package graspdb
 * added segmented images to the database
 * Contributors: Russell Toris
 
+1.1.6 (2015-05-05)
+------------------
+
 1.1.5 (2015-04-29)
 ------------------
 
