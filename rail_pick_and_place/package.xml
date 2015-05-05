@@ -1,6 +1,6 @@
 <package>
   <name>rail_pick_and_place</name>
-  <version>1.1.5</version>
+  <version>1.1.6</version>
   <description>Grasp Training and Pick and Place Methods Developed by the RAIL Lab</description>
 
   <author email="rctoris@wpi.edu">Russell Toris</author>
