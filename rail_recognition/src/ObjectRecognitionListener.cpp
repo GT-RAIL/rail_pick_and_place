@@ -273,8 +273,48 @@ void ObjectRecognitionListener::combineModels(const rail_manipulation_msgs::Segm
   combined.center.y = (max_pt[1] + min_pt[1]) / 2.0;
   combined.center.z = (max_pt[2] + min_pt[2]) / 2.0;
 
-  // TODO: calculate combined orientation here once orientation is implemented for segmented objects
-  combined.orientation = model1.orientation;
+  // recalculate orientation of combined point clouds
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
+  // project point cloud onto the xy plane
+  pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
+  coefficients->values.resize(4);
+  coefficients->values[0] = 0;
+  coefficients->values[1] = 0;
+  coefficients->values[2] = 1.0;
+  coefficients->values[3] = 0;
+  pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+  proj.setModelType(pcl::SACMODEL_PLANE);
+  proj.setInputCloud(combined_cloud);
+  proj.setModelCoefficients(coefficients);
+  proj.filter(*projected_cluster);
+
+  //calculate the Eigen vectors of the projected point cloud's covariance matrix, used to determine orientation
+  Eigen::Vector4f projected_centroid;
+  Eigen::Matrix3f covariance_matrix;
+  pcl::compute3DCentroid(*projected_cluster, projected_centroid);
+  pcl::computeCovarianceMatrixNormalized(*projected_cluster, projected_centroid, covariance_matrix);
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance_matrix, Eigen::ComputeEigenvectors);
+  Eigen::Matrix3f eigen_vectors = eigen_solver.eigenvectors();
+  eigen_vectors.col(2) = eigen_vectors.col(0).cross(eigen_vectors.col(1));
+  //calculate rotation from eigenvectors
+  const Eigen::Quaternionf qfinal(eigen_vectors);
+
+  //convert orientation to a single angle on the 2D plane defined by the segmentation coordinate frame
+  tf::Quaternion tf_quat;
+  tf_quat.setValue(qfinal.x(), qfinal.y(), qfinal.z(), qfinal.w());
+  double r, p, y;
+  tf::Matrix3x3 m(tf_quat);
+  m.getRPY(r, p, y);
+  double angle = r + y;
+  while (angle < -M_PI)
+  {
+    angle += 2 * M_PI;
+  }
+  while (angle > M_PI)
+  {
+    angle -= 2 * M_PI;
+  }
+  combined.orientation = tf::createQuaternionMsgFromYaw(angle);
 
   // combine the two markers
   combined.marker = model1.marker;

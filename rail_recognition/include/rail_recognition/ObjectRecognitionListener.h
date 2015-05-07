@@ -18,8 +18,10 @@
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
 #include <rail_pick_and_place_msgs/RemoveObject.h>
 #include <ros/ros.h>
+#include <tf/transform_datatypes.h>
 
 // PCL
+#include <pcl/filters/project_inliers.h>
 #include <pcl/filters/voxel_grid.h>
 
 // Boost
