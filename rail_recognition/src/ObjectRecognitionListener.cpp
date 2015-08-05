@@ -33,10 +33,12 @@ ObjectRecognitionListener::ObjectRecognitionListener() : private_node_("~")
   string user("ros");
   string password("");
   string db("graspdb");
+  use_image_recognition_ = true;
 
   // grab any parameters we need
   private_node_.getParam("debug", debug_);
   private_node_.getParam("segmented_objects_topic", segmented_objects_topic);
+  private_node_.getParam("use_image_recognition", use_image_recognition_);
   node_.getParam("/graspdb/host", host);
   node_.getParam("/graspdb/port", port);
   node_.getParam("/graspdb/user", user);
@@ -46,6 +48,12 @@ ObjectRecognitionListener::ObjectRecognitionListener() : private_node_("~")
   // connect to the grasp database
   graspdb_ = new graspdb::Client(host, port, user, password, db);
   okay_ = graspdb_->connect();
+
+  // load the image recognition data (if it's being used)
+  if (use_image_recognition_)
+  {
+    image_recognizer_.loadImageRecognizer();
+  }
 
   // setup a debug publisher if we need it
   if (debug_)
@@ -118,26 +126,82 @@ void ObjectRecognitionListener::segmentedObjectsCallback(
 
   // run recognition
   ROS_INFO("Running recognition...");
-  // populate candidates
-  vector<graspdb::GraspModel> candidates;
-  graspdb_->loadGraspModels(candidates);
-  // convert to PCL grasp models
+
   vector<PCLGraspModel> pcl_candidates;
-  for (size_t i = 0; i < candidates.size(); i++)
+  if (!use_image_recognition_) //populate full list of candidates to use directly with point cloud registration
   {
-    pcl_candidates.push_back(PCLGraspModel(candidates[i]));
+    // populate candidates
+    vector<graspdb::GraspModel> candidates;
+    graspdb_->loadGraspModels(candidates);
+    // convert to PCL grasp models
+    for (size_t i = 0; i < candidates.size(); i++)
+    {
+      pcl_candidates.push_back(PCLGraspModel(candidates[i]));
+    }
   }
 
   // go through the current list
-  PointCloudRecognizer recognizer;
+  PointCloudRecognizer point_cloud_recognizer;
   for (size_t i = 0; i < object_list_.objects.size(); i++)
   {
+    if (!use_image_recognition_)
+      pcl_candidates.clear();
+
     // check if it is already recognized
     rail_manipulation_msgs::SegmentedObject &object = object_list_.objects[i];
     if (!object.recognized)
     {
-      // perform recognition
-      recognizer.recognizeObject(object, pcl_candidates);
+      if (use_image_recognition_)
+      {
+        // perform recognition based on the image
+        vector<pair<float, string> > image_recognizer_results;
+        image_recognizer_.recognizeObject(object_list_.objects[i], image_recognizer_results);
+
+        //use results with above the recognition threshold as candidates for point cloud registration
+        vector<string> candidate_names;
+        for (unsigned int j = 0; j < image_recognizer_results.size(); j++)
+        {
+          if (image_recognizer_results[j].first >= RECOGNITION_THRESHOLD)
+          {
+            candidate_names.push_back(image_recognizer_results[j].second);
+
+          }
+          else
+            break;
+        }
+
+        ROS_INFO("Image recognition resulted in %lu candidates.", candidate_names.size());
+
+        if (candidate_names.empty())
+        {
+          ROS_INFO("No suitable recognition results, object %lu is unrecognized.", i);
+        }
+        else
+        {
+          // get candidates from graspdb
+          vector<graspdb::GraspModel> candidates;
+          for (unsigned int j = 0; j < candidate_names.size(); j++)
+          {
+            ROS_INFO("Attempting to load candidates with name: %s", candidate_names[j].c_str());
+            graspdb_->loadGraspModelsByObjectName(candidate_names[j], candidates);
+          }
+          ROS_INFO("Successfully loaded %lu candidates, including: ", candidates.size());
+          // convert to PCL grasp models
+          pcl_candidates.clear();
+          for (size_t j = 0; j < candidates.size(); j++)
+          {
+            pcl_candidates.push_back(PCLGraspModel(candidates[j]));
+            ROS_INFO("%s", candidates[j].getObjectName().c_str());
+          }
+
+          // refine recognition with registration to a point cloud model
+          point_cloud_recognizer.recognizeObject(object, pcl_candidates);
+        }
+      }
+      else
+      {
+        point_cloud_recognizer.recognizeObject(object, pcl_candidates);
+      }
     }
   }
 

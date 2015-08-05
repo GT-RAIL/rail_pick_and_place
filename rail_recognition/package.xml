@@ -5,6 +5,7 @@
 
   <author email="davidkent@wpi.edu">David Kent</author>
   <author email="rctoris@wpi.edu">Russell Toris</author>
+  <author email="bhetherman@wpi.edu">bhetherman</author>
   <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
   <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
   
@@ -17,24 +18,34 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>actionlib</build_depend>
+  <build_depend>actionlib_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>graspdb</build_depend>
   <build_depend>pcl_conversions</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>rail_manipulation_msgs</build_depend>
   <build_depend>rail_pick_and_place_msgs</build_depend>
+  <build_depend>rail_segmentation</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
   <build_depend>tf2</build_depend>
 
   <run_depend>actionlib</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
+  <run_depend>cv_bridge</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>graspdb</run_depend>
   <run_depend>pcl_conversions</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>rail_manipulation_msgs</run_depend>
   <run_depend>rail_pick_and_place_msgs</run_depend>
+  <run_depend>rail_segmentation</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>std_srvs</run_depend>
   <run_depend>tf2</run_depend>
 </package>

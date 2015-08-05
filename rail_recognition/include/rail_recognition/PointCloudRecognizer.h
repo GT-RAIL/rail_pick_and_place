@@ -45,9 +45,9 @@ public:
   /*! The weighting constant for the match score metric. */
   static const double ALPHA = 0.5;
   /*! The confidence threshold for a recognition score. */
-  static const double SCORE_CONFIDENCE_THRESHOLD = 0.8;
+  static const double SCORE_CONFIDENCE_THRESHOLD = 0.9;
   /*! The threshold for the overlap metric to be considered a valid match. */
-  static const double OVERLAP_THRESHOLD = 0.75;
+  static const double OVERLAP_THRESHOLD = 0.6;
 
   /*!
    * \brief Creates a new PointCloudRecognizer.

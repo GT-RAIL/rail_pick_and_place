@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="rail_recognition" name="save_image_recognizer_features" type="save_image_recognizer_features" output="screen" />
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+    <arg name="new_images_dir" default="$(find rail_recognition)/data/newimages/" />
+
+    <node pkg="rail_recognition" name="collect_images" type="collect_images" output="screen">
+        <param name="save_new_images" value="true" />
+        <param name="new_images_dir" value="$(arg new_images_dir)" />
+    </node>
+</launch>

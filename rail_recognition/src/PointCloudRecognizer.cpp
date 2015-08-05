@@ -64,10 +64,10 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
     if (!candidate_point_cloud->empty())
     {
       // do an average color check
-      if (fabs(object_r - candidates[i].getAverageRed()) <= object_std_dev_r / 1.5
-          && fabs(object_g - candidates[i].getAverageGreen()) <= object_std_dev_g / 1.5
-          && fabs(object_b - candidates[i].getAverageBlue()) <= object_std_dev_b / 1.5)
-      {
+//      if (fabs(object_r - candidates[i].getAverageRed()) <= object_std_dev_r / 0.75
+//          && fabs(object_g - candidates[i].getAverageGreen()) <= object_std_dev_g / 0.75
+//          && fabs(object_b - candidates[i].getAverageBlue()) <= object_std_dev_b / 0.75)
+//      {
         tf2::Transform cur_icp_tf;
         double score = this->scoreRegistration(candidate_point_cloud, object_point_cloud, cur_icp_tf);
         if (score < min_score)
@@ -76,22 +76,28 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
           min_index = i;
           min_icp_tf = cur_icp_tf;
         }
-      }
+//      }
+//      else
+//      {
+//        ROS_INFO("Failed color check for model %s", candidates[i].getObjectName().c_str());
+//      }
     }
   }
 
   // check if there is enough confidence
   if (min_score > SCORE_CONFIDENCE_THRESHOLD)
   {
+    ROS_INFO("Minimum recognition score did not exceed confidence threshold.");
+    ROS_INFO("Min score: %lf", min_score);
     return false;
   }
+    ROS_INFO("Object successfully recognized as: %s", object.name.c_str());
 
   // fill in recognition information
   object.name = candidates[min_index].getObjectName();
   object.model_id = candidates[min_index].getID();
   object.confidence = min_score;
   object.recognized = true;
-  // TODO infer object orientation
   object.orientation.w = 1.0;
   object.grasps.clear();
 

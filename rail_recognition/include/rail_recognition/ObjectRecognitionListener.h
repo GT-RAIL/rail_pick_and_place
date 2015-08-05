@@ -17,6 +17,7 @@
 #include <graspdb/graspdb.h>
 #include <rail_manipulation_msgs/SegmentedObjectList.h>
 #include <rail_pick_and_place_msgs/RemoveObject.h>
+#include <rail_recognition/ImageRecognizer.h>
 #include <ros/ros.h>
 #include <tf/transform_datatypes.h>
 
@@ -48,6 +49,8 @@ public:
   static const float DOWNSAMPLE_LEAF_SIZE = 0.01;
   /*! The distance threshold for two point clouds being the same item. */
   static const double SAME_OBJECT_DIST_THRESHOLD = 0.2;
+  /*! Confidence threshold for the recognizer. */
+  static const double RECOGNITION_THRESHOLD = 0.5;
 
   /*!
    * \brief Creates a new ObjectRecognitionListener.
@@ -138,6 +141,10 @@ private:
   ros::ServiceServer remove_object_srv_;
   /*! The most recent segmented objects. */
   rail_manipulation_msgs::SegmentedObjectList object_list_;
+
+  ImageRecognizer image_recognizer_;
+
+  bool use_image_recognition_;
 };
 
 }
