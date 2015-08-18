@@ -1,6 +1,6 @@
 <package>
   <name>rail_grasp_collection</name>
-  <version>1.1.7</version>
+  <version>1.1.8</version>
   <description>Grasp Collection for Constructing a Grasping and Recognition Database</description>
 
   <author email="rctoris@wpi.edu">Russell Toris</author>
