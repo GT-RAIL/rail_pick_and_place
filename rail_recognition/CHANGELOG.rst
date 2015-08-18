@@ -13,6 +13,12 @@ Changelog for package rail_recognition
 * stores metrics
 * Contributors: David Kent, Russell Toris
 
+1.1.8 (2015-08-18)
+------------------
+* Merge branch 'develop' of github.com:WPI-RAIL/rail_pick_and_place into develop
+* 2D image recognition added
+* Contributors: David Kent
+
 1.1.7 (2015-05-08)
 ------------------
 * Calculated new orientation of combined recognized objects
