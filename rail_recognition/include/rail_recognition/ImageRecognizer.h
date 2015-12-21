@@ -194,16 +194,15 @@ private:
 
   ros::Subscriber sub; /*!< subscriber handle for the segmented objects list topic */
 
-  cv::Ptr<cv::BOWImgDescriptorExtractor> siftBowide, surfBowide;/*!< BOWImgDescriptorExtractor ptrs for sift and surf bags */
+  cv::Ptr<cv::BOWImgDescriptorExtractor> siftBowide;/*!< BOWImgDescriptorExtractor ptrs for sift bags */
   cv::Ptr<cv::DescriptorMatcher> bfMatcher, flannMatcher;/*!< DescriptorMatcher ptrs for brute force and flann matchers */
-  cv::Ptr<cv::FeatureDetector> siftDetector, surfDetector;/*!< FeatureDetector ptrs for sift and surf */
-  cv::Ptr<cv::DescriptorExtractor> siftExtractor, surfExtractor;/*!< DescriptorExtractor ptrs for sift and surf */
+  cv::Ptr<cv::FeatureDetector> siftDetector;/*!< FeatureDetector ptrs for sift */
+  cv::Ptr<cv::DescriptorExtractor> siftExtractor;/*!< DescriptorExtractor ptrs for sift */
   cv::Ptr<CvANN_MLP> classifier;/*!< CvANN_MLP ptr for the ANN classifier */
 
   std::vector<std::string> classLegend;/*!< vector of object class names that are in the same order as the ANN */
 
   int numSiftFeatures;/*!< number of sift features to find */
-  int minHessian;/*!< min Hessian value for surf features*/
   int dictionarySize;/*!< the numbers of words in each BOW */
   int histSize;/*!< number of groups in RGB/HSV histograms */
 
