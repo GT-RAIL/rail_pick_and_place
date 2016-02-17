@@ -3,17 +3,17 @@
   <version>1.1.8</version>
   <description>Construction and Use of a Recognition Database for Grasping Purposes</description>
 
-  <author email="davidkent@wpi.edu">David Kent</author>
+  <author email="dekent@gatech.edu">David Kent</author>
   <author email="rctoris@wpi.edu">Russell Toris</author>
   <author email="bhetherman@wpi.edu">bhetherman</author>
-  <maintainer email="davidkent@wpi.edu">David Kent</maintainer>
+  <maintainer email="dekent@gatech.edu">David Kent</maintainer>
   <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
   
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/rail_recognition</url>
-  <url type="bugtracker">https://github.com/WPI-RAIL/rail_pick_and_place/issues</url>
-  <url type="repository">https://github.com/WPI-RAIL/rail_pick_and_place</url>
+  <url type="bugtracker">https://github.com/GT-RAIL/rail_pick_and_place/issues</url>
+  <url type="repository">https://github.com/GT-RAIL/rail_pick_and_place</url>
   
   <buildtool_depend>catkin</buildtool_depend>
 
