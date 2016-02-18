@@ -26,7 +26,6 @@ ImageRecognizer::ImageRecognizer() : pnh("~")
 {
   //ros::NodeHandle private_nh("~");
   numResponses = 1;
-  numSiftFeatures = 10;
   dictionarySize=10;//the number of bags
   histSize = 10;
 
@@ -45,13 +44,8 @@ ImageRecognizer::ImageRecognizer() : pnh("~")
   pnh.param("new_images_dir", newImagesDirPath, ssNewImagesDirPath.str());
   pnh.param("save_new_images", saveNewImages, false);
 
-  siftDetector = new SiftFeatureDetector(numSiftFeatures);
-  siftExtractor = new SiftDescriptorExtractor();
-
   bfMatcher = new BFMatcher(NORM_L2, false );//(new FlannBasedMatcher());
   flannMatcher = new FlannBasedMatcher();//new BFMatcher(NORM_HAMMING));
-
-  siftBowide = new BOWImgDescriptorExtractor(siftExtractor,bfMatcher);
 
   classifier = new CvANN_MLP();
 
@@ -70,20 +64,11 @@ ImageRecognizer::ImageRecognizer() : pnh("~")
  */
 void ImageRecognizer::loadImageRecognizer()
 {
-  Mat input, descriptor, siftVocabulary, featuresUnclustered;
+  Mat input, descriptor, featuresUnclustered;
   vector<string> FileNames, classes_names;
-  vector<KeyPoint> keypoints;//To store the keypoints that will be extracted by SIFT
 
   FileNode vocabFileNode;
   FileStorage fs;
-
-  fs.open(savedDataDirPath + "/sift_dictionary.yml", FileStorage::READ);
-  vocabFileNode = fs["vocabulary"];
-  read( vocabFileNode, siftVocabulary);
-  fs.release();
-
-  siftBowide->setVocabulary(siftVocabulary);
-  //cout << "siftBowide descriptor size = " << siftBowide->descriptorSize() << endl;
 
   classLegend.clear();
   fs.open(savedDataDirPath + "/recognitionNeuralNet.yml", FileStorage::READ);
@@ -98,16 +83,10 @@ void ImageRecognizer::loadImageRecognizer()
 
 void ImageRecognizer::calculateAndSaveFeatures()
 {
-  Mat siftVocabulary, featuresUnclustered, response_hist;
+  Mat featuresUnclustered, response_hist;
   vector<string> FileNames, classes_names;
 
   getFilesAndClasses(classes_names, FileNames);
-
-  getFeatures(featuresUnclustered, siftExtractor, siftDetector, FileNames);
-  trainVocabulary("sift", featuresUnclustered, siftVocabulary);
-
-  siftBowide->setVocabulary(siftVocabulary);
-  //cout << "siftBowide descriptor size = " << siftBowide->descriptorSize() << endl;
 
   int numClasses = 0;
   map<string,Mat> classes_training_data; //training data for classifiers
@@ -163,16 +142,10 @@ void ImageRecognizer::calculateAndSaveFeatures()
  */
 void ImageRecognizer::trainImageRecognizer()
 {
-  Mat siftVocabulary, featuresUnclustered, response_hist;
+  Mat featuresUnclustered, response_hist;
   vector<string> FileNames, classes_names;
 
   getFilesAndClasses(classes_names, FileNames);
-
-  getFeatures(featuresUnclustered, siftExtractor, siftDetector, FileNames);
-  trainVocabulary("sift", featuresUnclustered, siftVocabulary);
-
-  siftBowide->setVocabulary(siftVocabulary);
-  //cout << "siftBowide descriptor size = " << siftBowide->descriptorSize() << endl;
 
   int numClasses = 0;
   map<string,Mat> classes_training_data; //training data for classifiers
@@ -351,20 +324,13 @@ void ImageRecognizer::detectExtractFeatures(Mat &input, vector<KeyPoint> &keypoi
 void ImageRecognizer::detectExtractComputeFeatures(Mat colorInput, Mat &response_hist)
 {
   vector<KeyPoint> keypoints;
-  Mat sift_hist, colorhsv_hist, inputGS, descriptor;
+  Mat colorhsv_hist, inputGS, descriptor;
 
   cvtColor(colorInput,inputGS,CV_RGB2GRAY);
 
-  siftDetector->detect(inputGS, keypoints);//detect feature points
-  siftExtractor->compute(inputGS, keypoints, descriptor);//compute the descriptors for each keypoint
-  siftBowide->compute(inputGS, keypoints, sift_hist);
-  if(keypoints.size() == 0)
-    sift_hist = Mat::zeros(1, dictionarySize, CV_32F);
-
   colorAndHSVDescriptors(colorInput, colorhsv_hist);
 
-  response_hist = sift_hist.clone();
-  hconcat(response_hist,colorhsv_hist,response_hist);
+  response_hist = colorhsv_hist.clone();
 }
 
 /*!
