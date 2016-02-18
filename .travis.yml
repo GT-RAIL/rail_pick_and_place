@@ -10,7 +10,7 @@ branches:
   only:
     - master
     - develop
-    - develop_no_opencv_nonfree
+    - develop-no-opencv-nonfree
 
 install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
