@@ -118,7 +118,6 @@ target_link_libraries(object_recognizer
 target_link_libraries(object_recognition_listener
  ${catkin_LIBRARIES}
  ${OpenCV_LIBRARIES}
- opencv_nonfree
 )
 target_link_libraries(rail_grasp_model_retriever
  ${catkin_LIBRARIES}
@@ -126,22 +125,18 @@ target_link_libraries(rail_grasp_model_retriever
 target_link_libraries(train_image_recognizer
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
-  opencv_nonfree
 )
 target_link_libraries(test_image_recognizer
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
-  opencv_nonfree
 )
 target_link_libraries(collect_images
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
-  opencv_nonfree
 )
 target_link_libraries(save_image_recognizer_features
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
-  opencv_nonfree
 )
 
 #############

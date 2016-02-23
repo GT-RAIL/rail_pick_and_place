@@ -13,6 +13,13 @@ Changelog for package rail_recognition
 * stores metrics
 * Contributors: David Kent, Russell Toris
 
+1.1.9 (2016-02-23)
+------------------
+* Removed opencv_nonfree features
+* Update package.xml
+* Updates to suppor the Kinect2, switched to more minimal object set for demonstration purposes
+* Contributors: David Kent
+
 1.1.8 (2015-08-18)
 ------------------
 * Merge branch 'develop' of github.com:WPI-RAIL/rail_pick_and_place into develop
