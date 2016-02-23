@@ -21,7 +21,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
   // initialize ROS and the node
-  ros::init(argc, argv, "test_image_recognizer");
+  ros::init(argc, argv, "collect_images");
 
   ImageRecognizer ir;
 

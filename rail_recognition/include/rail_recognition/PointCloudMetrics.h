@@ -35,7 +35,7 @@ namespace point_cloud_metrics
 /*! The radius to search within for neighbors during pre-processing. */
 static const double DEFAULT_FILTER_OUTLIER_SEARCH_RADIUS = 0.01;
 /*! The radius to search within for neighbors during pre-processing. */
-static const double DEFAULT_FILTER_REDUNDANT_SEARCH_RADIUS = 0.00075;
+static const double DEFAULT_FILTER_REDUNDANT_SEARCH_RADIUS = 0.0004;
 /*! The minimum number of neighbors required to keep a point during pre-processing. */
 static const int DEFAULT_FILTER_OUTLIER_MIN_NUM_NEIGHBORS = 6;
 /*! The radius to search within for neighbors during the overlap metric search. */

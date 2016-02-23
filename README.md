@@ -1,4 +1,4 @@
-rail_pick_and_place [![Build Status](https://api.travis-ci.org/WPI-RAIL/rail_pick_and_place.png)](https://travis-ci.org/WPI-RAIL/rail_pick_and_place)
+rail_pick_and_place [![Build Status](https://api.travis-ci.org/GT-RAIL/rail_pick_and_place.png)](https://travis-ci.org/GT-RAIL/rail_pick_and_place)
 ===================
 
 #### Grasp Training and Pick and Place Methods Developed by the RAIL Lab

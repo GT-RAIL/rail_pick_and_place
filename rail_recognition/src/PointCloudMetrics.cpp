@@ -277,8 +277,13 @@ bool point_cloud_metrics::classifyMerge(const pcl::PointCloud<pcl::PointXYZRGB>:
   double overlap, color_error;
   point_cloud_metrics::calculateRegistrationMetricOverlap(base, target, overlap, color_error);
 
-  // values found via decision tree training
-  return (overlap > 0.471303) && (color_error <= 97.0674);
+  double distance_error = point_cloud_metrics::calculateRegistrationMetricDistanceError(base, target);
+
+  // values found via decision tree training (standard kinect)
+  //return (overlap > 0.471303) && (color_error <= 97.0674);
+
+  // values found via decision tree training (hd kinect v2)
+  return distance_error <= .347063 && color_error <= 113.569;
 }
 
 tf2::Transform point_cloud_metrics::performICP(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &target,

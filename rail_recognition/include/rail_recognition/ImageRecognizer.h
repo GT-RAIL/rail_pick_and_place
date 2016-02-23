@@ -29,7 +29,6 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/ml/ml.hpp>
 
 //CPP
@@ -194,16 +193,11 @@ private:
 
   ros::Subscriber sub; /*!< subscriber handle for the segmented objects list topic */
 
-  cv::Ptr<cv::BOWImgDescriptorExtractor> siftBowide, surfBowide;/*!< BOWImgDescriptorExtractor ptrs for sift and surf bags */
   cv::Ptr<cv::DescriptorMatcher> bfMatcher, flannMatcher;/*!< DescriptorMatcher ptrs for brute force and flann matchers */
-  cv::Ptr<cv::FeatureDetector> siftDetector, surfDetector;/*!< FeatureDetector ptrs for sift and surf */
-  cv::Ptr<cv::DescriptorExtractor> siftExtractor, surfExtractor;/*!< DescriptorExtractor ptrs for sift and surf */
   cv::Ptr<CvANN_MLP> classifier;/*!< CvANN_MLP ptr for the ANN classifier */
 
   std::vector<std::string> classLegend;/*!< vector of object class names that are in the same order as the ANN */
 
-  int numSiftFeatures;/*!< number of sift features to find */
-  int minHessian;/*!< min Hessian value for surf features*/
   int dictionarySize;/*!< the numbers of words in each BOW */
   int histSize;/*!< number of groups in RGB/HSV histograms */
 

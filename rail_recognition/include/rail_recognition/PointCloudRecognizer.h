@@ -45,7 +45,7 @@ public:
   /*! The weighting constant for the match score metric. */
   static const double ALPHA = 0.5;
   /*! The confidence threshold for a recognition score. */
-  static const double SCORE_CONFIDENCE_THRESHOLD = 0.9;
+  static const double SCORE_CONFIDENCE_THRESHOLD = 1.1;
   /*! The threshold for the overlap metric to be considered a valid match. */
   static const double OVERLAP_THRESHOLD = 0.6;
 

@@ -17,10 +17,6 @@
   <arg name="debug" default="false" />
   <arg name="use_image_recognition" default="true" />
 
-  <!-- Image Recognizer Params -->
-  <arg name="save_new_images" default="false" />
-  <arg name="new_images_dir" default="$(find rail_recognition)/data/newimages/" />
-
   <!-- Set Global Params -->
   <param name="/graspdb/host" type="str" value="$(arg host)" />
   <param name="/graspdb/port" type="int" value="$(arg port)" />
@@ -32,7 +28,5 @@
     <param name="segmented_objects_topic" value="$(arg segmented_objects_topic)" />
     <param name="debug" value="$(arg debug)" />
     <param name="use_image_recognition" value="$(arg use_image_recognition)" />
-    <param name="save_new_images" value="$(arg save_new_images)" />
-    <param name="new_images_dir" value="$(arg new_images_dir)" />
   </node>
 </launch>
