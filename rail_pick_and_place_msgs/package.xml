@@ -3,10 +3,10 @@
   <version>1.1.9</version>
   <description>Messages and Services for RAIL Pick and Place</description>
 
-  <author email="rctoris@wpi.edu">Russell Toris</author>
+  <author email="russell.toris@gmail.com">Russell Toris</author>
   <author email="dekent@gatech.edu">David Kent</author>
   <maintainer email="dekent@gatech.edu">David Kent</maintainer>
-  <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
+  <maintainer email="russell.toris@gmail.com">Russell Toris</maintainer>
   
   <license>BSD</license>
 

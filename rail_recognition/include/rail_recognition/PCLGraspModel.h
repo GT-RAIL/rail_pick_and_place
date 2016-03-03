@@ -6,7 +6,7 @@
  * to mark the grasp model as an original (as apposed to newly generated during model generation). All accessors to
  * the ROS point cloud message are disabled.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

@@ -5,7 +5,7 @@
  * The grasp collector is responsible for capturing and storing grasps. An action server is started is the main
  * entry point to grasp collecting.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date March 3, 2015
  */
 

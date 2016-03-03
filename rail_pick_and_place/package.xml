@@ -3,9 +3,9 @@
   <version>1.1.9</version>
   <description>Grasp Training and Pick and Place Methods Developed by the RAIL Lab</description>
 
-  <author email="rctoris@wpi.edu">Russell Toris</author>
+  <author email="russell.toris@gmail.com">Russell Toris</author>
   <author email="dekent@gatech.edu">David Kent</author>
-  <maintainer email="rctoris@wpi.edu">Russell Toris</maintainer>
+  <maintainer email="russell.toris@gmail.com">Russell Toris</maintainer>
   <maintainer email="dekent@gatech.edu">David Kent</maintainer>
 
   <license>BSD</license>
