@@ -6,10 +6,8 @@ python:
 compiler:
   - gcc
 
-os:
-  - linux
-    dist: trusty
-    sudo: required
+sudo: required
+dist: trusty
 
 branches:
   only:
