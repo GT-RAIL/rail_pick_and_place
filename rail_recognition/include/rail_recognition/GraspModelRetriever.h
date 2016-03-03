@@ -6,7 +6,7 @@
  * started as the main entry point to grasp retrieval. A latched topic is used to publish the resulting point cloud and
  * pose array.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 3, 2015
  */
 

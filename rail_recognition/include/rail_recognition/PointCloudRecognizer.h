@@ -5,8 +5,8 @@
  * The point cloud recognizer takes a segmented object and a list of grasp model candidates and attempts to recognize
  * the object.
  *
- * \author David Kent, WPI - rctoris@wpi.edu
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - russell.toris@gmail.com
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

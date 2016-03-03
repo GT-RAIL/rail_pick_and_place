@@ -4,7 +4,7 @@
  *
  * The metric training panel allows for sending metric training requests and getting user Yes/No feedback.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

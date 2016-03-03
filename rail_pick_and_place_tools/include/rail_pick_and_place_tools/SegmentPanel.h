@@ -5,7 +5,7 @@
  * The segmentation panel allows for sending segmentation service requests.
  *
  * \author David Kent, WPI - davidkent@wpi.edu
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 6, 2015
  */
 
