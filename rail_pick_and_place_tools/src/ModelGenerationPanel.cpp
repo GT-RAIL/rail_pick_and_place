@@ -5,7 +5,7 @@
  * The model generation panel allows for model generation requests to be made using a selection of grasps and models.
  *
  * \author David Kent, WPI - davidkent@wpi.edu
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

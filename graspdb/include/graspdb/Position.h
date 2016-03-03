@@ -5,7 +5,7 @@
  * A position simply contains x, y, and z value. This class is useful for internal data management within the graspdb
  * library. Convenience functions are added for use with ROS messages.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date March 3, 2015
  */
 

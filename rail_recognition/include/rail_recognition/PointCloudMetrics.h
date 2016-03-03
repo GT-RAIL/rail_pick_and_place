@@ -4,8 +4,8 @@
  *
  * A collection of static functions for calculating various point cloud metrics and utility functions.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
- * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
+ * \author David Kent, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

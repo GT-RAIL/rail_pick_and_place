@@ -5,7 +5,7 @@
  * The grasp collection panel allows for calling the grasp and store action server with the associated settings.
  *
  * \author David Kent, WPI - davidkent@wpi.edu
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 6, 2015
  */
 

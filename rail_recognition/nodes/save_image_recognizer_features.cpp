@@ -2,7 +2,7 @@
  * \file save_image_recognizer_features.cpp
  * \brief Train a neural network for the image recognizer, based on sorted training images
  *
- * \author David Kent, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - russell.toris@gmail.com
  * \date May 12, 2015
  */
 

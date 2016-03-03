@@ -4,8 +4,8 @@
  *
  * The object recognizer sets up an action server that allows the recognition of a single segmented object.
  *
- * \author David Kent, WPI - rctoris@wpi.edu
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - russell.toris@gmail.com
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

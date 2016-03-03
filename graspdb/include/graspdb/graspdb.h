@@ -4,7 +4,7 @@
  *
  * The graspdb library is a standalone C++ library for communicating with the PostgreSQL grasp database.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
  * \date March 3, 2015
  */
 

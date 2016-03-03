@@ -5,8 +5,8 @@
  * The object recognition listener will listen to a specified SegmentedObjectsArray topic and attempt to recognize
  * all segmented objects. The new list are republished on a separate topic.
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
- * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
+ * \author David Kent, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

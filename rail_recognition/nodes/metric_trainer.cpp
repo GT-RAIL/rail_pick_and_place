@@ -5,8 +5,8 @@
  * The metric trainer allows for generating data sets for training registration metric decision trees. An action server
  * is used to provide the object name and files are dumped to "registration_metrics.txt".
  *
- * \author Russell Toris, WPI - rctoris@wpi.edu
- * \author David Kent, WPI - rctoris@wpi.edu
+ * \author Russell Toris, WPI - russell.toris@gmail.com
+ * \author David Kent, WPI - russell.toris@gmail.com
  * \date April 8, 2015
  */
 

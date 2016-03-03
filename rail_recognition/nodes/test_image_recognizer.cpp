@@ -3,7 +3,7 @@
  * \brief Test the image recognizer with a set of previously saved and sorted test images.
  *
  * \author Brian Hetherman, WPI - bhetherman@wpi.edu
- * \author David Kent, WPI - rctoris@wpi.edu
+ * \author David Kent, WPI - russell.toris@gmail.com
  * \date May 12, 2015
  */
 
