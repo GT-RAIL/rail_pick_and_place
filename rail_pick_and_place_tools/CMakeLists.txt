@@ -67,7 +67,7 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
 ## Add message build dependencies (needed for source build)
 add_dependencies(${PROJECT_NAME}
-  rail_pick_and_place_generate_msgs_cpp
+  rail_pick_and_place_msgs_gencpp
 )
 
 ## Specify libraries to link a library or executable target against
