@@ -121,6 +121,7 @@ bool PointCloudRecognizer::recognizeObject(rail_manipulation_msgs::SegmentedObje
       bool inserted = false;
       rail_manipulation_msgs::Grasp grasp;
       grasp.grasp_pose = pose;
+      grasp.grasp_id = possible_grasps[i].getID();
       grasp.attempts = possible_grasps[i].getAttempts();
       grasp.successes = possible_grasps[i].getSuccesses();
       grasp.eef_frame_id = possible_grasps[i].getEefFrameID();
