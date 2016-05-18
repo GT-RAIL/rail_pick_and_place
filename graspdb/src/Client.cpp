@@ -139,6 +139,9 @@ bool Client::connect()
       connection_->prepare("grasps.insert",
                            "INSERT INTO grasps (grasp_model_id, grasp_pose, eef_frame_id, successes, attempts) " \
           "VALUES ($1, $2, $3, $4, $5) RETURNING id, created");
+      connection_->prepare("grasps.update",
+                           "UPDATE grasps SET grasp_model_id=$1, grasp_pose=$2, eef_frame_id=$3, successes=$4, " \
+          "attempts=$5 WHERE id=$6 RETURNING id, created");
       connection_->prepare("grasps.select",
                            "SELECT id, grasp_model_id, (grasp_pose).robot_fixed_frame_id, (grasp_pose).position, " \
           "(grasp_pose).orientation, eef_frame_id, successes, attempts, created FROM grasps WHERE id=$1");
@@ -457,6 +460,33 @@ bool Client::addGrasp(Grasp &grasp) const
   if (!result.empty())
   {
     grasp.setID(result[0]["id"].as<uint32_t>());
+    grasp.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
+    return true;
+  } else
+  {
+    return false;
+  }
+}
+
+bool Client::updateGrasp(Grasp &grasp) const
+{
+  // build the SQL bits we need
+  uint32_t grasp_id = grasp.getID();
+  uint32_t grasp_model_id = grasp.getGraspModelID();
+  const string &grasp_pose = this->toSQL(grasp.getGraspPose());
+  const string &eef_frame_id = grasp.getEefFrameID();
+  uint32_t succeses = grasp.getSuccesses();
+  uint32_t attempts = grasp.getAttempts();
+
+  // create and execute the query
+  pqxx::work w(*connection_);
+  pqxx::result result = w.prepared("grasps.update")(grasp_model_id)(grasp_pose)(eef_frame_id)(succeses)(attempts)
+          (grasp_id).exec();
+  w.commit();
+
+  // check the result
+  if (!result.empty())
+  {
     grasp.setCreated(this->extractTimeFromString(result[0]["created"].as<string>()));
     return true;
   } else

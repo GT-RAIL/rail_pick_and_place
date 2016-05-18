@@ -261,6 +261,17 @@ public:
   bool addGrasp(Grasp &graps) const;
 
   /*!
+   * \brief Update an existing grasp in the database.
+   *
+   * Stores the given grasp data to the database. The ID field of the grasp must be set correctly since the update
+   * is based on the primary field ID.
+   *
+   * \param g The Grasp with the data to store.
+   * \return Returns true if the entity was added to the database.
+   */
+  bool updateGrasp(Grasp &graps) const;
+
+  /*!
    * \brief Add a grasp demonstration to the database.
    *
    * Stores the given grasp demonstration data to the database. If the grasp was successfully added, the ID and created
