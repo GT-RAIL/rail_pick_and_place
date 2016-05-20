@@ -23,6 +23,11 @@ install:
   - sudo apt-get install -qq -y python-rosdep python-catkin-tools
   - sudo rosdep init
   - rosdep update
+  - mkdir -p /tmp/ws/src
+  - ln -s `pwd` /tmp/ws/src/package
+  - cd /tmp/ws/src
+  - git clone https://github.com/GT-RAIL/rail_manipulation_msgs.git
+  - cd ..
   - rosdep install --from-paths ./ -i -y --rosdistro $CI_ROS_DISTRO
 
 script:
